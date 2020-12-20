@@ -23,5 +23,9 @@ public class OrderRepository {
 
         return orders;
     }
+
+    public void submitOrder(OrderDTO orderDTO) {
+
+    }
 }
 

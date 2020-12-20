@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Set;
 
 import com.broscraft.cda.model.items.ItemDTO;
+import com.broscraft.cda.model.items.visitors.ItemNameBuilder;
 
 import org.bukkit.Material;
 
 public class ItemUitls {
+    private static final ItemNameBuilder itemNameBuilder = new ItemNameBuilder();
+
     private static final Set<String> NAME_CONTAINS_BLACKLIST = new HashSet<>(
         Arrays.asList("LEGACY",
                 "AIR",
@@ -83,5 +86,10 @@ public class ItemUitls {
         }
 
         return items;
+    }
+
+    public static String getItemName(ItemDTO itemDTO) {
+        itemDTO.accept(itemNameBuilder);
+        return itemNameBuilder.getItemName();
     }
 }

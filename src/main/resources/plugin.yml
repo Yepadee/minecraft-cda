@@ -5,5 +5,9 @@ api-version: 1.16
 commands:
   market:
     description: Open the market GUI.
-    usage: /market
-    aliases: [m]
+    usage: /<command>
+    aliases: ['m']
+  neworder:
+    description: Create a new order.
+    usage: /<command> [bid | ask] <price> <quantity>
+    aliases: ['no']
