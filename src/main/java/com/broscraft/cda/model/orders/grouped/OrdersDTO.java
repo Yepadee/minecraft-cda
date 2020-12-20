@@ -1,6 +1,6 @@
-package com.broscraft.cda.model.orders;
+package com.broscraft.cda.model.orders.grouped;
 
-public abstract class OrderDTO {
+public class OrdersDTO {
     Float price;
     Integer quantity;
 

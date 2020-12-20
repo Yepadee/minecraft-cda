@@ -4,6 +4,10 @@ import java.util.Objects;
 
 import com.broscraft.cda.commands.NewOrderCommand;
 import com.broscraft.cda.commands.OpenMenuCommand;
+import com.broscraft.cda.gui.OverviewIconsManager;
+import com.broscraft.cda.gui.screens.MarketOverviewScreen;
+import com.broscraft.cda.repositories.ItemOverviewRepository;
+import com.broscraft.cda.repositories.OrderRepository;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -15,11 +19,27 @@ public class CDAPlugin extends JavaPlugin
 {
     private OpenMenuCommand openMenuCommand;
     private NewOrderCommand newOrderCommand;
+    private OrderRepository orderRepository;
+    private ItemOverviewRepository itemOverviewRepository;
+    private MarketOverviewScreen marketOverviewScreen;
+    private OverviewIconsManager overviewIconsManager;
     
     @Override
     public void onEnable() {
-        openMenuCommand = new OpenMenuCommand();
-        newOrderCommand = new NewOrderCommand();
+        orderRepository = new OrderRepository();
+
+        marketOverviewScreen = new MarketOverviewScreen();
+        overviewIconsManager = new OverviewIconsManager(marketOverviewScreen);
+        itemOverviewRepository = new ItemOverviewRepository(overviewIconsManager);
+        
+        orderRepository.addObserver(itemOverviewRepository);
+
+        openMenuCommand = new OpenMenuCommand(marketOverviewScreen);
+        newOrderCommand = new NewOrderCommand(orderRepository);
+
+        itemOverviewRepository.loadItemOverviews();
+        
+        
         getLogger().info("Enabled CDA!");
         this.setupCommands();
     }

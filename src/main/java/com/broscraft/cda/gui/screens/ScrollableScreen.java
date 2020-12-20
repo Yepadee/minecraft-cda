@@ -1,5 +1,7 @@
 package com.broscraft.cda.gui.screens;
 
+import java.util.List;
+
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
@@ -85,9 +87,8 @@ public abstract class ScrollableScreen extends ChestGui {
         this.update();
     }
 
-    protected void addPage(Pane page) {
-        int numPages = this.scrollingPane.getPages();
-        this.scrollingPane.addPane(numPages, page);
+    protected void setItems(List<GuiItem> guiItems) {
+        this.scrollingPane.populateWithGuiItems(guiItems);
+        this.update();
     }
-    
 }

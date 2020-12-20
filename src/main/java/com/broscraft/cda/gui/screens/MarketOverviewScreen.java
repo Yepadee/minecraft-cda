@@ -1,41 +1,58 @@
 package com.broscraft.cda.gui.screens;
 
-import com.broscraft.cda.repositories.ItemOverviewRepository;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.broscraft.cda.observers.IconUpdateObserver;
+import com.broscraft.utils.ItemUitls;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
-import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 
-import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-public class MarketOverviewScreen extends ScrollableScreen {
-    private ItemOverviewRepository itemOverviewRepository;
-    public MarketOverviewScreen(ItemOverviewRepository itemOverviewRepository) {
+public class MarketOverviewScreen extends ScrollableScreen implements IconUpdateObserver {
+    int numItems = 0;
+    Map<Long, GuiItem> guiItems = new HashMap<>();
+    Player player;
+
+    public MarketOverviewScreen() {
         super("Market Overview");
-        this.itemOverviewRepository = itemOverviewRepository;
-        this.setUpPages();
     }
 
-    private void setUpPages() {
-        OutlinePane page;
-        
-        page = new OutlinePane(7, 4);
-        ItemStack beacon = new ItemStack(Material.BEACON);
-        ItemMeta beaconMeta = beacon.getItemMeta();
-        beaconMeta.setDisplayName("Hello World!");
-        beacon.setItemMeta(beaconMeta);
-        page.addItem(new GuiItem(beacon));
-        this.addPage(page);
+    private GuiItem createGuiItem(ItemStack icon) {
+        //TODO: take to item screen
+        Long id = ItemUitls.getId(icon);
+        return new GuiItem(icon, event -> {
+            HumanEntity human = event.getWhoClicked();
+            human.sendMessage("Clicked item " + id + "!");
+        });
+    }
 
-        page = new OutlinePane(7, 4);
-        ItemStack bed = new ItemStack(Material.RED_BED);
-        ItemMeta bedMeta = bed.getItemMeta();
-        bedMeta.setDisplayName("Hello Again!");
-        bed.setItemMeta(bedMeta);
+    @Override
+    public void onNewIcon(ItemStack icon) {
+        Long id = ItemUitls.getId(icon);
+        this.guiItems.put(id, createGuiItem(icon));
+        this.setItems(new ArrayList<>(this.guiItems.values()));
+        this.update();
+    }
 
-        bed.setItemMeta(bedMeta);
-        page.addItem(new GuiItem(bed));
-        this.addPage(page);
+    @Override
+    public void onIconUpdate() {
+        System.out.println("Icon updated!");
+        this.update();
+    }
+
+    @Override
+    public void onNewIcons(Collection<ItemStack> icons) {
+        icons.forEach(icon -> {
+            Long id = ItemUitls.getId(icon);
+            this.guiItems.put(id, createGuiItem(icon));
+        });
+        this.setItems(new ArrayList<>(this.guiItems.values()));
+        this.update();
     }
     
 }

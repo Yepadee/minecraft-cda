@@ -1,8 +1,7 @@
 package com.broscraft.cda.commands;
-
-import com.broscraft.cda.model.orders.AskDTO;
-import com.broscraft.cda.model.orders.BidDTO;
-import com.broscraft.cda.model.orders.OrderDTO;
+import com.broscraft.cda.model.orders.OrderType;
+import com.broscraft.cda.model.orders.input.NewOrderDTO;
+import com.broscraft.cda.repositories.OrderRepository;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -15,6 +14,12 @@ import net.md_5.bungee.api.ChatColor;
 
 public class NewOrderCommand implements CommandExecutor {
 
+    private OrderRepository orderRepository;
+
+    public NewOrderCommand(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
@@ -25,23 +30,17 @@ public class NewOrderCommand implements CommandExecutor {
 
             if (args.length < 2) return false;
             String orderType = args[0];
-            OrderDTO orderDto;
-    
-            switch (orderType) {
-                case "bid":
-                    orderDto = new BidDTO();
-                    break;
-                case "ask":
-                    orderDto = new AskDTO();
-                    break;
-                default:
-                    sender.sendMessage(ChatColor.RED.toString() + "Invalid order type");
-                    return false;
+            NewOrderDTO newOrderDto = new NewOrderDTO();
+            try {
+                newOrderDto.setType(OrderType.valueOf(orderType.toUpperCase()));
+            } catch (Exception e) {
+                sender.sendMessage(ChatColor.RED.toString() + "Invalid order-type specified");
             }
-    
+            
+
             try {
                 Float price = Float.parseFloat(args[1]);
-                orderDto.setPrice(price);
+                newOrderDto.setPrice(price);
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED.toString() + "Invalid price specified");
                 return false;
@@ -56,7 +55,7 @@ public class NewOrderCommand implements CommandExecutor {
             if (args.length > 2) {
                 try {
                     quantity = Integer.parseInt(args[2]);
-                    orderDto.setQuantity(quantity);
+                    newOrderDto.setQuantity(quantity);
                 } catch (Exception e) {
                     sender.sendMessage(ChatColor.RED.toString() + "Invalid quantity specified");
                     return false;
@@ -64,12 +63,18 @@ public class NewOrderCommand implements CommandExecutor {
             } else {
                 quantity = itemStack.getAmount();
             }
-            orderDto.setQuantity(quantity);
+            newOrderDto.setQuantity(quantity);
     
             sender.sendMessage(ChatColor.GREEN.toString() + "Created " + ChatColor.BOLD.toString()
             + orderType + ChatColor.RESET.toString() + ChatColor.GREEN.toString() + " order for "
-            + quantity + " " + itemStack.getType() + " at " + orderDto.getPrice());
-    
+            + quantity + " " + itemStack.getType() + " at " + newOrderDto.getPrice());
+            
+            try {
+                orderRepository.submitOrder(newOrderDto);
+            } catch (Exception e) {
+                sender.sendMessage(ChatColor.RED.toString() + e.getMessage());
+            }
+
             return true;
         } 
     }

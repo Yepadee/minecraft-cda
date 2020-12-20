@@ -1,16 +1,24 @@
 package com.broscraft.cda.repositories;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.broscraft.cda.model.items.ItemDTO;
+import com.broscraft.cda.model.orders.input.NewOrderDTO;
+import com.broscraft.cda.observers.NewOrderObserver;
+import com.broscraft.cda.observers.OverviewUpdateObserver;
 import com.broscraft.cda.model.ItemOverviewDTO;
 
-public class ItemOverviewRepository {
+public class ItemOverviewRepository implements NewOrderObserver {
     Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
+    OverviewUpdateObserver overviewUpdateObserver;
+
+    public ItemOverviewRepository(OverviewUpdateObserver overviewUpdateObserver) {
+        this.overviewUpdateObserver = overviewUpdateObserver;
+    }
 
     public void loadItemOverviews() {
+        // TODO
         ItemDTO item1 = new ItemDTO();
         item1.setId(1L);
         item1.setMaterial("STONE");
@@ -34,10 +42,7 @@ public class ItemOverviewRepository {
         overview2.setItem(item2);
 
         itemOverviews.put(item2.getId(), overview2);
-    }
-
-    public Collection<ItemOverviewDTO> getItemOverviews() {
-        return this.itemOverviews.values();
+        overviewUpdateObserver.onOverviewLoad(itemOverviews.values());
     }
 
     public void hitBid(long itemId, int quantity) {
@@ -50,5 +55,46 @@ public class ItemOverviewRepository {
         ItemOverviewDTO itemOverview = this.itemOverviews.get(itemId);
         int supply = itemOverview.getSupply();
         itemOverview.setDemand(supply - quantity);
+    }
+
+    @Override
+    public void onNewOrder(NewOrderDTO newOrderDTO) {
+        Long itemId = newOrderDTO.getItem().getId();
+        ItemOverviewDTO itemOverview;
+        if (this.itemOverviews.containsKey(itemId)) {
+            itemOverview = this.itemOverviews.get(itemId);
+            
+            switch (newOrderDTO.getType()) {
+                case ASK:
+                    Float bestAsk = itemOverview.getBestAsk();
+                    int supply = itemOverview.getSupply();
+                    itemOverview.setSupply(supply + newOrderDTO.getQuantity());
+                    if (newOrderDTO.getPrice() < bestAsk) itemOverview.setBestAsk(newOrderDTO.getPrice());
+                    break;
+                case BID:
+                    Float bestBid = itemOverview.getBestBid();
+                    int demand = itemOverview.getDemand();
+                    itemOverview.setDemand(demand + newOrderDTO.getQuantity());
+                    if (newOrderDTO.getPrice() > bestBid) itemOverview.setBestBid(newOrderDTO.getPrice());
+                    break;
+            }
+        } else {
+            itemOverview = new ItemOverviewDTO();
+            
+            switch (newOrderDTO.getType()) {
+                case ASK:
+                    itemOverview.setSupply(newOrderDTO.getQuantity());
+                    itemOverview.setBestAsk(newOrderDTO.getPrice());
+                    break;
+                case BID:
+                    itemOverview.setDemand(newOrderDTO.getQuantity());
+                    itemOverview.setBestBid(newOrderDTO.getPrice());
+                    break;
+            }
+            this.itemOverviews.put(itemId, itemOverview);
+        }
+        
+
+        this.overviewUpdateObserver.onOverviewUpdate(itemOverview);
     }
 }
