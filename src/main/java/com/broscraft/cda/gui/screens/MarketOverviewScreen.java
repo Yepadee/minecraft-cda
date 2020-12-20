@@ -1,24 +1,39 @@
 package com.broscraft.cda.gui.screens;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
-import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
-import com.github.stefvanschie.inventoryframework.pane.Pane;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-public class MarketOverviewScreen extends ChestGui {
+public class MarketOverviewScreen extends ScrollableScreen {
 
     public MarketOverviewScreen() {
-        super(9, "Items");
-        this.setOnGlobalClick(event -> event.setCancelled(true));
-        OutlinePane background = new OutlinePane(0, 0, 9, 9, Pane.Priority.LOWEST);
-        background.addItem(new GuiItem(new ItemStack(Material.WHITE_STAINED_GLASS_PANE)));
-        background.setRepeat(true);
-        this.addPane(background);
-
+        super("Market Overview");
+        this.setUpPages();
     }
 
+    private void setUpPages() {
+        OutlinePane page;
+        
+        page = new OutlinePane(7, 4);
+        ItemStack beacon = new ItemStack(Material.BEACON);
+        ItemMeta beaconMeta = beacon.getItemMeta();
+        beaconMeta.setDisplayName("Hello World!");
+        beacon.setItemMeta(beaconMeta);
+        page.addItem(new GuiItem(beacon));
+        this.addPage(page);
+
+        page = new OutlinePane(7, 4);
+        ItemStack bed = new ItemStack(Material.RED_BED);
+        ItemMeta bedMeta = bed.getItemMeta();
+        bedMeta.setDisplayName("Hello Again!");
+        bed.setItemMeta(bedMeta);
+
+        bed.setItemMeta(bedMeta);
+        page.addItem(new GuiItem(bed));
+        this.addPage(page);
+    }
     
 }

@@ -3,9 +3,6 @@ package com.broscraft.cda;
 import java.util.Objects;
 
 import com.broscraft.cda.commands.OpenMenuCommand;
-import com.broscraft.cda.modules.CDABinderModule;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -15,18 +12,12 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class CDAPlugin extends JavaPlugin
 {
-    private Injector injector;
-
-    @Inject
     private OpenMenuCommand openMenuCommand;
-
+    
     @Override
     public void onEnable() {
+        openMenuCommand = new OpenMenuCommand();
         getLogger().info("Enabled CDA!");
-        CDABinderModule module = new CDABinderModule(this);
-        this.injector = module.createInjector();
-        this.injector.injectMembers(this);
-
         this.setupCommands();
     }
 
