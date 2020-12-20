@@ -18,13 +18,13 @@ public class ItemNameBuilder extends ItemVisitor {
     public ItemNameBuilder() {
     }
 
-    public String getSearchableName() {
+    public String getItemName() {
         return builder.toString();
     }
 
     public void setMaterialName(ItemDTO itemEntity) {
         this.builder = new StringBuilder();
-        this.builder.append(itemEntity.getMaterial().name().replace("_", "").toLowerCase());
+        this.builder.append(itemEntity.getMaterial().name().replace("_", " ").toLowerCase());
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ItemNameBuilder extends ItemVisitor {
     public void visit(EnchantedItemDTO enchantedItemDto) {
         this.setMaterialName(enchantedItemDto);
         enchantedItemDto.getEnchantments().forEach((enchantment) -> {
-            String enchantmentName = enchantment.getEnchantment().replaceAll("[_\\s]", "").toLowerCase();
+            String enchantmentName = enchantment.getEnchantment().replaceAll("[_\\s]", " ").toLowerCase();
             builder.append(enchantmentName).append(enchantment.getLevel() + 1).append(enchantmentName)
                     .append(repeat('i', enchantment.getLevel() + 1));
         });
@@ -45,7 +45,7 @@ public class ItemNameBuilder extends ItemVisitor {
     @Override
     public void visit(PotionDTO potionDto) {
         //this.setMaterialName(potionDto);
-        String potionName = potionDto.getType().name().replace("_", "").toLowerCase();
+        String potionName = potionDto.getType().name().replace("_", " ").toLowerCase();
         builder.append(potionName);
         if (potionDto.getUpgraded()) {
             builder.append(2).append(potionName).append("ii");
