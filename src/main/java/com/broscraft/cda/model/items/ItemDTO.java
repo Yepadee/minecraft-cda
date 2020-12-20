@@ -1,5 +1,7 @@
 package com.broscraft.cda.model.items;
 
+import com.broscraft.cda.model.items.visitors.ItemVisitor;
+
 import org.bukkit.Material;
 
 public class ItemDTO {
@@ -26,6 +28,10 @@ public class ItemDTO {
 
     public void setMaterial(String material) {
         this.material = Material.valueOf(material);
+    }
+
+    public void accept(ItemVisitor v) {
+        v.visit(this);
     }
 
 }

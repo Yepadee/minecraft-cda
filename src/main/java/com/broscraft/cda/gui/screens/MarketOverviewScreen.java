@@ -1,5 +1,6 @@
 package com.broscraft.cda.gui.screens;
 
+import com.broscraft.cda.repositories.ItemOverviewRepository;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 
@@ -8,9 +9,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class MarketOverviewScreen extends ScrollableScreen {
-
-    public MarketOverviewScreen() {
+    private ItemOverviewRepository itemOverviewRepository;
+    public MarketOverviewScreen(ItemOverviewRepository itemOverviewRepository) {
         super("Market Overview");
+        this.itemOverviewRepository = itemOverviewRepository;
         this.setUpPages();
     }
 

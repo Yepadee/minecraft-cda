@@ -1,5 +1,7 @@
 package com.broscraft.cda.model.items;
 
+import com.broscraft.cda.model.items.visitors.ItemVisitor;
+
 import org.bukkit.potion.PotionType;
 
 public class PotionDTO extends ItemDTO {
@@ -33,4 +35,7 @@ public class PotionDTO extends ItemDTO {
         this.extended = extended;
     }
 
+    public void accept(ItemVisitor v) {
+        v.visit(this);
+    }
 }
