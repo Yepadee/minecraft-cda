@@ -49,7 +49,9 @@ public class EnchantedItemDTO extends ItemDTO {
     @Override
     public String toString() {
         return "{" +
-            " enchantments='" + getEnchantments() + "'" +
+            " id='" + getId() + "'" +
+            ", material='" + getMaterial() + "'" +
+            ", enchantments='" + getEnchantments() + "'" +
             "}";
     }
 

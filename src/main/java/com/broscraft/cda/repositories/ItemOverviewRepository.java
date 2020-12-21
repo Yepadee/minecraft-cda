@@ -1,8 +1,10 @@
 package com.broscraft.cda.repositories;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
@@ -15,6 +17,8 @@ import com.broscraft.cda.model.ItemOverviewDTO;
 
 public class ItemOverviewRepository implements NewOrderObserver {
     Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
+    Set<ItemDTO> allItems = new HashSet<>();
+    
     OverviewUpdateObserver overviewUpdateObserver;
 
     public ItemOverviewRepository(OverviewUpdateObserver overviewUpdateObserver) {
@@ -48,18 +52,6 @@ public class ItemOverviewRepository implements NewOrderObserver {
         itemOverviews.put(item1.getId(), overview1);
         itemOverviews.put(item2.getId(), overview2);
         overviewUpdateObserver.onOverviewLoad(itemOverviews.values());
-    }
-
-    public void hitBid(long itemId, int quantity) {
-        ItemOverviewDTO itemOverview = this.itemOverviews.get(itemId);
-        int demand = itemOverview.getDemand();
-        itemOverview.setDemand(demand - quantity);
-    }
-
-    public void liftAsk(long itemId, int quantity) {
-        ItemOverviewDTO itemOverview = this.itemOverviews.get(itemId);
-        int supply = itemOverview.getSupply();
-        itemOverview.setDemand(supply - quantity);
     }
 
     @Override

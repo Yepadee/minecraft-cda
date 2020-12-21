@@ -75,12 +75,12 @@ public class NewOrderCommand implements CommandExecutor {
             + orderType + ChatColor.RESET.toString() + ChatColor.GREEN.toString() + " order for "
             + quantity + " " + itemStack.getType() + " at " + newOrderDto.getPrice());
             
-            orderRepository.submitOrder(newOrderDto);
-            // try {
-            //     orderRepository.submitOrder(newOrderDto);
-            // } catch (Exception e) {
-            //     sender.sendMessage(ChatColor.RED.toString() + e.getMessage());
-            // }
+            //orderRepository.submitOrder(newOrderDto);
+            try {
+                orderRepository.submitOrder(newOrderDto);
+            } catch (Exception e) {
+                sender.sendMessage(ChatColor.RED.toString() + e.getMessage());
+            }
 
             return true;
         } 
