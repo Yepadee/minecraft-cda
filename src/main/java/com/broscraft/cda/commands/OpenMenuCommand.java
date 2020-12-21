@@ -22,8 +22,11 @@ public class OpenMenuCommand implements CommandExecutor {
         sender.sendMessage(ChatColor.RED.toString() + ChatColor.BOLD + "Executed the OpenMenu command");
         MarketOverviewScreen marketOverviewScreen = new MarketOverviewScreen(overviewIconsManager.getAllIcons());
         overviewIconsManager.addIconUpdateObserver(marketOverviewScreen);
+        marketOverviewScreen.setOnClose(event -> {
+            overviewIconsManager.removeIconUpdateObserver(marketOverviewScreen);
+        });
         marketOverviewScreen.show((HumanEntity) sender);
-        marketOverviewScreen.setOnClose(event -> overviewIconsManager.removeIconUpdateObserver(marketOverviewScreen));
+        
         return true;
     }
 }

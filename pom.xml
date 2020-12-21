@@ -18,7 +18,7 @@
     <maven.compiler.target>1.7</maven.compiler.target>
     <guice.version>4.0</guice.version>
     <spigot.api.version>1.16.4-R0.1-SNAPSHOT</spigot.api.version>
-    <inventoryframework.version>0.9.0</inventoryframework.version>
+    <inventoryframework.version>0.8.0</inventoryframework.version>
   </properties>
 
   <dependencies>

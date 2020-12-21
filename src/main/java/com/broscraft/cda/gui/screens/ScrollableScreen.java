@@ -67,6 +67,7 @@ public abstract class ScrollableScreen extends ChestGui {
     private void onPrevBtnClick(InventoryClickEvent event) {
         int currentPageNo = this.scrollingPane.getPage();
         int newPageNo = currentPageNo - 1;
+
         this.scrollingPane.setPage(newPageNo);
         
         if (newPageNo == 0) {
@@ -92,11 +93,12 @@ public abstract class ScrollableScreen extends ChestGui {
 
     protected void setItems(List<GuiItem> guiItems) {
         System.out.println("SET ITEMS:" + guiItems.size() + "/" + ITEM_AREA_SIZE);
+        scrollingPane.clear();
         this.scrollingPane.populateWithGuiItems(guiItems);
         if (guiItems.size() > ITEM_AREA_SIZE) {
-            System.out.println("OVERFLOW!");
             nextBtn.setVisible(true);
         }
+        this.addPane(scrollingPane);
         this.update();
     }
 }

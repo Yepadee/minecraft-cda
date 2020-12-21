@@ -5,7 +5,6 @@ import java.util.Objects;
 import com.broscraft.cda.commands.NewOrderCommand;
 import com.broscraft.cda.commands.OpenMenuCommand;
 import com.broscraft.cda.gui.OverviewIconsManager;
-import com.broscraft.cda.gui.screens.MarketOverviewScreen;
 import com.broscraft.cda.repositories.ItemOverviewRepository;
 import com.broscraft.cda.repositories.OrderRepository;
 
