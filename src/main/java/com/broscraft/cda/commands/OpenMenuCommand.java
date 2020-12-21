@@ -24,8 +24,9 @@ public class OpenMenuCommand implements CommandExecutor {
         overviewIconsManager.addIconUpdateObserver(marketOverviewScreen);
         marketOverviewScreen.setOnClose(event -> {
             overviewIconsManager.removeIconUpdateObserver(marketOverviewScreen);
+            System.out.println("MENU CLOSED");
         });
-        marketOverviewScreen.show((HumanEntity) sender);
+        marketOverviewScreen.open((HumanEntity) sender);
         
         return true;
     }

@@ -5,14 +5,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.broscraft.cda.gui.components.Navbar;
 import com.broscraft.cda.observers.IconUpdateObserver;
 import com.broscraft.utils.ItemUitls;
-import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import me.mattstudios.mfgui.gui.guis.GuiItem;
 
 public class MarketOverviewScreen extends ScrollableScreen implements IconUpdateObserver {
     int numItems = 0;
@@ -21,7 +21,6 @@ public class MarketOverviewScreen extends ScrollableScreen implements IconUpdate
 
     public MarketOverviewScreen(Collection<ItemStack> icons) {
         super("Market Overview");
-        this.addPane(new Navbar());
         this.onNewIcons(icons);
     }
 
@@ -37,14 +36,13 @@ public class MarketOverviewScreen extends ScrollableScreen implements IconUpdate
     @Override
     public void onNewIcon(ItemStack icon) {
         Long id = ItemUitls.getId(icon);
-        this.guiItems.put(id, createItemButton(icon));
-        this.setItems(new ArrayList<>(this.guiItems.values()));
-        this.update();
+        GuiItem newIcon = createItemButton(icon);
+        this.guiItems.put(id, newIcon);
+        this.addItem(newIcon);
     }
 
     @Override
     public void onIconUpdate() {
-        this.update();
     }
 
     @Override
@@ -54,7 +52,6 @@ public class MarketOverviewScreen extends ScrollableScreen implements IconUpdate
             this.guiItems.put(id, createItemButton(icon));
         });
         this.setItems(new ArrayList<>(this.guiItems.values()));
-        this.update();
     }
     
 }

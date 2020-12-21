@@ -18,7 +18,7 @@
     <maven.compiler.target>1.7</maven.compiler.target>
     <guice.version>4.0</guice.version>
     <spigot.api.version>1.16.4-R0.1-SNAPSHOT</spigot.api.version>
-    <inventoryframework.version>0.8.0</inventoryframework.version>
+    <matt-framework-gui.version>2.0.2</matt-framework-gui.version>
   </properties>
 
   <dependencies>
@@ -38,7 +38,7 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>23.6-jre</version>
-  </dependency> 
+    </dependency> 
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
@@ -52,10 +52,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.github.stefvanschie.inventoryframework</groupId>
-      <artifactId>IF</artifactId>
-      <version>${inventoryframework.version}</version>
-      <scope>compile</scope>
+      <groupId>me.mattstudios.utils</groupId>
+      <artifactId>matt-framework-gui</artifactId>
+      <version>${matt-framework-gui.version}</version> <!-- replace version here -->
     </dependency>
   </dependencies>
 
@@ -84,16 +83,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1</version>
         <configuration>
           <outputFile>${outputDirectory}/${project.artifactId}-${project.version}-shaded.jar</outputFile>
           <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
           <relocations>
             <relocation>
-              <pattern>com.github.stefvanschie.inventoryframework</pattern>
-              <shadedPattern>com.broscraft.cda.inventoryframework</shadedPattern>
+                <pattern>me.mattstudios.mfgui</pattern>
+                <shadedPattern>com.broscraft.cda.mfgui</shadedPattern> <!-- Replace package here here -->
             </relocation>
-          </relocations>
+        </relocations>
         </configuration>
         <executions>
             <execution>
