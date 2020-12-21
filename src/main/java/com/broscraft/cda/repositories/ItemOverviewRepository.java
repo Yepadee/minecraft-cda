@@ -8,6 +8,9 @@ import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.NewOrderObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
+
+import org.bukkit.Material;
+
 import com.broscraft.cda.model.ItemOverviewDTO;
 
 public class ItemOverviewRepository implements NewOrderObserver {
@@ -22,7 +25,7 @@ public class ItemOverviewRepository implements NewOrderObserver {
         // TODO
         ItemDTO item1 = new ItemDTO();
         item1.setId(1L);
-        item1.setMaterial("STONE");
+        item1.setMaterial(Material.STONE);
 
         ItemOverviewDTO overview1 = new ItemOverviewDTO();
         overview1.setDemand(100);
@@ -33,7 +36,7 @@ public class ItemOverviewRepository implements NewOrderObserver {
 
         ItemDTO item2 = new ItemDTO();
         item2.setId(2L);
-        item2.setMaterial("DIAMOND_BLOCK");
+        item2.setMaterial(Material.DIAMOND_BLOCK);
 
         ItemOverviewDTO overview2 = new ItemOverviewDTO();
         overview2.setDemand(100);

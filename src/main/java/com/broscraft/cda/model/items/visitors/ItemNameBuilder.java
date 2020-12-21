@@ -35,7 +35,7 @@ public class ItemNameBuilder extends ItemVisitor {
     @Override
     public void visit(EnchantedItemDTO enchantedItemDto) {
         this.setMaterialName(enchantedItemDto);
-        enchantedItemDto.getEnchantments().forEach((enchantment) -> {
+        enchantedItemDto.getEnchantments().forEach(enchantment -> {
             String enchantmentName = enchantment.getEnchantment().replaceAll("[_\\s]", " ").toLowerCase();
             builder.append(enchantmentName).append(enchantment.getLevel() + 1).append(enchantmentName)
                     .append(repeat('i', enchantment.getLevel() + 1));
@@ -44,7 +44,7 @@ public class ItemNameBuilder extends ItemVisitor {
 
     @Override
     public void visit(PotionDTO potionDto) {
-        //this.setMaterialName(potionDto);
+        // this.setMaterialName(potionDto);
         String potionName = potionDto.getType().name().replace("_", " ").toLowerCase();
         builder.append(potionName);
         if (potionDto.getUpgraded()) {

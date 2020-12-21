@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.broscraft.cda.gui.components.Navbar;
 import com.broscraft.cda.observers.IconUpdateObserver;
 import com.broscraft.utils.ItemUitls;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
@@ -20,28 +21,28 @@ public class MarketOverviewScreen extends ScrollableScreen implements IconUpdate
 
     public MarketOverviewScreen() {
         super("Market Overview");
+        this.addPane(new Navbar());
     }
 
-    private GuiItem createGuiItem(ItemStack icon) {
+    private GuiItem createItemButton(ItemStack icon) {
         //TODO: take to item screen
         Long id = ItemUitls.getId(icon);
         return new GuiItem(icon, event -> {
             HumanEntity human = event.getWhoClicked();
-            human.sendMessage("Clicked item " + id + "!");
+            human.sendMessage("Clicked item " + id + "!"); // TEMP
         });
     }
 
     @Override
     public void onNewIcon(ItemStack icon) {
         Long id = ItemUitls.getId(icon);
-        this.guiItems.put(id, createGuiItem(icon));
+        this.guiItems.put(id, createItemButton(icon));
         this.setItems(new ArrayList<>(this.guiItems.values()));
         this.update();
     }
 
     @Override
     public void onIconUpdate() {
-        System.out.println("Icon updated!");
         this.update();
     }
 
@@ -49,7 +50,7 @@ public class MarketOverviewScreen extends ScrollableScreen implements IconUpdate
     public void onNewIcons(Collection<ItemStack> icons) {
         icons.forEach(icon -> {
             Long id = ItemUitls.getId(icon);
-            this.guiItems.put(id, createGuiItem(icon));
+            this.guiItems.put(id, createItemButton(icon));
         });
         this.setItems(new ArrayList<>(this.guiItems.values()));
         this.update();

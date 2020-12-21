@@ -58,6 +58,7 @@ public class NewOrderCommand implements CommandExecutor {
 
             Integer quantity;
             if (args.length > 2) {
+                // TODO: count number of items in player inventory to validate they have enough
                 try {
                     quantity = Integer.parseInt(args[2]);
                     newOrderDto.setQuantity(quantity);

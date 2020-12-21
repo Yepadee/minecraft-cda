@@ -19,6 +19,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -133,18 +134,28 @@ public class ItemUitls {
 
     public static ItemDTO parseItemStack(ItemStack itemStack) {
         ItemDTO itemDTO;
-        Map<Enchantment, Integer> enchantments = itemStack.getEnchantments();
+        Map<Enchantment, Integer> enchantments;
+        if (itemStack.getType().equals(Material.ENCHANTED_BOOK)) {
+            EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
+            enchantments = meta.getStoredEnchants();
+        } else {
+            enchantments = itemStack.getEnchantments();
+        }
+        System.out.println(itemStack.getType());
+        System.out.println(enchantments);
+
         if (enchantments.size() > 0) {
             EnchantedItemDTO enchantedItemDTO = new EnchantedItemDTO();
+            // Parse enchantments from itemstack
             List<EnchantmentDTO> enchantmentDTOs = enchantments.entrySet().stream().map(entry -> {
                 EnchantmentDTO enchantmentDTO = new EnchantmentDTO();
-                enchantmentDTO.setEnchantment(entry.getKey().getKey().toString());
+                enchantmentDTO.setEnchantment(entry.getKey().getKey().getKey());
                 enchantmentDTO.setLevel(entry.getValue());
                 return enchantmentDTO;
             }).collect(Collectors.toList());
             enchantedItemDTO.setEnchantments(enchantmentDTOs);
             itemDTO = enchantedItemDTO;
-        } else if(itemStack.getType().equals(Material.POTION)) {
+        } else if(itemStack.getType().equals(Material.POTION) || itemStack.getType().equals(Material.SPLASH_POTION)) {
             PotionDTO potionDTO = new PotionDTO();
             PotionMeta pm = (PotionMeta) itemStack.getItemMeta();
             

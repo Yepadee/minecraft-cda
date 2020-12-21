@@ -11,6 +11,9 @@ import com.broscraft.cda.observers.NewOrderObserver;
 public class OrderRepository {
     private List<NewOrderObserver> observers = new ArrayList<>();
 
+    //TEMP:
+    Long lastId = 0L;
+
     public void addObserver(NewOrderObserver observer) {
         this.observers.add(observer);
     }
@@ -39,7 +42,8 @@ public class OrderRepository {
         // TODO:
         // Check if item exisists in database, if not insert it and retrieve the id.
         // The item in newOrderDTO will have it's id set here.
-        newOrderDTO.getItem().setId(10L); // Temp
+        newOrderDTO.getItem().setId(lastId); // Temp
+        lastId ++;
         notifyObservers(newOrderDTO);
     }
 }
