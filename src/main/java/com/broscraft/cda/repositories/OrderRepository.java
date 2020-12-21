@@ -39,6 +39,7 @@ public class OrderRepository {
         // TODO:
         // Check if item exisists in database, if not insert it and retrieve the id.
         // The item in newOrderDTO will have it's id set here.
+        newOrderDTO.getItem().setId(10L); // Temp
         notifyObservers(newOrderDTO);
     }
 }

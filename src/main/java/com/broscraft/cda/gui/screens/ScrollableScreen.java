@@ -14,7 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public abstract class ScrollableScreen extends ChestGui {
-
+    private static int WIDTH = 9;
+    private static int HEIGHT = 6;
     private Material NEXT_MATERIAL = Material.GLOWSTONE_DUST;
     private Material PREV_MATERIAL = Material.REDSTONE;
     PaginatedPane scrollingPane = new PaginatedPane(1, 1, 7, 4);
@@ -22,7 +23,7 @@ public abstract class ScrollableScreen extends ChestGui {
     StaticPane nextBtn = new StaticPane(8,5,1,1);
 
     public ScrollableScreen(String name) {
-        super(6, name);
+        super(HEIGHT, name);
         this.setOnGlobalClick(event -> event.setCancelled(true));
         this.setBorder();
         this.addNavigationButtons();
@@ -59,6 +60,7 @@ public abstract class ScrollableScreen extends ChestGui {
         this.addPane(nextBtn);
 
         prevBtn.setVisible(false);
+        nextBtn.setVisible(false);
     }
 
     private void onPrevBtnClick(InventoryClickEvent event) {
@@ -89,6 +91,7 @@ public abstract class ScrollableScreen extends ChestGui {
 
     protected void setItems(List<GuiItem> guiItems) {
         this.scrollingPane.populateWithGuiItems(guiItems);
+        if (guiItems.size() > WIDTH * HEIGHT) nextBtn.setVisible(true);
         this.update();
     }
 }

@@ -4,18 +4,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.broscraft.cda.model.items.EnchantedItemDTO;
+import com.broscraft.cda.model.items.EnchantmentDTO;
 import com.broscraft.cda.model.items.ItemDTO;
+import com.broscraft.cda.model.items.PotionDTO;
 import com.broscraft.cda.model.items.visitors.IconBuilder;
 import com.broscraft.cda.model.items.visitors.ItemNameBuilder;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionType;
 
 public class ItemUitls {
     private static final ItemNameBuilder itemNameBuilder = new ItemNameBuilder();
@@ -121,5 +129,39 @@ public class ItemUitls {
             meta.getPersistentDataContainer().set(ICON_ID_KEY, PersistentDataType.LONG, id);
             icon.setItemMeta(meta);
         }
+    }
+
+    public static ItemDTO parseItemStack(ItemStack itemStack) {
+        ItemDTO itemDTO;
+        Map<Enchantment, Integer> enchantments = itemStack.getEnchantments();
+        if (enchantments.size() > 0) {
+            EnchantedItemDTO enchantedItemDTO = new EnchantedItemDTO();
+            List<EnchantmentDTO> enchantmentDTOs = enchantments.entrySet().stream().map(entry -> {
+                EnchantmentDTO enchantmentDTO = new EnchantmentDTO();
+                enchantmentDTO.setEnchantment(entry.getKey().getKey().toString());
+                enchantmentDTO.setLevel(entry.getValue());
+                return enchantmentDTO;
+            }).collect(Collectors.toList());
+            enchantedItemDTO.setEnchantments(enchantmentDTOs);
+            itemDTO = enchantedItemDTO;
+        } else if(itemStack.getType().equals(Material.POTION)) {
+            PotionDTO potionDTO = new PotionDTO();
+            PotionMeta pm = (PotionMeta) itemStack.getItemMeta();
+            
+            Boolean extended = pm.getBasePotionData().isExtended();
+            Boolean upgraded = pm.getBasePotionData().isUpgraded();
+            PotionType type = pm.getBasePotionData().getType();
+
+            potionDTO.setExtended(extended);
+            potionDTO.setUpgraded(upgraded);
+            potionDTO.setType(type);
+
+            itemDTO = potionDTO;
+        } else {
+            itemDTO = new ItemDTO();
+        }
+
+        itemDTO.setMaterial(itemStack.getType());
+        return itemDTO;
     }
 }

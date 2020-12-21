@@ -1,7 +1,9 @@
 package com.broscraft.cda.commands;
+import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.orders.OrderType;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.repositories.OrderRepository;
+import com.broscraft.utils.ItemUitls;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -51,6 +53,9 @@ public class NewOrderCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED.toString() + "You must be holding an item to create an order for");
                 return false;
             }
+            ItemDTO itemDTO = ItemUitls.parseItemStack(itemStack);
+            newOrderDto.setItem(itemDTO);
+
             Integer quantity;
             if (args.length > 2) {
                 try {
@@ -69,11 +74,12 @@ public class NewOrderCommand implements CommandExecutor {
             + orderType + ChatColor.RESET.toString() + ChatColor.GREEN.toString() + " order for "
             + quantity + " " + itemStack.getType() + " at " + newOrderDto.getPrice());
             
-            try {
-                orderRepository.submitOrder(newOrderDto);
-            } catch (Exception e) {
-                sender.sendMessage(ChatColor.RED.toString() + e.getMessage());
-            }
+            orderRepository.submitOrder(newOrderDto);
+            // try {
+            //     orderRepository.submitOrder(newOrderDto);
+            // } catch (Exception e) {
+            //     sender.sendMessage(ChatColor.RED.toString() + e.getMessage());
+            // }
 
             return true;
         } 

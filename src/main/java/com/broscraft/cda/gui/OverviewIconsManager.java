@@ -45,20 +45,20 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
 
     private List<String> getLore(ItemOverviewDTO itemOverview) {
         String notAvailable = ChatColor.RED.toString() + ChatColor.BOLD + "N/A";
-        float bestBid = itemOverview.getBestBid();
-        float bestAsk = itemOverview.getBestAsk();
+        Float bestBid = itemOverview.getBestBid();
+        Float bestAsk = itemOverview.getBestAsk();
         int supply = itemOverview.getSupply();
         int demand = itemOverview.getDemand();
         List<String> lore = Arrays.asList(
             "",
             ChatColor.GOLD.toString() + ChatColor.UNDERLINE + "     Bids      ",
             ChatColor.GRAY + "Best Bid: " +
-            (bestBid > 0 ? ChatColor.GOLD.toString() + ChatColor.BOLD + bestBid : notAvailable),
+            (bestBid != null ? ChatColor.GOLD.toString() + ChatColor.BOLD + bestBid : notAvailable),
             ChatColor.GRAY + "Demand: " + ChatColor.GOLD + ChatColor.BOLD + demand,
             "",
             ChatColor.AQUA.toString() + ChatColor.UNDERLINE + "     Asks     ",
             ChatColor.GRAY + "Best Ask: " +
-            (bestAsk > 0 ? ChatColor.AQUA.toString() + ChatColor.BOLD + bestAsk : notAvailable),
+            (bestAsk != null ? ChatColor.AQUA.toString() + ChatColor.BOLD + bestAsk : notAvailable),
             ChatColor.GRAY + "Supply: " + ChatColor.AQUA + ChatColor.BOLD + supply
         );
         return lore;
