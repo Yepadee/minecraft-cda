@@ -21,20 +21,18 @@ public class CDAPlugin extends JavaPlugin
     private NewOrderCommand newOrderCommand;
     private OrderRepository orderRepository;
     private ItemOverviewRepository itemOverviewRepository;
-    private MarketOverviewScreen marketOverviewScreen;
     private OverviewIconsManager overviewIconsManager;
     
     @Override
     public void onEnable() {
         orderRepository = new OrderRepository();
 
-        marketOverviewScreen = new MarketOverviewScreen();
-        overviewIconsManager = new OverviewIconsManager(marketOverviewScreen);
+        overviewIconsManager = new OverviewIconsManager();
         itemOverviewRepository = new ItemOverviewRepository(overviewIconsManager);
         
         orderRepository.addObserver(itemOverviewRepository);
 
-        openMenuCommand = new OpenMenuCommand(marketOverviewScreen);
+        openMenuCommand = new OpenMenuCommand(overviewIconsManager);
         newOrderCommand = new NewOrderCommand(orderRepository);
 
         itemOverviewRepository.loadItemOverviews();

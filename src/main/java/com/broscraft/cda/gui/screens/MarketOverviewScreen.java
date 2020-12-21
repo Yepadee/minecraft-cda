@@ -19,9 +19,10 @@ public class MarketOverviewScreen extends ScrollableScreen implements IconUpdate
     Map<Long, GuiItem> guiItems = new HashMap<>();
     Player player;
 
-    public MarketOverviewScreen() {
+    public MarketOverviewScreen(Collection<ItemStack> icons) {
         super("Market Overview");
         this.addPane(new Navbar());
+        this.onNewIcons(icons);
     }
 
     private GuiItem createItemButton(ItemStack icon) {

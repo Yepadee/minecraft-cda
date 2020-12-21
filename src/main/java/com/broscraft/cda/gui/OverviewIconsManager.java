@@ -1,5 +1,6 @@
 package com.broscraft.cda.gui;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,10 +21,31 @@ import net.md_5.bungee.api.ChatColor;
 public class OverviewIconsManager implements OverviewUpdateObserver {
     private Map<Long, ItemStack> icons = new HashMap<>();
 
-    private IconUpdateObserver iconUpdateObserver;
+    private List<IconUpdateObserver> iconUpdateObserver = new ArrayList<>();
 
-    public OverviewIconsManager(IconUpdateObserver iconUpdateObserver) {
-        this.iconUpdateObserver = iconUpdateObserver;
+    public void addIconUpdateObserver(IconUpdateObserver o) {
+        iconUpdateObserver.add(o);
+    }
+
+    public void removeIconUpdateObserver(IconUpdateObserver o) {
+        iconUpdateObserver.remove(o);
+    }
+
+    private void notifyIconUpdateObservers() {
+        iconUpdateObserver.forEach(o ->  o.onIconUpdate());
+    }
+
+    private void notifyNewIconObservers(ItemStack icon) {
+        iconUpdateObserver.forEach(o ->  o.onNewIcon(icon));
+    }
+
+    private void notifyNewIconsObservers(Collection<ItemStack> icons) {
+        iconUpdateObserver.forEach(o ->  o.onNewIcons(icons));
+    }
+
+
+    public Collection<ItemStack> getAllIcons() {
+        return this.icons.values();
     }
 
     public void createIcons(List<ItemOverviewDTO> itemOverviews) {
@@ -84,8 +106,8 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
         meta.setLore(lore);
         icon.setItemMeta(meta);
 
-        if (newIcon) iconUpdateObserver.onNewIcon(icon);
-        else iconUpdateObserver.onIconUpdate();
+        if (newIcon) this.notifyNewIconObservers(icon);
+        else this.notifyIconUpdateObservers();
 
     }
 
@@ -100,6 +122,6 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
             icon.setItemMeta(meta);
             icons.put(itemId, icon);
         });
-        iconUpdateObserver.onNewIcons(this.icons.values());
+        this.notifyNewIconsObservers(this.icons.values());
     }
 }

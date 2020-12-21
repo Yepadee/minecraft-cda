@@ -141,8 +141,6 @@ public class ItemUitls {
         } else {
             enchantments = itemStack.getEnchantments();
         }
-        System.out.println(itemStack.getType());
-        System.out.println(enchantments);
 
         if (enchantments.size() > 0) {
             EnchantedItemDTO enchantedItemDTO = new EnchantedItemDTO();

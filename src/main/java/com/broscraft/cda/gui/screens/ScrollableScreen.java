@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public abstract class ScrollableScreen extends ChestGui {
     private static int WIDTH = 9;
     private static int HEIGHT = 6;
+    private static int ITEM_AREA_SIZE = (WIDTH - 2) * (HEIGHT - 2);
     private Material NEXT_MATERIAL = Material.GLOWSTONE_DUST;
     private Material PREV_MATERIAL = Material.REDSTONE;
     PaginatedPane scrollingPane = new PaginatedPane(1, 1, 7, 4);
@@ -90,8 +91,12 @@ public abstract class ScrollableScreen extends ChestGui {
     }
 
     protected void setItems(List<GuiItem> guiItems) {
+        System.out.println("SET ITEMS:" + guiItems.size() + "/" + ITEM_AREA_SIZE);
         this.scrollingPane.populateWithGuiItems(guiItems);
-        if (guiItems.size() > WIDTH * HEIGHT) nextBtn.setVisible(true);
+        if (guiItems.size() > ITEM_AREA_SIZE) {
+            System.out.println("OVERFLOW!");
+            nextBtn.setVisible(true);
+        }
         this.update();
     }
 }
