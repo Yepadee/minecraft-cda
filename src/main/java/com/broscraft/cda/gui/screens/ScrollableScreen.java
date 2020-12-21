@@ -13,7 +13,7 @@ import me.mattstudios.mfgui.gui.guis.GuiItem;
 import me.mattstudios.mfgui.gui.guis.ScrollingGui;
 
 public abstract class ScrollableScreen {
-    private ScrollingGui gui;
+    protected ScrollingGui gui;
 
     private static int WIDTH = 9;
     private static int HEIGHT = 6;
