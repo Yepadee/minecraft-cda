@@ -1,6 +1,7 @@
 package com.broscraft.cda.gui.screens.overview;
 
 import java.util.Collection;
+import java.util.function.Function;
 
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -10,14 +11,13 @@ import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
 
 public class SearchResultsScreen extends MarketOverviewScreen {
-
-    public SearchResultsScreen(String name, Collection<ItemStack> icons, GuiAction<InventoryClickEvent> onBackBtnClick) {
-        super(name, icons);
+    public SearchResultsScreen(String name, Collection<ItemStack> icons, GuiAction<InventoryClickEvent> onBackBtnClick, Function<ItemStack, GuiAction<InventoryClickEvent>> onItemClick) {
+        super(name, icons, onItemClick);
         this.createNavbar(onBackBtnClick);
     }
 
     private void createNavbar(GuiAction<InventoryClickEvent> onBackBtnClick) {
-        this.gui.setItem(1, 5, ItemBuilder.from(Material.BARRIER).setName("Back").asGuiItem(onBackBtnClick));
+        this.gui.setItem(1, 1, ItemBuilder.from(Material.BARRIER).setName("Back").asGuiItem(onBackBtnClick));
     }
     
 }

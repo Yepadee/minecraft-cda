@@ -16,10 +16,11 @@ import me.mattstudios.mfgui.gui.guis.ScrollingGui;
 public abstract class ScrollableScreen {
     protected ScrollingGui gui;
 
-    private static int WIDTH = 9;
-    private static int HEIGHT = 6;
-    private Material NEXT_MATERIAL = Material.GLOWSTONE_DUST;
-    private Material PREV_MATERIAL = Material.REDSTONE;
+    protected static int WIDTH = 9;
+    protected static int HEIGHT = 6;
+    protected static Material BACKGROUND_MATERIAL = Material.WHITE_STAINED_GLASS_PANE;
+    private static Material NEXT_MATERIAL = Material.GLOWSTONE_DUST;
+    private static Material PREV_MATERIAL = Material.REDSTONE;
 
 
     public ScrollableScreen(String name, ScrollType scrollType) {
@@ -36,14 +37,14 @@ public abstract class ScrollableScreen {
     }
 
     private void setBorder() {
-        GuiItem background = ItemBuilder.from(Material.WHITE_STAINED_GLASS_PANE).asGuiItem();
-        for (int i = 1; i <= HEIGHT; i ++) {
-            gui.setItem(i, 1, background);
-            gui.setItem(i, WIDTH, background);
+        GuiItem background = ItemBuilder.from(BACKGROUND_MATERIAL).setName("").asGuiItem();
+        for (int row = 1; row <= HEIGHT; row ++) {
+            gui.setItem(row, 1, background);
+            gui.setItem(row, WIDTH, background);
         }
-        for (int i = 1; i <= WIDTH; i ++) {
-            gui.setItem(1, i, background);
-            gui.setItem(HEIGHT, i, background);
+        for (int col = 1; col <= WIDTH; col ++) {
+            gui.setItem(1, col, background);
+            gui.setItem(HEIGHT, col, background);
         }
     }
 

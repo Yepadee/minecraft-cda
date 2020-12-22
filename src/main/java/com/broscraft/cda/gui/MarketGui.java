@@ -1,10 +1,17 @@
 package com.broscraft.cda.gui;
 
+import java.util.function.Function;
+
+import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
 import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
 
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
+
+import me.mattstudios.mfgui.gui.components.GuiAction;
 
 public class MarketGui {
     private OverviewIconsManager overviewIconsManager;
@@ -13,15 +20,20 @@ public class MarketGui {
         this.overviewIconsManager = overviewIconsManager;
     }
 
+    public void openSearchMenuScreen(HumanEntity player) {
+        player.sendMessage("Search Button Clicked!!!");
+    }
+
+    public void openMyOrdersScreen(HumanEntity player) {
+        player.sendMessage("MyOrders Button Clicked!!!");
+    }
+
     public void openAllItemsScreen(HumanEntity player) {
         AllItemsScreen allItemsScreen = new AllItemsScreen(
             overviewIconsManager.getAllIcons(),
-            e -> {
-                e.getWhoClicked().sendMessage("Search Button Clicked!!!");
-            },
-            e -> {
-                e.getWhoClicked().sendMessage("MyOrders Button Clicked!!!");
-            }
+            e -> openSearchMenuScreen(e.getWhoClicked()),
+            e -> openMyOrdersScreen(e.getWhoClicked()),
+            openItemOrdersScreen()
         );
 
         overviewIconsManager.addIconUpdateObserver(allItemsScreen);
@@ -38,10 +50,8 @@ public class MarketGui {
         SearchResultsScreen searchResultsScreen = new SearchResultsScreen(
             "Items matching '" + searchQuery + "'",
             overviewIconsManager.searchIcons(searchQuery),
-            e -> {
-                e.getWhoClicked().sendMessage("Back Button Clicked!!!");
-                openAllItemsScreen(e.getWhoClicked());
-            }
+            e -> openAllItemsScreen(e.getWhoClicked()),
+            openItemOrdersScreen()
         );
 
         overviewIconsManager.addIconUpdateObserver(searchResultsScreen);
@@ -51,5 +61,20 @@ public class MarketGui {
         });
         searchResultsScreen.open(player);
         
+    }
+
+    public Function<ItemStack, GuiAction<InventoryClickEvent>> openItemOrdersScreen() {
+        return itemStack -> (ie -> {
+            new ItemOrdersScreen(
+                itemStack,
+                e -> openAllItemsScreen(e.getWhoClicked()),
+                itemId -> (e -> {
+                    e.getWhoClicked().sendMessage("New bid btn clicked!");
+                }),
+                itemId -> (e -> {
+                    e.getWhoClicked().sendMessage("New ask btn clicked!");
+                })
+            ).open(ie.getWhoClicked());
+        });
     }
 }
