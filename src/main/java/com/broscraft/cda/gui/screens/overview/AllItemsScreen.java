@@ -1,4 +1,4 @@
-package com.broscraft.cda.gui.screens;
+package com.broscraft.cda.gui.screens.overview;
 
 import java.util.Collection;
 

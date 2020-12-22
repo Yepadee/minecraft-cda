@@ -1,7 +1,7 @@
 package com.broscraft.cda.commands;
 
-import com.broscraft.cda.gui.OverviewIconsManager;
-import com.broscraft.cda.gui.screens.SearchResultsScreen;
+import com.broscraft.cda.gui.utils.OverviewIconsManager;
+import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

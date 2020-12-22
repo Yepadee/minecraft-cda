@@ -43,6 +43,9 @@ public class OrderRepository {
     public void submitOrder(NewOrderDTO newOrderDTO) {
         Long itemId = itemRepository.getItemId(newOrderDTO.getItem());
         newOrderDTO.getItem().setId(itemId);
+
+        // TODO: Submit order request
+
         notifyObservers(newOrderDTO);
     }
 }

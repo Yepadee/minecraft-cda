@@ -1,4 +1,4 @@
-package com.broscraft.cda.gui.screens;
+package com.broscraft.cda.gui.screens.overview;
 
 import java.util.Collection;
 
@@ -16,7 +16,7 @@ public class SearchResultsScreen extends MarketOverviewScreen {
         this.createNavbar(onBackBtnClick);
     }
 
-    protected void createNavbar(GuiAction<InventoryClickEvent> onBackBtnClick) {
+    private void createNavbar(GuiAction<InventoryClickEvent> onBackBtnClick) {
         this.gui.setItem(1, 5, ItemBuilder.from(Material.BARRIER).asGuiItem(onBackBtnClick));
     }
     

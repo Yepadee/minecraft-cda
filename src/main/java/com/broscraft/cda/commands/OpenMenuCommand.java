@@ -1,7 +1,7 @@
 package com.broscraft.cda.commands;
 
-import com.broscraft.cda.gui.OverviewIconsManager;
-import com.broscraft.cda.gui.screens.AllItemsScreen;
+import com.broscraft.cda.gui.utils.OverviewIconsManager;
+import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

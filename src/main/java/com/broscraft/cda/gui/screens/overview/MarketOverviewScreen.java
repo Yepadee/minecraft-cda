@@ -1,10 +1,12 @@
-package com.broscraft.cda.gui.screens;
+package com.broscraft.cda.gui.screens.overview;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.broscraft.cda.gui.screens.ScrollableScreen;
+import com.broscraft.cda.gui.screens.item.ItemScreen;
 import com.broscraft.cda.observers.IconUpdateObserver;
 import com.broscraft.utils.ItemUitls;
 
@@ -34,8 +36,13 @@ public abstract class MarketOverviewScreen extends ScrollableScreen implements I
         //TODO: take to item screen
         Long id = ItemUitls.getId(icon);
         return new GuiItem(icon, event -> {
-            HumanEntity human = event.getWhoClicked();
-            human.sendMessage("Clicked item " + id + "!"); // TEMP
+            HumanEntity player = event.getWhoClicked();
+            new ItemScreen(
+                e -> {
+                    this.open(player);
+                }
+            ).open(player);
+            player.sendMessage("Clicked item " + id + "!"); // TEMP
         });
     }
 
