@@ -3,7 +3,7 @@ package com.broscraft.cda.model.items.visitors;
 import com.broscraft.cda.model.items.EnchantedItemDTO;
 import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.items.PotionDTO;
-import com.broscraft.utils.ItemUitls;
+import com.broscraft.cda.utils.ItemUitls;
 import com.google.common.base.Preconditions;
 
 import org.bukkit.Material;

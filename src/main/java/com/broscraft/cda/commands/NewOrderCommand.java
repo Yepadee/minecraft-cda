@@ -3,7 +3,7 @@ import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.orders.OrderType;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.repositories.OrderRepository;
-import com.broscraft.utils.ItemUitls;
+import com.broscraft.cda.utils.ItemUitls;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;

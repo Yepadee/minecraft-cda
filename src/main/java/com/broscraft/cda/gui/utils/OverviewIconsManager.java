@@ -13,7 +13,7 @@ import com.broscraft.cda.model.ItemOverviewDTO;
 import com.broscraft.cda.observers.IconUpdateObserver;
 import com.broscraft.cda.observers.NewIconObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
-import com.broscraft.utils.ItemUitls;
+import com.broscraft.cda.utils.ItemUitls;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

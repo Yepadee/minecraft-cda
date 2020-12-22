@@ -2,7 +2,7 @@ package com.broscraft.cda.model.items;
 
 import java.util.List;
 
-import com.broscraft.utils.ItemUitls;
+import com.broscraft.cda.utils.ItemUitls;
 
 import org.junit.Test;
 

@@ -3,7 +3,7 @@ package com.broscraft.cda.gui.screens.overview;
 import java.util.Collection;
 
 import com.broscraft.cda.observers.NewIconObserver;
-import com.broscraft.utils.ItemUitls;
+import com.broscraft.cda.utils.ItemUitls;
 
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;

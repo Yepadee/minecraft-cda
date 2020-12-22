@@ -8,7 +8,7 @@ import java.util.Map;
 import com.broscraft.cda.gui.screens.ScrollableScreen;
 import com.broscraft.cda.gui.screens.item.ItemScreen;
 import com.broscraft.cda.observers.IconUpdateObserver;
-import com.broscraft.utils.ItemUitls;
+import com.broscraft.cda.utils.ItemUitls;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
