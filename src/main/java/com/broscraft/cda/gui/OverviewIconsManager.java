@@ -3,10 +3,12 @@ package com.broscraft.cda.gui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.broscraft.cda.model.ItemOverviewDTO;
 import com.broscraft.cda.observers.IconUpdateObserver;
@@ -21,7 +23,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class OverviewIconsManager implements OverviewUpdateObserver {
     private Map<Long, ItemStack> icons = new HashMap<>();
-    private Map<String, ItemStack> namedIcons = new HashMap<>();
+    private Map<Long, String> iconNames = new HashMap<>();
 
     private List<IconUpdateObserver> iconUpdateObservers = new ArrayList<>();
     private List<NewIconObserver> newIconObservers = new ArrayList<>();
@@ -57,11 +59,19 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
         return this.icons.values();
     }
 
+    public Collection<ItemStack> searchIcons(String searchQuery) {
+        Collection<ItemStack> results = new ArrayList<>();
+        results = icons.keySet().stream().filter(k -> {
+            String iconName = this.iconNames.get(k);
+            return iconName.contains(searchQuery);
+        }).map(k -> this.icons.get(k))
+        .collect(Collectors.toList());
+        return results;
+    }
+
     public void createIcons(List<ItemOverviewDTO> itemOverviews) {
         itemOverviews.forEach(itemOverview -> {
-            Long id = itemOverview.getItem().getId();
-            ItemStack icon = createIcon(itemOverview);
-            icons.put(id, icon);
+            createIcon(itemOverview);
         });
     }
 
@@ -69,9 +79,23 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
         ItemStack icon = ItemUitls.createIcon(itemOverview.getItem());
         List<String> lore = this.getLore(itemOverview);
         ItemMeta meta = icon.getItemMeta();
+
+        Long id = itemOverview.getItem().getId();
+
         meta.setLore(lore);
         icon.setItemMeta(meta);
+        iconNames.put(id, ItemUitls.getItemName(itemOverview.getItem()));
+        icons.put(id, icon);
         return icon;
+    }
+
+    private void updateIcon(ItemOverviewDTO itemOverviewDTO) {
+        Long itemId = Objects.requireNonNull(itemOverviewDTO.getItem().getId());
+        ItemStack icon = this.icons.get(itemId);
+        List<String> lore = this.getLore(itemOverviewDTO);
+        ItemMeta meta = icon.getItemMeta();
+        meta.setLore(lore);
+        icon.setItemMeta(meta);
     }
 
     private List<String> getLore(ItemOverviewDTO itemOverview) {
@@ -100,37 +124,20 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
         System.out.println("Overview Update!");
         // Update icon lore when data changes
         Long itemId = Objects.requireNonNull(itemOverviewDTO.getItem().getId());
-        ItemStack icon;
-        // Check icon exists
-        boolean newIcon = false;
+
         if (this.icons.containsKey(itemId)) {
-            icon = this.icons.get(itemId); // If so, retrieve it
+            this.updateIcon(itemOverviewDTO);
+            this.notifyIconUpdateObservers();
         } else {
-            icon = createIcon(itemOverviewDTO);
-            icons.put(itemId, icon); // Otherwise, create a new one
-            newIcon = true;
+            ItemStack icon = createIcon(itemOverviewDTO);
+            this.notifyNewIconObservers(icon);
         }
-
-        List<String> lore = this.getLore(itemOverviewDTO);
-        ItemMeta meta = icon.getItemMeta();
-        meta.setLore(lore);
-        icon.setItemMeta(meta);
-
-        if (newIcon) this.notifyNewIconObservers(icon);
-        else this.notifyIconUpdateObservers();
-
     }
 
     @Override
     public void onOverviewLoad(Collection<ItemOverviewDTO> itemOverviewDTOs) {
         itemOverviewDTOs.forEach(itemOverviewDTO -> {
-            Long itemId = Objects.requireNonNull(itemOverviewDTO.getItem().getId());
-            ItemStack icon = createIcon(itemOverviewDTO);
-            List<String> lore = this.getLore(itemOverviewDTO);
-            ItemMeta meta = icon.getItemMeta();
-            meta.setLore(lore);
-            icon.setItemMeta(meta);
-            icons.put(itemId, icon);
+            createIcon(itemOverviewDTO);
         });
     }
 }

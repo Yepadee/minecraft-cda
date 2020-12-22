@@ -24,11 +24,14 @@ public class SearchMarketCommand implements CommandExecutor {
             return false;
         }
 
-        String itemName = args[0].substring(1, args[0].length() - 1);
+        String arg = args[0];
+        String searchQuery;
+        if (arg.startsWith("'")) searchQuery = arg.substring(1, arg.length() - 1);
+        else searchQuery = arg;
 
         SearchResultsScreen searchResultsScreen = new SearchResultsScreen(
-            "Items matching '" + itemName + "'",
-            overviewIconsManager.getAllIcons(),
+            "Items matching '" + searchQuery + "'",
+            overviewIconsManager.searchIcons(searchQuery),
             e -> {
                 e.getWhoClicked().sendMessage("Back Button Clicked!!!");
             }
