@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
+import me.mattstudios.mfgui.gui.components.ScrollType;
 import me.mattstudios.mfgui.gui.guis.GuiItem;
 import me.mattstudios.mfgui.gui.guis.ScrollingGui;
 
@@ -21,8 +22,8 @@ public abstract class ScrollableScreen {
     private Material PREV_MATERIAL = Material.REDSTONE;
 
 
-    public ScrollableScreen(String name) {
-        this.gui = new ScrollingGui(HEIGHT, name);
+    public ScrollableScreen(String name, ScrollType scrollType) {
+        this.gui = new ScrollingGui(HEIGHT, name, scrollType);
         gui.setDefaultClickAction(event -> {
             event.setCancelled(true);
         });
@@ -31,7 +32,7 @@ public abstract class ScrollableScreen {
         });
 
         this.setBorder();
-        this.addNavigationButtons();
+        this.addNavigationButtons(scrollType);
     }
 
     private void setBorder() {
@@ -46,9 +47,24 @@ public abstract class ScrollableScreen {
         }
     }
 
-    private void addNavigationButtons() {
-        gui.setItem(1, WIDTH, ItemBuilder.from(PREV_MATERIAL).setName("Scroll Up").asGuiItem(this::onPrevBtnClick));
-        gui.setItem(HEIGHT, WIDTH, ItemBuilder.from(NEXT_MATERIAL).setName("Scroll Down").asGuiItem(this::onNextBtnClick));
+    private void addNavigationButtons(ScrollType scrollType) {
+        int prevBtnRow = HEIGHT,
+            prevBtnCol = 1,
+            nextBtnRow = HEIGHT,
+            nextBtnCol = WIDTH;
+
+        String prevBtnTxt = "Previous",
+               nextBtnTxt = "Next";
+
+        if (scrollType.equals(ScrollType.VERTICAL)) {
+            prevBtnRow = 1;
+            prevBtnCol = WIDTH;
+            prevBtnTxt = "Scroll Up";
+            nextBtnTxt = "Scroll Down";
+        }
+
+        gui.setItem(prevBtnRow, prevBtnCol, ItemBuilder.from(PREV_MATERIAL).setName(prevBtnTxt).asGuiItem(this::onPrevBtnClick));
+        gui.setItem(nextBtnRow, nextBtnCol, ItemBuilder.from(NEXT_MATERIAL).setName(nextBtnTxt).asGuiItem(this::onNextBtnClick));
     }
 
     private void onPrevBtnClick(InventoryClickEvent event) {

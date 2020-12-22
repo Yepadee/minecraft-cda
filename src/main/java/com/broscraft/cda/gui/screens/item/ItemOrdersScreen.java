@@ -7,11 +7,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
+import me.mattstudios.mfgui.gui.components.ScrollType;
 
-public class ItemScreen extends ScrollableScreen {
+public class ItemOrdersScreen extends ScrollableScreen {
 
-    public ItemScreen(GuiAction<InventoryClickEvent> onBackBtnClick) {
-        super("Item Orders");
+    public ItemOrdersScreen(GuiAction<InventoryClickEvent> onBackBtnClick) {
+        super("Item Orders", ScrollType.HORIZONTAL);
         this.createNavbar(onBackBtnClick);
     }
 

@@ -21,6 +21,16 @@
     <matt-framework-gui.version>2.0.2</matt-framework-gui.version>
   </properties>
   
+  <repositories>
+      <repository>
+          <id>aikar</id>
+          <url>https://repo.aikar.co/content/groups/aikar/</url>
+      </repository>
+      <repository>
+          <id>spigot</id>
+          <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+      </repository>
+  </repositories>
 
   <dependencies>
     <dependency>
@@ -40,6 +50,11 @@
       <artifactId>spigot-api</artifactId>
       <version>${spigot.api.version}</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>co.aikar</groupId>
+      <artifactId>taskchain-bukkit</artifactId>
+      <version>3.7.2</version> <!-- Replace this with the version from TaskChain -->
     </dependency>
     <dependency>
       <groupId>me.mattstudios.utils</groupId>
@@ -79,8 +94,12 @@
           <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
           <relocations>
             <relocation>
-                <pattern>me.mattstudios.mfgui</pattern>
-                <shadedPattern>com.broscraft.cda.mfgui</shadedPattern> <!-- Replace package here here -->
+              <pattern>me.mattstudios.mfgui</pattern>
+              <shadedPattern>com.broscraft.cda.mfgui</shadedPattern> <!-- Replace package here here -->
+            </relocation>
+            <relocation>
+              <pattern>co.aikar.taskchain</pattern>
+              <shadedPattern>com.broscraft.cda.taskchain</shadedPattern> <!-- Replace this -->
             </relocation>
         </relocations>
         </configuration>

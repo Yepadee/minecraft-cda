@@ -13,6 +13,10 @@ import com.broscraft.cda.repositories.OrderRepository;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import co.aikar.taskchain.BukkitTaskChainFactory;
+import co.aikar.taskchain.TaskChain;
+import co.aikar.taskchain.TaskChainFactory;
+
 /**
  * Continuous Double Action Plugin
  *
@@ -29,9 +33,21 @@ public class CDAPlugin extends JavaPlugin
     private OverviewIconsManager overviewIconsManager;
 
     private MarketGui marketGui;
+
+    private static TaskChainFactory taskChainFactory;
+    
+    public static <T> TaskChain<T> newChain() {
+        return taskChainFactory.newChain();
+    }
+
+    public static <T> TaskChain<T> newSharedChain(String name) {
+        return taskChainFactory.newSharedChain(name);
+    }
     
     @Override
     public void onEnable() {
+        taskChainFactory = BukkitTaskChainFactory.create(this);
+        
         itemRepository = new ItemRepository();
         orderRepository = new OrderRepository(itemRepository);
 

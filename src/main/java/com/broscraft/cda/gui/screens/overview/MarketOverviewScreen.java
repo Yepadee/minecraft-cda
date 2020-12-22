@@ -5,14 +5,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.gui.screens.ScrollableScreen;
-import com.broscraft.cda.gui.screens.item.ItemScreen;
+import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
 import com.broscraft.cda.observers.IconUpdateObserver;
 import com.broscraft.cda.utils.ItemUitls;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 
+import me.mattstudios.mfgui.gui.components.ScrollType;
 import me.mattstudios.mfgui.gui.guis.GuiItem;
 
 public abstract class MarketOverviewScreen extends ScrollableScreen implements IconUpdateObserver {
@@ -20,7 +22,7 @@ public abstract class MarketOverviewScreen extends ScrollableScreen implements I
     Map<Long, GuiItem> guiItems = new HashMap<>();
 
     public MarketOverviewScreen(String name, Collection<ItemStack> icons) {
-        super(name);
+        super(name, ScrollType.VERTICAL);
         this.setIcons(icons);
     }
 
@@ -37,7 +39,7 @@ public abstract class MarketOverviewScreen extends ScrollableScreen implements I
         Long id = ItemUitls.getId(icon);
         return new GuiItem(icon, event -> {
             HumanEntity player = event.getWhoClicked();
-            new ItemScreen(
+            new ItemOrdersScreen(
                 e -> {
                     this.open(player);
                 }
@@ -48,7 +50,7 @@ public abstract class MarketOverviewScreen extends ScrollableScreen implements I
 
     @Override
     public void onIconUpdate() {
-        this.update();
+        CDAPlugin.newChain().async(this::update).execute();
     }
     
 }
