@@ -1,23 +1,25 @@
 package com.broscraft.cda.gui;
 
-import java.util.function.Function;
-
 import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
 import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
+import com.broscraft.cda.repositories.OrderRepository;
+import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-
-import me.mattstudios.mfgui.gui.components.GuiAction;
 
 public class MarketGui {
     private OverviewIconsManager overviewIconsManager;
+    private OrderRepository orderRepository;
 
-    public MarketGui(OverviewIconsManager overviewIconsManager) {
+    public MarketGui(
+        OverviewIconsManager overviewIconsManager,
+        OrderRepository orderRepository
+    ) {
         this.overviewIconsManager = overviewIconsManager;
+        this.orderRepository = orderRepository;
     }
 
     public void openSearchMenuScreen(HumanEntity player) {
@@ -33,7 +35,7 @@ public class MarketGui {
             overviewIconsManager.getAllIcons(),
             e -> openSearchMenuScreen(e.getWhoClicked()),
             e -> openMyOrdersScreen(e.getWhoClicked()),
-            openItemOrdersScreen()
+            itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
         );
 
         overviewIconsManager.addIconUpdateObserver(allItemsScreen);
@@ -51,7 +53,7 @@ public class MarketGui {
             "Items matching '" + searchQuery + "'",
             overviewIconsManager.searchIcons(searchQuery),
             e -> openAllItemsScreen(e.getWhoClicked()),
-            openItemOrdersScreen()
+            itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
         );
 
         overviewIconsManager.addIconUpdateObserver(searchResultsScreen);
@@ -63,18 +65,21 @@ public class MarketGui {
         
     }
 
-    public Function<ItemStack, GuiAction<InventoryClickEvent>> openItemOrdersScreen() {
-        return itemStack -> (ie -> {
+    public void openItemOrdersScreen(ItemStack item, HumanEntity player) {
+        Long itemId = ItemUtils.getId(item);
+        orderRepository.getOrders(itemId, orders -> {
             new ItemOrdersScreen(
-                itemStack,
+                item,
+                orders,
                 e -> openAllItemsScreen(e.getWhoClicked()),
-                itemId -> (e -> {
-                    e.getWhoClicked().sendMessage("New bid btn clicked!");
-                }),
-                itemId -> (e -> {
-                    e.getWhoClicked().sendMessage("New ask btn clicked!");
-                })
-            ).open(ie.getWhoClicked());
+                e -> {
+                    e.getWhoClicked().sendMessage("New bid btn clicked for item " + itemId + "!");
+                },
+                e -> {
+                    e.getWhoClicked().sendMessage("New ask btn clicked for item " + itemId + "!");
+                }
+            ).open(player);
         });
     }
+
 }

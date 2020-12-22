@@ -56,7 +56,10 @@ public class CDAPlugin extends JavaPlugin
         
         orderRepository.addObserver(itemOverviewRepository);
 
-        marketGui = new MarketGui(overviewIconsManager);
+        marketGui = new MarketGui(
+            overviewIconsManager,
+            orderRepository
+        );
 
         openMenuCommand = new OpenMenuCommand(marketGui);
         searchMarketCommand = new SearchMarketCommand(marketGui);

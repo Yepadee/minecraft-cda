@@ -1,8 +1,10 @@
 package com.broscraft.cda.model.orders.grouped;
 
-public class OrdersDTO {
-    Float price;
-    Integer quantity;
+import com.broscraft.cda.model.orders.grouped.visitors.GroupedOrderVisitor;
+
+public abstract class GroupedOrderDTO {
+    private Float price;
+    private Integer quantity;
 
     public Float getPrice() {
         return this.price;
@@ -19,5 +21,7 @@ public class OrdersDTO {
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
+
+    public abstract void accept(GroupedOrderVisitor v);
 
 }

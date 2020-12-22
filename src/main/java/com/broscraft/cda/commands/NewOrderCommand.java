@@ -3,7 +3,7 @@ import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.orders.OrderType;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.repositories.OrderRepository;
-import com.broscraft.cda.utils.ItemUitls;
+import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -54,7 +54,7 @@ public class NewOrderCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED.toString() + "You must be holding an item to create an order for");
                 return false;
             }
-            ItemDTO itemDTO = ItemUitls.parseItemStack(itemStack);
+            ItemDTO itemDTO = ItemUtils.parseItemStack(itemStack);
             newOrderDto.setItem(itemDTO);
 
             Integer quantity;

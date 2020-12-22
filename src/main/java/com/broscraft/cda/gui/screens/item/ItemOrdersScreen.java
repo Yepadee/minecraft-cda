@@ -1,9 +1,14 @@
 package com.broscraft.cda.gui.screens.item;
 
+import java.util.List;
 import java.util.function.Function;
 
 import com.broscraft.cda.gui.screens.ScrollableScreen;
-import com.broscraft.cda.utils.ItemUitls;
+import com.broscraft.cda.model.orders.grouped.GroupedAskDTO;
+import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
+import com.broscraft.cda.model.orders.grouped.GroupedOrderDTO;
+import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
+import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -29,23 +34,25 @@ public class ItemOrdersScreen extends ScrollableScreen {
 
     public ItemOrdersScreen(
         ItemStack item,
+        GroupedOrdersDTO groupedOrders,
         GuiAction<InventoryClickEvent> onBackBtnClick,
-        Function<Long, GuiAction<InventoryClickEvent>> onNewBidClick,
-        Function<Long, GuiAction<InventoryClickEvent>> onNewAskClick
+        GuiAction<InventoryClickEvent> onNewBidClick,
+        GuiAction<InventoryClickEvent> onNewAskClick
     ) {
         super("Item Orders", ScrollType.HORIZONTAL);
         this.createNavbar(item, onBackBtnClick);
         this.setGuiIcons();
-        this.setCreateOrderButtons(ItemUitls.getId(item), onNewBidClick, onNewAskClick);
+        this.setCreateOrderButtons(ItemUtils.getId(item), onNewBidClick, onNewAskClick);
+        this.setOrders(groupedOrders);
     }
 
     private void setCreateOrderButtons(
         Long itemId,
-        Function<Long, GuiAction<InventoryClickEvent>> onNewBidClick,
-        Function<Long, GuiAction<InventoryClickEvent>> onNewAskClick
+        GuiAction<InventoryClickEvent> onNewBidClick,
+        GuiAction<InventoryClickEvent> onNewAskClick
     ) {
-        GuiItem newBidBtn = ItemBuilder.from(NEW_ORDER_MATERIAL).setName("New Bid").setLore("Creates a new bid").asGuiItem(onNewBidClick.apply(itemId));
-        GuiItem newAskBtn = ItemBuilder.from(NEW_ORDER_MATERIAL).setName("New Ask").setLore("Creates a new ask").asGuiItem(onNewAskClick.apply(itemId));
+        GuiItem newBidBtn = ItemBuilder.from(NEW_ORDER_MATERIAL).setName("New Bid").setLore("Creates a new bid").asGuiItem(onNewBidClick);
+        GuiItem newAskBtn = ItemBuilder.from(NEW_ORDER_MATERIAL).setName("New Ask").setLore("Creates a new ask").asGuiItem(onNewAskClick);
 
         gui.setItem(3, WIDTH, newBidBtn);
         gui.setItem(4, WIDTH, newAskBtn);
@@ -81,4 +88,31 @@ public class ItemOrdersScreen extends ScrollableScreen {
         this.gui.setItem(1, 5, ItemBuilder.from(item).asGuiItem());
     }
 
+
+    private void setOrders(GroupedOrdersDTO groupedOrders) {
+        List<GroupedBidDTO> groupedBids = groupedOrders.getGroupedBids();
+        List<GroupedAskDTO> groupedAsks = groupedOrders.getGroupedAsks();
+        int numBids = groupedBids.size();
+        int numAsks = groupedAsks.size();
+        int smallest = numBids < numAsks ? numBids : numAsks;
+        for (int i = 0; i < smallest; ++i) {
+            GroupedBidDTO groupedBid = groupedBids.get(i);
+            GroupedAskDTO groupedAsk = groupedAsks.get(i);
+            gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).asGuiItem());
+            gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).asGuiItem());
+        }
+        if (smallest == numBids) {
+            for (int i = smallest - 1; i < numAsks; ++i) {
+                GroupedAskDTO groupedAsk = groupedAsks.get(i);
+                gui.addItem(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).asGuiItem());
+            }
+        } else {
+            for (int i = smallest - 1; i < numBids; ++i) {
+                GroupedBidDTO groupedBid = groupedBids.get(i);
+                gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).asGuiItem());
+                gui.addItem(ItemBuilder.from(Material.BARRIER).asGuiItem());
+            }
+        }
+    }
 }

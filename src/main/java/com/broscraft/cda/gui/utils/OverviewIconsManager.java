@@ -13,7 +13,7 @@ import com.broscraft.cda.model.ItemOverviewDTO;
 import com.broscraft.cda.observers.IconUpdateObserver;
 import com.broscraft.cda.observers.NewIconObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
-import com.broscraft.cda.utils.ItemUitls;
+import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -75,7 +75,7 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
     }
 
     private ItemStack createIcon(ItemOverviewDTO itemOverview) {
-        ItemStack icon = ItemUitls.createIcon(itemOverview.getItem());
+        ItemStack icon = ItemUtils.createIcon(itemOverview.getItem());
         List<String> lore = this.getLore(itemOverview);
         ItemMeta meta = icon.getItemMeta();
 
@@ -83,7 +83,7 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
 
         meta.setLore(lore);
         icon.setItemMeta(meta);
-        iconNames.put(id, ItemUitls.getItemName(itemOverview.getItem()));
+        iconNames.put(id, ItemUtils.getItemName(itemOverview.getItem()));
         icons.put(id, icon);
         return icon;
     }

@@ -14,6 +14,8 @@ import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.items.PotionDTO;
 import com.broscraft.cda.model.items.visitors.IconBuilder;
 import com.broscraft.cda.model.items.visitors.ItemNameBuilder;
+import com.broscraft.cda.model.orders.grouped.GroupedOrderDTO;
+import com.broscraft.cda.model.orders.grouped.visitors.GroupedOrderIconBuilder;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -26,9 +28,10 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionType;
 
-public class ItemUitls {
+public class ItemUtils {
     private static final ItemNameBuilder itemNameBuilder = new ItemNameBuilder();
     private static final IconBuilder iconBuilder = new IconBuilder();
+    private static final GroupedOrderIconBuilder groupedOrderIconBuilder = new GroupedOrderIconBuilder();
 
     private static final NamespacedKey ICON_ID_KEY = new NamespacedKey(JavaPlugin.getProvidingPlugin(IconBuilder.class), "icon_id");
 
@@ -114,6 +117,11 @@ public class ItemUitls {
     public static ItemStack createIcon(ItemDTO itemDTO) {
         itemDTO.accept(iconBuilder);
         return iconBuilder.getIcon();
+    }
+
+    public static ItemStack createGroupedOrderIcon(GroupedOrderDTO groupedOrderDTO) {
+        groupedOrderDTO.accept(groupedOrderIconBuilder);
+        return groupedOrderIconBuilder.getIcon();
     }
 
     public static Long getId(ItemStack icon) {
