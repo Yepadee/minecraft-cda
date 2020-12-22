@@ -120,7 +120,6 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
 
     @Override
     public void onOverviewUpdate(ItemOverviewDTO itemOverviewDTO) {
-        System.out.println("Overview Update!");
         // Update icon lore when data changes
         Long itemId = Objects.requireNonNull(itemOverviewDTO.getItem().getId());
 

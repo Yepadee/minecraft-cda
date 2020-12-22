@@ -30,8 +30,8 @@ public class AllItemsScreen extends MarketOverviewScreen implements NewIconObser
         GuiAction<InventoryClickEvent> onSearchBtnClick,
         GuiAction<InventoryClickEvent> onMyOrdersBtnClick
     ) {
-        this.gui.setItem(1, 6, ItemBuilder.from(SEARCH_ICON).asGuiItem(onSearchBtnClick));
-        this.gui.setItem(1, 4, ItemBuilder.from(MY_ORDERS_ICON).asGuiItem(onMyOrdersBtnClick));
+        this.gui.setItem(1, 6, ItemBuilder.from(SEARCH_ICON).setName("Search").asGuiItem(onSearchBtnClick));
+        this.gui.setItem(1, 4, ItemBuilder.from(MY_ORDERS_ICON).setName("My Orders").asGuiItem(onMyOrdersBtnClick));
     }
 
     @Override

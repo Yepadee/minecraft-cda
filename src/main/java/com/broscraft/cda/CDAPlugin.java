@@ -5,6 +5,7 @@ import java.util.Objects;
 import com.broscraft.cda.commands.NewOrderCommand;
 import com.broscraft.cda.commands.OpenMenuCommand;
 import com.broscraft.cda.commands.SearchMarketCommand;
+import com.broscraft.cda.gui.MarketGui;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
 import com.broscraft.cda.repositories.ItemOverviewRepository;
 import com.broscraft.cda.repositories.ItemRepository;
@@ -26,6 +27,8 @@ public class CDAPlugin extends JavaPlugin
     private OrderRepository orderRepository;
     private ItemOverviewRepository itemOverviewRepository;
     private OverviewIconsManager overviewIconsManager;
+
+    private MarketGui marketGui;
     
     @Override
     public void onEnable() {
@@ -37,9 +40,13 @@ public class CDAPlugin extends JavaPlugin
         
         orderRepository.addObserver(itemOverviewRepository);
 
-        openMenuCommand = new OpenMenuCommand(overviewIconsManager);
-        searchMarketCommand = new SearchMarketCommand(overviewIconsManager);
+        marketGui = new MarketGui(overviewIconsManager);
+
+        openMenuCommand = new OpenMenuCommand(marketGui);
+        searchMarketCommand = new SearchMarketCommand(marketGui);
         newOrderCommand = new NewOrderCommand(orderRepository);
+
+        
 
         itemOverviewRepository.loadItemOverviews();
         
