@@ -65,6 +65,11 @@ public abstract class ScrollableScreen {
 
     protected void addItem(GuiItem guiItem) {
         gui.addItem(guiItem);
+        this.update();
+    }
+
+    protected void update() {
+        this.gui.update();
     }
 
     public void open(HumanEntity player) {

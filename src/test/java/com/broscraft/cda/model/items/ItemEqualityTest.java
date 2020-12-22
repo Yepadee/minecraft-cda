@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.junit.Test;
 
 public class ItemEqualityTest {

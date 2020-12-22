@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import com.broscraft.cda.model.ItemOverviewDTO;
 import com.broscraft.cda.observers.IconUpdateObserver;
+import com.broscraft.cda.observers.NewIconObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
 import com.broscraft.utils.ItemUitls;
 
@@ -20,27 +21,35 @@ import net.md_5.bungee.api.ChatColor;
 
 public class OverviewIconsManager implements OverviewUpdateObserver {
     private Map<Long, ItemStack> icons = new HashMap<>();
+    private Map<String, ItemStack> namedIcons = new HashMap<>();
 
-    private List<IconUpdateObserver> iconUpdateObserver = new ArrayList<>();
+    private List<IconUpdateObserver> iconUpdateObservers = new ArrayList<>();
+    private List<NewIconObserver> newIconObservers = new ArrayList<>();
+
 
     public void addIconUpdateObserver(IconUpdateObserver o) {
-        iconUpdateObserver.add(o);
+        iconUpdateObservers.add(o);
     }
 
     public void removeIconUpdateObserver(IconUpdateObserver o) {
-        iconUpdateObserver.remove(o);
+        iconUpdateObservers.remove(o);
     }
 
+    public void addNewIconObserver(NewIconObserver o) {
+        newIconObservers.add(o);
+    }
+
+    public void removeNewIconObserver(NewIconObserver o) {
+        newIconObservers.remove(o);
+    }
+
+
     private void notifyIconUpdateObservers() {
-        iconUpdateObserver.forEach(o ->  o.onIconUpdate());
+        iconUpdateObservers.forEach(o ->  o.onIconUpdate());
     }
 
     private void notifyNewIconObservers(ItemStack icon) {
-        iconUpdateObserver.forEach(o ->  o.onNewIcon(icon));
-    }
-
-    private void notifyNewIconsObservers(Collection<ItemStack> icons) {
-        iconUpdateObserver.forEach(o ->  o.onNewIcons(icons));
+        newIconObservers.forEach(o ->  o.onNewIcon(icon));
     }
 
 
@@ -88,6 +97,7 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
 
     @Override
     public void onOverviewUpdate(ItemOverviewDTO itemOverviewDTO) {
+        System.out.println("Overview Update!");
         // Update icon lore when data changes
         Long itemId = Objects.requireNonNull(itemOverviewDTO.getItem().getId());
         ItemStack icon;
@@ -122,6 +132,5 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
             icon.setItemMeta(meta);
             icons.put(itemId, icon);
         });
-        this.notifyNewIconsObservers(this.icons.values());
     }
 }

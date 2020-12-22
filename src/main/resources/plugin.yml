@@ -7,6 +7,10 @@ commands:
     description: Open the market GUI.
     usage: /<command>
     aliases: ['m']
+  searchmarket:
+    description: Create a new order.
+    usage: /<command> 'item name'
+    aliases: ['sm']
   neworder:
     description: Create a new order.
     usage: /<command> [bid | ask] <price> <quantity>

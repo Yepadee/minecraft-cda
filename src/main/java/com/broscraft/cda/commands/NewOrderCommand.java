@@ -37,6 +37,7 @@ public class NewOrderCommand implements CommandExecutor {
                 newOrderDto.setType(OrderType.valueOf(orderType.toUpperCase()));
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED.toString() + "Invalid order-type specified");
+                return false;
             }
             
 

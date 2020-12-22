@@ -17,7 +17,7 @@ import com.broscraft.cda.model.ItemOverviewDTO;
 
 public class ItemOverviewRepository implements NewOrderObserver {
     Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
-    Set<ItemDTO> allItems = new HashSet<>();
+    Set<ItemDTO> allItems = new HashSet<>(); 
     
     OverviewUpdateObserver overviewUpdateObserver;
 

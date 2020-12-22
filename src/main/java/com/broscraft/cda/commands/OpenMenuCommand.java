@@ -1,14 +1,12 @@
 package com.broscraft.cda.commands;
 
 import com.broscraft.cda.gui.OverviewIconsManager;
-import com.broscraft.cda.gui.screens.MarketOverviewScreen;
+import com.broscraft.cda.gui.screens.AllItemsScreen;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.HumanEntity;
-
-import net.md_5.bungee.api.ChatColor;
 
 public class OpenMenuCommand implements CommandExecutor {
     OverviewIconsManager overviewIconsManager;
@@ -19,14 +17,24 @@ public class OpenMenuCommand implements CommandExecutor {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        sender.sendMessage(ChatColor.RED.toString() + ChatColor.BOLD + "Executed the OpenMenu command");
-        MarketOverviewScreen marketOverviewScreen = new MarketOverviewScreen(overviewIconsManager.getAllIcons());
-        overviewIconsManager.addIconUpdateObserver(marketOverviewScreen);
-        marketOverviewScreen.setOnClose(event -> {
-            overviewIconsManager.removeIconUpdateObserver(marketOverviewScreen);
-            System.out.println("MENU CLOSED");
+        AllItemsScreen allItemsScreen = new AllItemsScreen(
+            overviewIconsManager.getAllIcons(),
+            e -> {
+                e.getWhoClicked().sendMessage("Search Button Clicked!!!");
+            },
+            e -> {
+                e.getWhoClicked().sendMessage("MyOrders Button Clicked!!!");
+            }
+        );
+
+        overviewIconsManager.addIconUpdateObserver(allItemsScreen);
+        overviewIconsManager.addNewIconObserver(allItemsScreen);
+        
+        allItemsScreen.setOnClose(event -> {
+            overviewIconsManager.removeIconUpdateObserver(allItemsScreen);
+            overviewIconsManager.removeNewIconObserver(allItemsScreen);
         });
-        marketOverviewScreen.open((HumanEntity) sender);
+        allItemsScreen.open((HumanEntity) sender);
         
         return true;
     }
