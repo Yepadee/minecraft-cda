@@ -17,7 +17,7 @@ public class SearchResultsScreen extends MarketOverviewScreen {
     }
 
     private void createNavbar(GuiAction<InventoryClickEvent> onBackBtnClick) {
-        this.gui.setItem(1, 5, ItemBuilder.from(Material.BARRIER).asGuiItem(onBackBtnClick));
+        this.gui.setItem(1, 5, ItemBuilder.from(Material.BARRIER).setName("Back").asGuiItem(onBackBtnClick));
     }
     
 }
