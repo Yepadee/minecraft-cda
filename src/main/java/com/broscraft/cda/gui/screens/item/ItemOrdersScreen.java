@@ -34,7 +34,6 @@ public class ItemOrdersScreen extends ScrollableScreen {
 
     public ItemOrdersScreen(
         ItemStack item,
-        GroupedOrdersDTO groupedOrders,
         GuiAction<InventoryClickEvent> onBackBtnClick,
         GuiAction<InventoryClickEvent> onNewBidClick,
         GuiAction<InventoryClickEvent> onNewAskClick
@@ -43,7 +42,6 @@ public class ItemOrdersScreen extends ScrollableScreen {
         this.createNavbar(item, onBackBtnClick);
         this.setGuiIcons();
         this.setCreateOrderButtons(ItemUtils.getId(item), onNewBidClick, onNewAskClick);
-        this.setOrders(groupedOrders);
     }
 
     private void setCreateOrderButtons(
@@ -80,7 +78,7 @@ public class ItemOrdersScreen extends ScrollableScreen {
     }
 
 
-    private void setOrders(GroupedOrdersDTO groupedOrders) {
+    public void setOrders(GroupedOrdersDTO groupedOrders) {
         // This is a very aids way of doing the UI, but necessary give the lack of "Panes" in this gui framework :(
         List<GroupedBidDTO> groupedBids = groupedOrders.getGroupedBids();
         List<GroupedAskDTO> groupedAsks = groupedOrders.getGroupedAsks();
@@ -137,5 +135,7 @@ public class ItemOrdersScreen extends ScrollableScreen {
         for (int i = 0; i < 3; ++i) {
             gui.addItem(ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).asGuiItem());
         }
+
+        gui.update();
     }
 }

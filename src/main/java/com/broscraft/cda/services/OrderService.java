@@ -2,33 +2,42 @@ package com.broscraft.cda.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import com.broscraft.cda.CDAPlugin;
+import com.broscraft.cda.model.items.ItemDTO;
+import com.broscraft.cda.model.orders.OrderDTO;
+import com.broscraft.cda.model.orders.OrderType;
 import com.broscraft.cda.model.orders.grouped.GroupedAskDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
-import com.broscraft.cda.observers.NewOrderObserver;
+import com.broscraft.cda.observers.OrderObserver;
+
+import org.bukkit.Material;
 
 
 public class OrderService {
-    private List<NewOrderObserver> observers = new ArrayList<>();
+    private List<OrderObserver> observers = new ArrayList<>();
     private ItemService itemService;
 
     public OrderService(ItemService itemService) {
         this.itemService = itemService;
     }
 
-    public void addObserver(NewOrderObserver observer) {
+    public void addObserver(OrderObserver observer) {
         this.observers.add(observer);
     }
 
-    private void notifyObservers(NewOrderDTO newOrderDTO) {
-        CDAPlugin.newChain().async(() -> {
-            observers.forEach(o -> o.onNewOrder(newOrderDTO));
-        }).execute();
+    private void notifyNewOrderObservers(NewOrderDTO newOrderDTO) {
+        observers.forEach(o -> o.onNewOrder(newOrderDTO));
         
+    }
+
+    private void notifyRemoveOrderObservers(OrderDTO orderDTO, Float nextBestPrice) {
+        observers.forEach(o -> o.onRemoveOrder(orderDTO, nextBestPrice));
+
     }
 
     public void getOrders(Long itemId, Consumer<GroupedOrdersDTO> onComplete) {
@@ -62,13 +71,59 @@ public class OrderService {
         .execute();
     }
 
+    public void getPlayerOrders(UUID playerUUID, Consumer<List<OrderDTO>> onComplete) {
+        CDAPlugin.newChain()
+        .asyncFirst(() -> {
+            // TODO: Actually load orders
+            System.out.println("Loading orders for player " + playerUUID + "!");
+            List<OrderDTO> orderDTOs = new ArrayList<>();
+            orderDTOs.add(
+                new OrderDTO()
+                .type(OrderType.ASK)
+                .price(10.0f)
+                .quantity(3)
+                .quantityFilled(0)
+                .item(
+                    new ItemDTO().id(1L).material(Material.STONE)
+                )
+            );
+
+            orderDTOs.add(
+                new OrderDTO()
+                .type(OrderType.BID)
+                .price(10.0f)
+                .quantity(3)
+                .quantityFilled(1)
+                .item(
+                    new ItemDTO().id(2L).material(Material.DIAMOND_BLOCK)
+                )
+            );
+
+            return orderDTOs;
+    
+        }).abortIfNull()
+        .syncLast(result -> onComplete.accept(result))
+        .execute();
+    }
+
     public void submitOrder(NewOrderDTO newOrderDTO) {
-        Long itemId = itemService.getItemId(newOrderDTO.getItem());
-        newOrderDTO.getItem().setId(itemId);
+        CDAPlugin.newSharedChain("submitOrder").current(() -> {        
+            Long itemId = itemService.getItemId(newOrderDTO.getItem());
+            newOrderDTO.getItem().setId(itemId);
 
-        // TODO: Submit order request
+            // TODO: Submit order request
 
-        notifyObservers(newOrderDTO);
+            notifyNewOrderObservers(newOrderDTO);
+        }).execute();
+    }
+
+    public void cancelOrder(OrderDTO orderDTO) {
+        CDAPlugin.newSharedChain("cancelOrder").current(() -> {
+            //TODO: load next best price
+            Float nextBestPrice = 3.3f;
+
+            notifyRemoveOrderObservers(orderDTO, nextBestPrice);
+        }).execute();
     }
 }
 

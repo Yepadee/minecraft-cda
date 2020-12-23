@@ -1,6 +1,7 @@
 package com.broscraft.cda.gui;
 
 import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
+import com.broscraft.cda.gui.screens.orders.PlayerOrdersScreen;
 import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.screens.search.SearchInputScreen;
@@ -36,7 +37,13 @@ public class MarketGui {
     }
 
     public void openMyOrdersScreen(HumanEntity player) {
-        player.sendMessage("MyOrders Button Clicked!!!");
+        PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen();
+        orderService.getPlayerOrders(player.getUniqueId(), orders -> {
+            playerOrdersScreen.setOrders(orders, order -> {
+                player.sendMessage("clicked order for item " + order.getItem().getId() + "!");
+            });
+        });
+        playerOrdersScreen.open(player);
     }
 
     public void openAllItemsScreen(HumanEntity player) {
@@ -79,19 +86,21 @@ public class MarketGui {
 
     public void openItemOrdersScreen(ItemStack item, HumanEntity player) {
         Long itemId = ItemUtils.getId(item);
+        ItemOrdersScreen itemOrdersScreen = new ItemOrdersScreen(
+            item,
+            e -> openAllItemsScreen(e.getWhoClicked()),
+            e -> {
+                e.getWhoClicked().sendMessage("New bid btn clicked for item " + itemId + "!");
+            },
+            e -> {
+                e.getWhoClicked().sendMessage("New ask btn clicked for item " + itemId + "!");
+            }
+        );
         orderService.getOrders(itemId, orders -> {
-            new ItemOrdersScreen(
-                item,
-                orders,
-                e -> openAllItemsScreen(e.getWhoClicked()),
-                e -> {
-                    e.getWhoClicked().sendMessage("New bid btn clicked for item " + itemId + "!");
-                },
-                e -> {
-                    e.getWhoClicked().sendMessage("New ask btn clicked for item " + itemId + "!");
-                }
-            ).open(player);
+            itemOrdersScreen.setOrders(orders);
         });
+
+        itemOrdersScreen.open(player);
     }
 
     public void openNewBidScreen(HumanEntity player) {

@@ -20,6 +20,7 @@ import com.broscraft.cda.model.orders.grouped.visitors.GroupedOrderIconBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -107,6 +108,13 @@ public class ItemUtils {
         }
 
         return items;
+    }
+
+    public static ItemStack hideAttributes(ItemStack itemStack) {
+        ItemMeta meta = itemStack.getItemMeta();
+        meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+        itemStack.setItemMeta(meta);
+        return itemStack;
     }
 
     public static String getItemName(ItemDTO itemDTO) {

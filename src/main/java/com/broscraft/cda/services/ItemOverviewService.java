@@ -7,18 +7,19 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.broscraft.cda.model.items.ItemDTO;
+import com.broscraft.cda.model.orders.OrderDTO;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
-import com.broscraft.cda.observers.NewOrderObserver;
+import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
 
 import org.bukkit.Material;
 
 import com.broscraft.cda.model.ItemOverviewDTO;
 
-public class ItemOverviewService implements NewOrderObserver {
+public class ItemOverviewService implements OrderObserver {
     Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
-    Set<ItemDTO> allItems = new HashSet<>(); 
-    
+    Set<ItemDTO> allItems = new HashSet<>();
+
     OverviewUpdateObserver overviewUpdateObserver;
 
     public ItemOverviewService(OverviewUpdateObserver overviewUpdateObserver) {
@@ -56,26 +57,30 @@ public class ItemOverviewService implements NewOrderObserver {
 
     @Override
     public void onNewOrder(NewOrderDTO newOrderDTO) {
-        //TODO: check item exists
+        // TODO: check item exists
         Long itemId = Objects.requireNonNull(newOrderDTO.getItem().getId());
         ItemOverviewDTO itemOverview;
         if (this.itemOverviews.containsKey(itemId)) {
             itemOverview = this.itemOverviews.get(itemId);
-            
+
             switch (newOrderDTO.getType()) {
                 case ASK:
                     Float bestAsk = itemOverview.getBestAsk();
-                    if (bestAsk == null) itemOverview.setBestAsk(newOrderDTO.getPrice());
-                    else if (newOrderDTO.getPrice() < bestAsk) itemOverview.setBestAsk(newOrderDTO.getPrice());
                     int supply = itemOverview.getSupply();
                     itemOverview.setSupply(supply + newOrderDTO.getQuantity());
+                    if (bestAsk == null)
+                        itemOverview.setBestAsk(newOrderDTO.getPrice());
+                    else if (newOrderDTO.getPrice() < bestAsk)
+                        itemOverview.setBestAsk(newOrderDTO.getPrice());
                     break;
                 case BID:
                     Float bestBid = itemOverview.getBestBid();
                     int demand = itemOverview.getDemand();
                     itemOverview.setDemand(demand + newOrderDTO.getQuantity());
-                    if (bestBid == null) itemOverview.setBestBid(newOrderDTO.getPrice());
-                    else if (newOrderDTO.getPrice() > bestBid) itemOverview.setBestBid(newOrderDTO.getPrice());
+                    if (bestBid == null)
+                        itemOverview.setBestBid(newOrderDTO.getPrice());
+                    else if (newOrderDTO.getPrice() > bestBid)
+                        itemOverview.setBestBid(newOrderDTO.getPrice());
                     break;
             }
         } else {
@@ -95,7 +100,26 @@ public class ItemOverviewService implements NewOrderObserver {
             }
             this.itemOverviews.put(itemId, itemOverview);
         }
-        
+
+        this.overviewUpdateObserver.onOverviewUpdate(itemOverview);
+    }
+
+    @Override
+    public void onRemoveOrder(OrderDTO orderDTO, Float nextBestPrice) {
+        Long itemId = Objects.requireNonNull(orderDTO.getItem().getId());
+        ItemOverviewDTO itemOverview = Objects.requireNonNull(this.itemOverviews.get(itemId));
+        int orderQuantityRemaining = orderDTO.getQuantity() - orderDTO.getQuantityFilled();
+        switch (orderDTO.getType()) {
+            case ASK:
+                int supply = itemOverview.getSupply();
+                itemOverview.setSupply(supply - orderQuantityRemaining);
+                itemOverview.setBestBid(nextBestPrice);
+            case BID:
+                int demand = itemOverview.getSupply();
+                itemOverview.setDemand(demand - orderQuantityRemaining);
+                itemOverview.setBestBid(nextBestPrice);
+                break;
+        }
 
         this.overviewUpdateObserver.onOverviewUpdate(itemOverview);
     }
