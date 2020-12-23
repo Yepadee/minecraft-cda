@@ -30,8 +30,6 @@ public class ItemOrdersScreen extends ScrollableScreen {
     private static GuiItem BEST_ORDER_ICON = ItemBuilder.from(BEST_ORDER_MATERIAL).setName("Best Price").asGuiItem();
     private static GuiItem OTHER_ORDER_ICON = ItemBuilder.from(OTHER_ORDER_MATERIAL).setName("Other Prices").asGuiItem();
 
-    private static Material ORDERS_BACKGROUND_MATERIAL = Material.GRAY_STAINED_GLASS_PANE;
-
 
     public ItemOrdersScreen(
         ItemStack item,
