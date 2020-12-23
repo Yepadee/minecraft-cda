@@ -3,6 +3,7 @@ package com.broscraft.cda.gui.screens.item;
 import java.util.List;
 
 import com.broscraft.cda.gui.screens.ScrollableScreen;
+import com.broscraft.cda.gui.utils.Styles;
 import com.broscraft.cda.model.orders.grouped.GroupedAskDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
@@ -57,7 +58,7 @@ public class ItemOrdersScreen extends ScrollableScreen {
     }
 
     private void setGuiIcons() {
-        GuiItem background = ItemBuilder.from(ORDERS_BACKGROUND_MATERIAL).setName("_").asGuiItem();
+        GuiItem background = Styles.BACKGROUND_DARK;
         gui.setItem(2, 1, background);
         gui.setItem(2, WIDTH, background);
         for (int col = 1; col <= WIDTH; col ++) {

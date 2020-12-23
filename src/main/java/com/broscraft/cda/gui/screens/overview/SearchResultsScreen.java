@@ -3,7 +3,8 @@ package com.broscraft.cda.gui.screens.overview;
 import java.util.Collection;
 import java.util.function.Function;
 
-import org.bukkit.Material;
+import com.broscraft.cda.gui.utils.Styles;
+
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -17,7 +18,7 @@ public class SearchResultsScreen extends MarketOverviewScreen {
     }
 
     private void createNavbar(GuiAction<InventoryClickEvent> onBackBtnClick) {
-        this.gui.setItem(1, 1, ItemBuilder.from(Material.BARRIER).setName("Back").asGuiItem(onBackBtnClick));
+        this.gui.setItem(1, 1, ItemBuilder.from(Styles.BACK_ICON).asGuiItem(onBackBtnClick));
     }
     
 }

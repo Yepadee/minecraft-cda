@@ -1,5 +1,7 @@
 package com.broscraft.cda.gui;
 
+import java.util.Objects;
+
 import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.gui.screens.ConfirmScreen;
 import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
@@ -31,7 +33,62 @@ public class MarketGui {
         this.orderService = orderService;
     }
 
-    public void openSearchInputScreen(HumanEntity player) {
+    public void openAllItemsScreen(HumanEntity player) {
+        AllItemsScreen allItemsScreen = new AllItemsScreen(
+            overviewIconsManager.getAllIcons(),
+            e -> openSearchInputScreen(e.getWhoClicked()),
+            e -> openMyOrdersScreen(e.getWhoClicked()),
+            itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
+        );
+
+        overviewIconsManager.addIconUpdateObserver(allItemsScreen);
+        overviewIconsManager.addNewIconObserver(allItemsScreen);
+        
+        allItemsScreen.setOnClose(event -> {
+            overviewIconsManager.removeIconUpdateObserver(allItemsScreen);
+            overviewIconsManager.removeNewIconObserver(allItemsScreen);
+        });
+        allItemsScreen.open(player);
+    }
+
+    public void openMyOrdersScreen(HumanEntity player) {
+        PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen(
+            e -> openAllItemsScreen(player)
+        );
+        loadPlayerOrders(playerOrdersScreen, player);
+        playerOrdersScreen.open(player);
+    }
+
+    public void openSearchResultsScreen(String searchQuery, HumanEntity player) {
+        overviewIconsManager.searchIcons(searchQuery, searchResults -> {
+            SearchResultsScreen searchResultsScreen = new SearchResultsScreen(
+                "Items matching '" + searchQuery + "'",
+                searchResults,
+                e -> openAllItemsScreen(e.getWhoClicked()),
+                itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
+            );
+    
+            overviewIconsManager.addIconUpdateObserver(searchResultsScreen);
+            
+            searchResultsScreen.setOnClose(event -> {
+                overviewIconsManager.removeIconUpdateObserver(searchResultsScreen);
+            });
+            searchResultsScreen.open(player);
+        });
+
+        
+    }
+
+    public void openNewBidScreen(HumanEntity player) {
+        player.sendMessage("New Bid Button Clicked!!!");
+    }
+
+    public void openNewAskScreen(HumanEntity player) {
+        player.sendMessage("New Ask Button Clicked!!!");
+    }
+
+
+    private void openSearchInputScreen(HumanEntity player) {
         new SearchInputScreen(
             (p, query) -> {
                 openSearchResultsScreen(query, p);
@@ -46,7 +103,9 @@ public class MarketGui {
         new ConfirmScreen(
             "Cancel Order?",
             e -> {
-                PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen();
+                PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen(
+                    ee -> openAllItemsScreen(player)
+                );
                 orderService.cancelOrder(orderDTO, () -> {
                     loadPlayerOrders(playerOrdersScreen, player);
                 });
@@ -79,52 +138,8 @@ public class MarketGui {
         });
     }
 
-    public void openMyOrdersScreen(HumanEntity player) {
-        PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen();
-        loadPlayerOrders(playerOrdersScreen, player);
-        playerOrdersScreen.open(player);
-    }
-
-    public void openAllItemsScreen(HumanEntity player) {
-        AllItemsScreen allItemsScreen = new AllItemsScreen(
-            overviewIconsManager.getAllIcons(),
-            e -> openSearchInputScreen(e.getWhoClicked()),
-            e -> openMyOrdersScreen(e.getWhoClicked()),
-            itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
-        );
-
-        overviewIconsManager.addIconUpdateObserver(allItemsScreen);
-        overviewIconsManager.addNewIconObserver(allItemsScreen);
-        
-        allItemsScreen.setOnClose(event -> {
-            overviewIconsManager.removeIconUpdateObserver(allItemsScreen);
-            overviewIconsManager.removeNewIconObserver(allItemsScreen);
-        });
-        allItemsScreen.open(player);
-    }
-
-    public void openSearchResultsScreen(String searchQuery, HumanEntity player) {
-        overviewIconsManager.searchIcons(searchQuery, searchResults -> {
-            SearchResultsScreen searchResultsScreen = new SearchResultsScreen(
-                "Items matching '" + searchQuery + "'",
-                searchResults,
-                e -> openAllItemsScreen(e.getWhoClicked()),
-                itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
-            );
-    
-            overviewIconsManager.addIconUpdateObserver(searchResultsScreen);
-            
-            searchResultsScreen.setOnClose(event -> {
-                overviewIconsManager.removeIconUpdateObserver(searchResultsScreen);
-            });
-            searchResultsScreen.open(player);
-        });
-
-        
-    }
-
-    public void openItemOrdersScreen(ItemStack item, HumanEntity player) {
-        Long itemId = ItemUtils.getId(item);
+    private void openItemOrdersScreen(ItemStack item, HumanEntity player) {
+        Long itemId = Objects.requireNonNull(ItemUtils.getId(item));
         ItemOrdersScreen itemOrdersScreen = new ItemOrdersScreen(
             item,
             e -> openAllItemsScreen(e.getWhoClicked()),
@@ -142,11 +157,4 @@ public class MarketGui {
         itemOrdersScreen.open(player);
     }
 
-    public void openNewBidScreen(HumanEntity player) {
-        player.sendMessage("New Bid Button Clicked!!!");
-    }
-
-    public void openNewAskScreen(HumanEntity player) {
-        player.sendMessage("New Ask Button Clicked!!!");
-    }
 }

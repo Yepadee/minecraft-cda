@@ -2,6 +2,7 @@ package com.broscraft.cda.gui.screens.orders;
 
 import java.util.List;
 import com.broscraft.cda.gui.screens.ScrollableScreen;
+import com.broscraft.cda.gui.utils.Styles;
 import com.broscraft.cda.model.orders.OrderDTO;
 import com.broscraft.cda.model.orders.OrderType;
 import com.broscraft.cda.utils.ItemUtils;
@@ -17,8 +18,14 @@ import net.md_5.bungee.api.ChatColor;
 
 public class PlayerOrdersScreen extends ScrollableScreen {
 
-    public PlayerOrdersScreen() {
+    public PlayerOrdersScreen(GuiAction<InventoryClickEvent> onBackBtnClick) {
         super("My Orders", ScrollType.VERTICAL);
+        createNavbar(onBackBtnClick);
+
+    }
+
+    private void createNavbar(GuiAction<InventoryClickEvent> onBackBtnClick) {
+        this.gui.setItem(1, 1, ItemBuilder.from(Styles.BACK_ICON).asGuiItem(onBackBtnClick));
     }
 
     private String getQuantityLore(OrderDTO orderDTO) {
