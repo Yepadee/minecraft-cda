@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.model.ItemOverviewDTO;
 import com.broscraft.cda.observers.IconUpdateObserver;
 import com.broscraft.cda.observers.NewIconObserver;
@@ -58,14 +60,18 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
         return this.icons.values();
     }
 
-    public Collection<ItemStack> searchIcons(String searchQuery) {
-        Collection<ItemStack> results = new ArrayList<>();
-        results = icons.keySet().stream().filter(k -> {
-            String iconName = this.iconNames.get(k);
-            return iconName.contains(searchQuery);
-        }).map(k -> this.icons.get(k))
-        .collect(Collectors.toList());
-        return results;
+    public void searchIcons(String searchQuery, Consumer<List<ItemStack>> onComplete) {
+        CDAPlugin.newChain()
+        .asyncFirst(
+            () -> icons.keySet().stream().filter(k -> {
+                String iconName = this.iconNames.get(k);
+                return iconName.contains(searchQuery);
+            }).map(k -> this.icons.get(k))
+            .collect(Collectors.toList())
+        )
+        .asyncLast(result -> onComplete.accept(result))
+        .execute();
+
     }
 
     public void createIcons(List<ItemOverviewDTO> itemOverviews) {

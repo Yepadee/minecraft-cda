@@ -12,14 +12,14 @@ import org.bukkit.inventory.ItemStack;
 
 public class MarketGui {
     private OverviewIconsManager overviewIconsManager;
-    private OrderService orderRepository;
+    private OrderService orderService;
 
     public MarketGui(
         OverviewIconsManager overviewIconsManager,
-        OrderService orderRepository
+        OrderService orderService
     ) {
         this.overviewIconsManager = overviewIconsManager;
-        this.orderRepository = orderRepository;
+        this.orderService = orderService;
     }
 
     public void openSearchMenuScreen(HumanEntity player) {
@@ -49,25 +49,28 @@ public class MarketGui {
     }
 
     public void openSearchResultsScreen(String searchQuery, HumanEntity player) {
-        SearchResultsScreen searchResultsScreen = new SearchResultsScreen(
-            "Items matching '" + searchQuery + "'",
-            overviewIconsManager.searchIcons(searchQuery),
-            e -> openAllItemsScreen(e.getWhoClicked()),
-            itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
-        );
-
-        overviewIconsManager.addIconUpdateObserver(searchResultsScreen);
-        
-        searchResultsScreen.setOnClose(event -> {
-            overviewIconsManager.removeIconUpdateObserver(searchResultsScreen);
+        overviewIconsManager.searchIcons(searchQuery, searchResults -> {
+            SearchResultsScreen searchResultsScreen = new SearchResultsScreen(
+                "Items matching '" + searchQuery + "'",
+                searchResults,
+                e -> openAllItemsScreen(e.getWhoClicked()),
+                itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
+            );
+    
+            overviewIconsManager.addIconUpdateObserver(searchResultsScreen);
+            
+            searchResultsScreen.setOnClose(event -> {
+                overviewIconsManager.removeIconUpdateObserver(searchResultsScreen);
+            });
+            searchResultsScreen.open(player);
         });
-        searchResultsScreen.open(player);
+
         
     }
 
     public void openItemOrdersScreen(ItemStack item, HumanEntity player) {
         Long itemId = ItemUtils.getId(item);
-        orderRepository.getOrders(itemId, orders -> {
+        orderService.getOrders(itemId, orders -> {
             new ItemOrdersScreen(
                 item,
                 orders,
@@ -82,4 +85,11 @@ public class MarketGui {
         });
     }
 
+    public void openNewBidScreen(HumanEntity player) {
+        player.sendMessage("New Bid Button Clicked!!!");
+    }
+
+    public void openNewAskScreen(HumanEntity player) {
+        player.sendMessage("New Ask Button Clicked!!!");
+    }
 }

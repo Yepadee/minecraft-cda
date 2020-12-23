@@ -14,10 +14,10 @@ import com.broscraft.cda.observers.NewOrderObserver;
 
 public class OrderService {
     private List<NewOrderObserver> observers = new ArrayList<>();
-    private ItemService itemRepository;
+    private ItemService itemService;
 
-    public OrderService(ItemService itemRepository) {
-        this.itemRepository = itemRepository;
+    public OrderService(ItemService itemService) {
+        this.itemService = itemService;
     }
 
     public void addObserver(NewOrderObserver observer) {
@@ -25,7 +25,10 @@ public class OrderService {
     }
 
     private void notifyObservers(NewOrderDTO newOrderDTO) {
-        observers.forEach(o -> o.onNewOrder(newOrderDTO));
+        CDAPlugin.newChain().async(() -> {
+            observers.forEach(o -> o.onNewOrder(newOrderDTO));
+        }).execute();
+        
     }
 
     public void getOrders(Long itemId, Consumer<GroupedOrdersDTO> onComplete) {
@@ -60,7 +63,7 @@ public class OrderService {
     }
 
     public void submitOrder(NewOrderDTO newOrderDTO) {
-        Long itemId = itemRepository.getItemId(newOrderDTO.getItem());
+        Long itemId = itemService.getItemId(newOrderDTO.getItem());
         newOrderDTO.getItem().setId(itemId);
 
         // TODO: Submit order request

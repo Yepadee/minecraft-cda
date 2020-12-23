@@ -16,10 +16,10 @@ import net.md_5.bungee.api.ChatColor;
 
 public class NewOrderCommand implements CommandExecutor {
 
-    private OrderService orderRepository;
+    private OrderService orderService;
 
-    public NewOrderCommand(OrderService orderRepository) {
-        this.orderRepository = orderRepository;
+    public NewOrderCommand(OrderService orderService) {
+        this.orderService = orderService;
     }
 
     @Override
@@ -76,9 +76,9 @@ public class NewOrderCommand implements CommandExecutor {
             + orderType + ChatColor.RESET.toString() + ChatColor.GREEN.toString() + " order for "
             + quantity + " " + itemStack.getType() + " at " + newOrderDto.getPrice());
             
-            //orderRepository.submitOrder(newOrderDto);
+            //orderService.submitOrder(newOrderDto);
             try {
-                orderRepository.submitOrder(newOrderDto);
+                orderService.submitOrder(newOrderDto);
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED.toString() + e.getMessage());
             }
