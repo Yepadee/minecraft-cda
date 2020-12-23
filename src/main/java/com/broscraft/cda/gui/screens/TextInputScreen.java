@@ -14,12 +14,14 @@ public abstract class TextInputScreen {
 
     public TextInputScreen(
         String name,
+        String placeholder,
         ItemStack confirmIcon,
         BiConsumer<Player, String> onConfirmBtnClick,
         Consumer<Player> onClose
     ) {
         setUpScreen(
             name,
+            placeholder,
             confirmIcon,
             onConfirmBtnClick,
             onClose
@@ -28,13 +30,14 @@ public abstract class TextInputScreen {
 
     private void setUpScreen(
         String name,
+        String placeholder,
         ItemStack confirmIcon,
         BiConsumer<Player, String> onConfirmBtnClick,
         Consumer<Player> onClose
     ) {
         this.gui.plugin(JavaPlugin.getProvidingPlugin(this.getClass()))
         .title(name)
-        .text("<query>")
+        .text(placeholder)
         .itemLeft(confirmIcon)
         .onComplete((p, text) -> {
             onConfirmBtnClick.accept(p, text);
