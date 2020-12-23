@@ -1,12 +1,10 @@
 package com.broscraft.cda.gui.screens.item;
 
 import java.util.List;
-import java.util.function.Function;
 
 import com.broscraft.cda.gui.screens.ScrollableScreen;
 import com.broscraft.cda.model.orders.grouped.GroupedAskDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
-import com.broscraft.cda.model.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.utils.ItemUtils;
 
@@ -28,6 +26,8 @@ public class ItemOrdersScreen extends ScrollableScreen {
 
     private static Material BEST_ORDER_MATERIAL = Material.GREEN_STAINED_GLASS_PANE;
     private static Material OTHER_ORDER_MATERIAL = Material.RED_STAINED_GLASS_PANE;
+    private static GuiItem BEST_ORDER_ICON = ItemBuilder.from(BEST_ORDER_MATERIAL).setName("Best Price").asGuiItem();
+    private static GuiItem OTHER_ORDER_ICON = ItemBuilder.from(OTHER_ORDER_MATERIAL).setName("Other Prices").asGuiItem();
 
     private static Material ORDERS_BACKGROUND_MATERIAL = Material.GRAY_STAINED_GLASS_PANE;
 
@@ -65,15 +65,6 @@ public class ItemOrdersScreen extends ScrollableScreen {
         for (int col = 1; col <= WIDTH; col ++) {
             gui.setItem(5, col, background);
         }
-
-        GuiItem bestOrderIcon = ItemBuilder.from(BEST_ORDER_MATERIAL).setName("Best Price").asGuiItem();
-        GuiItem otherOrderIcon = ItemBuilder.from(OTHER_ORDER_MATERIAL).setName("Other Prices").asGuiItem();
-
-        gui.setItem(2, 2, bestOrderIcon);
-
-        for (int col = 3; col < WIDTH; col ++) {
-            gui.setItem(2, col, otherOrderIcon);
-        }
         
         GuiItem bidOrdersIcon = ItemBuilder.from(BID_ORDERS_MATERIAL).setName("Bids").asGuiItem();
         GuiItem askOrdersIcon = ItemBuilder.from(ASK_ORDERS_MATERIAL).setName("Asks").asGuiItem();
@@ -90,29 +81,61 @@ public class ItemOrdersScreen extends ScrollableScreen {
 
 
     private void setOrders(GroupedOrdersDTO groupedOrders) {
+        // This is a very aids way of doing the UI, but necessary give the lack of "Panes" in this gui framework :(
         List<GroupedBidDTO> groupedBids = groupedOrders.getGroupedBids();
         List<GroupedAskDTO> groupedAsks = groupedOrders.getGroupedAsks();
         int numBids = groupedBids.size();
         int numAsks = groupedAsks.size();
         int smallest = numBids < numAsks ? numBids : numAsks;
-        for (int i = 0; i < smallest; ++i) {
+
+        if (smallest > 0) {
+            gui.addItem(BEST_ORDER_ICON);
+            GroupedBidDTO groupedBid = groupedBids.get(0);
+            GroupedAskDTO groupedAsk = groupedAsks.get(0);
+            gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem());
+            gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(true).asGuiItem());
+        } else {
+            if (numAsks == 0) {
+                GroupedBidDTO groupedBid = groupedBids.get(0);
+                gui.addItem(BEST_ORDER_ICON);
+                gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem());
+                gui.addItem(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                
+            } else if (numBids == 0) {
+                GroupedAskDTO groupedAsk = groupedAsks.get(0);
+                gui.addItem(BEST_ORDER_ICON);
+                gui.addItem(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(true).asGuiItem());
+            }
+        }
+
+
+        for (int i = 1; i < smallest; ++i) {
             GroupedBidDTO groupedBid = groupedBids.get(i);
             GroupedAskDTO groupedAsk = groupedAsks.get(i);
-            gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).asGuiItem());
-            gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).asGuiItem());
+            gui.addItem(OTHER_ORDER_ICON);
+            gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem());
+            gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(i % 2 == 0).asGuiItem());
         }
         if (smallest == numBids) {
-            for (int i = smallest - 1; i < numAsks; ++i) {
+            if (smallest == 0) smallest ++;
+            for (int i = smallest; i < numAsks; ++i) {
                 GroupedAskDTO groupedAsk = groupedAsks.get(i);
+                gui.addItem(OTHER_ORDER_ICON);
                 gui.addItem(ItemBuilder.from(Material.BARRIER).asGuiItem());
-                gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).asGuiItem());
+                gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(i % 2 == 0).asGuiItem());
             }
         } else {
-            for (int i = smallest - 1; i < numBids; ++i) {
+            if (smallest == 0) smallest ++;
+            for (int i = smallest; i < numBids; ++i) {
                 GroupedBidDTO groupedBid = groupedBids.get(i);
-                gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).asGuiItem());
+                gui.addItem(OTHER_ORDER_ICON);
+                gui.addItem(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem());
                 gui.addItem(ItemBuilder.from(Material.BARRIER).asGuiItem());
             }
+        }
+        for (int i = 0; i < 3; ++i) {
+            gui.addItem(ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).asGuiItem());
         }
     }
 }

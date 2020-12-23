@@ -35,7 +35,7 @@ public class OrderRepository {
             System.out.println("Loading orders for item " + itemId + "!");
             List<GroupedBidDTO> bids = new ArrayList<>();
             List<GroupedAskDTO> asks = new ArrayList<>();
-            for (int i = 1; i <= 20; ++i) {
+            for (int i = 1; i <= 15; ++i) {
                 GroupedBidDTO bid1 = new GroupedBidDTO();
                 bid1.setPrice(i*2.0f);
                 bid1.setQuantity(100 / i);
@@ -51,7 +51,6 @@ public class OrderRepository {
             ask1.setPrice(20.0f);
             ask1.setQuantity(120);
             asks.add(ask1);
-
 
             return new GroupedOrdersDTO().groupedBids(bids).groupedAsks(asks);
     
