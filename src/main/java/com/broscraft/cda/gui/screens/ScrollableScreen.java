@@ -37,7 +37,7 @@ public abstract class ScrollableScreen {
     }
 
     private void setBorder() {
-        GuiItem background = ItemBuilder.from(BACKGROUND_MATERIAL).setName("").asGuiItem();
+        GuiItem background = ItemBuilder.from(BACKGROUND_MATERIAL).setName("_").asGuiItem();
         for (int row = 1; row <= HEIGHT; row ++) {
             gui.setItem(row, 1, background);
             gui.setItem(row, WIDTH, background);

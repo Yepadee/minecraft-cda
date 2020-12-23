@@ -3,12 +3,14 @@ package com.broscraft.cda.gui;
 import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
 import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
+import com.broscraft.cda.gui.screens.search.SearchInputScreen;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class MarketGui {
     private OverviewIconsManager overviewIconsManager;
@@ -22,8 +24,15 @@ public class MarketGui {
         this.orderService = orderService;
     }
 
-    public void openSearchMenuScreen(HumanEntity player) {
-        player.sendMessage("Search Button Clicked!!!");
+    public void openSearchInputScreen(HumanEntity player) {
+        new SearchInputScreen(
+            (p, query) -> {
+                openSearchResultsScreen(query, p);
+            },
+            p -> p.getServer().getScheduler().runTask(JavaPlugin.getProvidingPlugin(this.getClass()), () -> {
+                openAllItemsScreen(p);
+            })
+        ).open(player);
     }
 
     public void openMyOrdersScreen(HumanEntity player) {
@@ -33,7 +42,7 @@ public class MarketGui {
     public void openAllItemsScreen(HumanEntity player) {
         AllItemsScreen allItemsScreen = new AllItemsScreen(
             overviewIconsManager.getAllIcons(),
-            e -> openSearchMenuScreen(e.getWhoClicked()),
+            e -> openSearchInputScreen(e.getWhoClicked()),
             e -> openMyOrdersScreen(e.getWhoClicked()),
             itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
         );

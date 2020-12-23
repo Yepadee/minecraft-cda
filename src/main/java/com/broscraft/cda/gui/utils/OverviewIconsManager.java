@@ -69,7 +69,7 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
             }).map(k -> this.icons.get(k))
             .collect(Collectors.toList())
         )
-        .asyncLast(result -> onComplete.accept(result))
+        .syncLast(result -> onComplete.accept(result))
         .execute();
 
     }

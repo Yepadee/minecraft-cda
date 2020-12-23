@@ -57,8 +57,8 @@ public class OrderService {
 
             return new GroupedOrdersDTO().groupedBids(bids).groupedAsks(asks);
     
-        })
-        .asyncLast(result -> onComplete.accept(result))
+        }).abortIfNull()
+        .syncLast(result -> onComplete.accept(result))
         .execute();
     }
 

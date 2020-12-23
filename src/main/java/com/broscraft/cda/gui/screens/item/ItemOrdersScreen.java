@@ -59,7 +59,7 @@ public class ItemOrdersScreen extends ScrollableScreen {
     }
 
     private void setGuiIcons() {
-        GuiItem background = ItemBuilder.from(ORDERS_BACKGROUND_MATERIAL).setName("").asGuiItem();
+        GuiItem background = ItemBuilder.from(ORDERS_BACKGROUND_MATERIAL).setName("_").asGuiItem();
         gui.setItem(2, 1, background);
         gui.setItem(2, WIDTH, background);
         for (int col = 1; col <= WIDTH; col ++) {
