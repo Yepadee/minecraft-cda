@@ -1,17 +1,23 @@
 package com.broscraft.cda.gui;
 
+import com.broscraft.cda.CDAPlugin;
+import com.broscraft.cda.gui.screens.ConfirmScreen;
 import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
 import com.broscraft.cda.gui.screens.orders.PlayerOrdersScreen;
 import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.screens.search.SearchInputScreen;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
+import com.broscraft.cda.model.orders.OrderDTO;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.ItemUtils;
+import com.google.common.base.Function;
 
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
+
+import me.mattstudios.mfgui.gui.components.GuiAction;
 
 public class MarketGui {
     private OverviewIconsManager overviewIconsManager;
@@ -30,19 +36,52 @@ public class MarketGui {
             (p, query) -> {
                 openSearchResultsScreen(query, p);
             },
-            p -> p.getServer().getScheduler().runTask(JavaPlugin.getProvidingPlugin(this.getClass()), () -> {
+            p -> CDAPlugin.runTask(() -> {
                 openAllItemsScreen(p);
             })
         ).open(player);
     }
 
+    private void confirmCancelOrder(OrderDTO orderDTO, HumanEntity player) {
+        new ConfirmScreen(
+            "Cancel Order?",
+            e -> {
+                PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen();
+                orderService.cancelOrder(orderDTO, () -> {
+                    loadPlayerOrders(playerOrdersScreen, player);
+                });
+                playerOrdersScreen.open(player);
+            },
+            e -> {
+                openMyOrdersScreen(player);
+            }
+        ).open(player);
+    }
+
+    private Function<OrderDTO, GuiAction<InventoryClickEvent>> onOrderClick(HumanEntity player) {
+        return order -> e -> {
+            if (e.getClick().isLeftClick()) {
+                player.sendMessage("clicked collect btn for item " + order.getItem().getId() + "!");
+            }
+            if (e.getClick().isRightClick()) {
+                player.sendMessage("clicked cancel btn for item " + order.getItem().getId() + "!");
+                confirmCancelOrder(order, player);
+            }
+        };
+    }
+
+    private void loadPlayerOrders(PlayerOrdersScreen playerOrdersScreen, HumanEntity player) {
+        orderService.getPlayerOrders(player.getUniqueId(), orders -> {
+            playerOrdersScreen.setOrders(
+                orders,
+                onOrderClick(player)
+            );
+        });
+    }
+
     public void openMyOrdersScreen(HumanEntity player) {
         PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen();
-        orderService.getPlayerOrders(player.getUniqueId(), orders -> {
-            playerOrdersScreen.setOrders(orders, order -> {
-                player.sendMessage("clicked order for item " + order.getItem().getId() + "!");
-            });
-        });
+        loadPlayerOrders(playerOrdersScreen, player);
         playerOrdersScreen.open(player);
     }
 

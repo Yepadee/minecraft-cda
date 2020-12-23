@@ -1,15 +1,16 @@
 package com.broscraft.cda.gui.screens.orders;
 
 import java.util.List;
-import java.util.function.Consumer;
-
 import com.broscraft.cda.gui.screens.ScrollableScreen;
 import com.broscraft.cda.model.orders.OrderDTO;
 import com.broscraft.cda.model.orders.OrderType;
 import com.broscraft.cda.utils.ItemUtils;
+import com.google.common.base.Function;
 
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
 import me.mattstudios.mfgui.gui.components.ScrollType;
 import net.md_5.bungee.api.ChatColor;
@@ -25,24 +26,29 @@ public class PlayerOrdersScreen extends ScrollableScreen {
         orderDTO.getQuantity();
         if (orderDTO.getType().equals(OrderType.BID)) {
             return ChatColor.AQUA +
-            "Items recieved: " + quantityTxt;
+            "Recieved: " + quantityTxt;
         } else {
             return ChatColor.GOLD +
-            "Items sold: " + quantityTxt;
+            "Sold: " + quantityTxt;
         }
     }
 
-    public void setOrders(List<OrderDTO> orders, Consumer<OrderDTO> onOrderClick) {
+    public void setOrders(List<OrderDTO> orders, Function<OrderDTO, GuiAction<InventoryClickEvent>> onOrderClick) {
         orders.forEach(order -> {
             ItemStack orderIcon = ItemUtils.hideAttributes(
                 ItemBuilder.from(ItemUtils.createIcon(order.getItem()))
                 .setLore(
+                    ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                      ",
                     "OrderType: " + order.getType(),
-                    getQuantityLore(order)
+                    ChatColor.YELLOW + "Price: " + order.getPrice(),
+                    getQuantityLore(order),
+                    ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                      ",
+                    ChatColor.GREEN + "Left click: Collect",
+                    ChatColor.RED + "Right click: Delete"
                 )
                 .build()
             );
-            this.gui.addItem(ItemBuilder.from(orderIcon).asGuiItem());
+            this.gui.addItem(ItemBuilder.from(orderIcon).asGuiItem(onOrderClick.apply(order)));
         });
         this.gui.update();
     }

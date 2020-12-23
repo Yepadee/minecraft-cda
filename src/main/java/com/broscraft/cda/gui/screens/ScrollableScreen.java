@@ -2,6 +2,8 @@ package com.broscraft.cda.gui.screens;
 
 import java.util.List;
 
+import com.broscraft.cda.gui.utils.Styles;
+
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -18,7 +20,6 @@ public abstract class ScrollableScreen {
 
     protected static int WIDTH = 9;
     protected static int HEIGHT = 6;
-    protected static Material BACKGROUND_MATERIAL = Material.WHITE_STAINED_GLASS_PANE;
     private static Material NEXT_MATERIAL = Material.GLOWSTONE_DUST;
     private static Material PREV_MATERIAL = Material.REDSTONE;
 
@@ -37,7 +38,7 @@ public abstract class ScrollableScreen {
     }
 
     private void setBorder() {
-        GuiItem background = ItemBuilder.from(BACKGROUND_MATERIAL).setName("_").asGuiItem();
+        GuiItem background = Styles.BACKGROUND;
         for (int row = 1; row <= HEIGHT; row ++) {
             gui.setItem(row, 1, background);
             gui.setItem(row, WIDTH, background);

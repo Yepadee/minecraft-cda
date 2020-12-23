@@ -117,12 +117,13 @@ public class OrderService {
         }).execute();
     }
 
-    public void cancelOrder(OrderDTO orderDTO) {
+    public void cancelOrder(OrderDTO orderDTO, Runnable onComplete) {
         CDAPlugin.newSharedChain("cancelOrder").current(() -> {
             //TODO: load next best price
             Float nextBestPrice = 3.3f;
-
+            System.out.println("Cancelling order " + orderDTO.getItem().getId());
             notifyRemoveOrderObservers(orderDTO, nextBestPrice);
+            onComplete.run();
         }).execute();
     }
 }

@@ -24,7 +24,7 @@ public class ItemOrdersScreen extends ScrollableScreen {
 
     private static Material NEW_ORDER_MATERIAL = Material.PAPER;
 
-    private static Material BEST_ORDER_MATERIAL = Material.GREEN_STAINED_GLASS_PANE;
+    private static Material BEST_ORDER_MATERIAL = Material.LIME_STAINED_GLASS_PANE;
     private static Material OTHER_ORDER_MATERIAL = Material.RED_STAINED_GLASS_PANE;
     private static GuiItem BEST_ORDER_ICON = ItemBuilder.from(BEST_ORDER_MATERIAL).setName("Best Price").asGuiItem();
     private static GuiItem OTHER_ORDER_ICON = ItemBuilder.from(OTHER_ORDER_MATERIAL).setName("Other Prices").asGuiItem();

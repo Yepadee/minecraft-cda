@@ -5,6 +5,7 @@ import java.util.Objects;
 import com.broscraft.cda.model.items.ItemDTO;
 
 public class OrderDTO {
+    private Long id;
     private ItemDTO item;
     private OrderType type;
     private Float price;
@@ -14,12 +15,21 @@ public class OrderDTO {
     public OrderDTO() {
     }
 
-    public OrderDTO(ItemDTO item, OrderType type, Float price, Integer quantity, Integer quantityFilled) {
+    public OrderDTO(Long id, ItemDTO item, OrderType type, Float price, Integer quantity, Integer quantityFilled) {
+        this.id = id;
         this.item = item;
         this.type = type;
         this.price = price;
         this.quantity = quantity;
         this.quantityFilled = quantityFilled;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public ItemDTO getItem() {
@@ -62,6 +72,11 @@ public class OrderDTO {
         this.quantityFilled = quantityFilled;
     }
 
+    public OrderDTO id(Long id) {
+        this.id = id;
+        return this;
+    }
+
     public OrderDTO item(ItemDTO item) {
         this.item = item;
         return this;
@@ -95,18 +110,19 @@ public class OrderDTO {
             return false;
         }
         OrderDTO orderDTO = (OrderDTO) o;
-        return Objects.equals(item, orderDTO.item) && Objects.equals(type, orderDTO.type) && Objects.equals(price, orderDTO.price) && Objects.equals(quantity, orderDTO.quantity) && Objects.equals(quantityFilled, orderDTO.quantityFilled);
+        return Objects.equals(id, orderDTO.id) && Objects.equals(item, orderDTO.item) && Objects.equals(type, orderDTO.type) && Objects.equals(price, orderDTO.price) && Objects.equals(quantity, orderDTO.quantity) && Objects.equals(quantityFilled, orderDTO.quantityFilled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(item, type, price, quantity, quantityFilled);
+        return Objects.hash(id, item, type, price, quantity, quantityFilled);
     }
 
     @Override
     public String toString() {
         return "{" +
-            " item='" + getItem() + "'" +
+            " id='" + getId() + "'" +
+            ", item='" + getItem() + "'" +
             ", type='" + getType() + "'" +
             ", price='" + getPrice() + "'" +
             ", quantity='" + getQuantity() + "'" +

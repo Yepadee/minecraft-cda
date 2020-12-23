@@ -11,6 +11,7 @@ import com.broscraft.cda.services.ItemOverviewService;
 import com.broscraft.cda.services.ItemService;
 import com.broscraft.cda.services.OrderService;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import co.aikar.taskchain.BukkitTaskChainFactory;
@@ -43,9 +44,17 @@ public class CDAPlugin extends JavaPlugin
     public static <T> TaskChain<T> newSharedChain(String name) {
         return taskChainFactory.newSharedChain(name);
     }
+
+    public static void runTask(Runnable r) {
+        Bukkit.getServer().getScheduler().runTask(instance, r);
+    }
+
+    private static CDAPlugin instance;
     
     @Override
     public void onEnable() {
+        instance = this;
+
         taskChainFactory = BukkitTaskChainFactory.create(this);
         
         itemService = new ItemService();
