@@ -2,7 +2,7 @@ package com.broscraft.cda.commands;
 import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.orders.OrderType;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
-import com.broscraft.cda.repositories.OrderRepository;
+import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.Material;
@@ -16,9 +16,9 @@ import net.md_5.bungee.api.ChatColor;
 
 public class NewOrderCommand implements CommandExecutor {
 
-    private OrderRepository orderRepository;
+    private OrderService orderRepository;
 
-    public NewOrderCommand(OrderRepository orderRepository) {
+    public NewOrderCommand(OrderService orderRepository) {
         this.orderRepository = orderRepository;
     }
 

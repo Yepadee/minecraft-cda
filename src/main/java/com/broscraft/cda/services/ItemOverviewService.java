@@ -1,4 +1,4 @@
-package com.broscraft.cda.repositories;
+package com.broscraft.cda.services;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,13 +15,13 @@ import org.bukkit.Material;
 
 import com.broscraft.cda.model.ItemOverviewDTO;
 
-public class ItemOverviewRepository implements NewOrderObserver {
+public class ItemOverviewService implements NewOrderObserver {
     Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
     Set<ItemDTO> allItems = new HashSet<>(); 
     
     OverviewUpdateObserver overviewUpdateObserver;
 
-    public ItemOverviewRepository(OverviewUpdateObserver overviewUpdateObserver) {
+    public ItemOverviewService(OverviewUpdateObserver overviewUpdateObserver) {
         this.overviewUpdateObserver = overviewUpdateObserver;
     }
 

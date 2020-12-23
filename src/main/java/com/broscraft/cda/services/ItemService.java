@@ -1,8 +1,8 @@
-package com.broscraft.cda.repositories;
+package com.broscraft.cda.services;
 
 import com.broscraft.cda.model.items.ItemDTO;
 
-public class ItemRepository {
+public class ItemService {
     //TEMP:
     Long lastId = 3L;
 

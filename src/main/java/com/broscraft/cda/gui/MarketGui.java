@@ -4,7 +4,7 @@ import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
 import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
-import com.broscraft.cda.repositories.OrderRepository;
+import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.entity.HumanEntity;
@@ -12,11 +12,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class MarketGui {
     private OverviewIconsManager overviewIconsManager;
-    private OrderRepository orderRepository;
+    private OrderService orderRepository;
 
     public MarketGui(
         OverviewIconsManager overviewIconsManager,
-        OrderRepository orderRepository
+        OrderService orderRepository
     ) {
         this.overviewIconsManager = overviewIconsManager;
         this.orderRepository = orderRepository;

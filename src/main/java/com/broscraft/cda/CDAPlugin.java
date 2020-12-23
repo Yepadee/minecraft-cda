@@ -7,9 +7,9 @@ import com.broscraft.cda.commands.OpenMenuCommand;
 import com.broscraft.cda.commands.SearchMarketCommand;
 import com.broscraft.cda.gui.MarketGui;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
-import com.broscraft.cda.repositories.ItemOverviewRepository;
-import com.broscraft.cda.repositories.ItemRepository;
-import com.broscraft.cda.repositories.OrderRepository;
+import com.broscraft.cda.services.ItemOverviewService;
+import com.broscraft.cda.services.ItemService;
+import com.broscraft.cda.services.OrderService;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,9 +27,9 @@ public class CDAPlugin extends JavaPlugin
     private SearchMarketCommand searchMarketCommand;
     private NewOrderCommand newOrderCommand;
 
-    private ItemRepository itemRepository;
-    private OrderRepository orderRepository;
-    private ItemOverviewRepository itemOverviewRepository;
+    private ItemService itemRepository;
+    private OrderService orderRepository;
+    private ItemOverviewService itemOverviewRepository;
     private OverviewIconsManager overviewIconsManager;
 
     private MarketGui marketGui;
@@ -48,11 +48,11 @@ public class CDAPlugin extends JavaPlugin
     public void onEnable() {
         taskChainFactory = BukkitTaskChainFactory.create(this);
         
-        itemRepository = new ItemRepository();
-        orderRepository = new OrderRepository(itemRepository);
+        itemRepository = new ItemService();
+        orderRepository = new OrderService(itemRepository);
 
         overviewIconsManager = new OverviewIconsManager();
-        itemOverviewRepository = new ItemOverviewRepository(overviewIconsManager);
+        itemOverviewRepository = new ItemOverviewService(overviewIconsManager);
         
         orderRepository.addObserver(itemOverviewRepository);
 

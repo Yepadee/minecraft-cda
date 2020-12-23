@@ -1,4 +1,4 @@
-package com.broscraft.cda.repositories;
+package com.broscraft.cda.services;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +12,11 @@ import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.NewOrderObserver;
 
 
-public class OrderRepository {
+public class OrderService {
     private List<NewOrderObserver> observers = new ArrayList<>();
-    private ItemRepository itemRepository;
+    private ItemService itemRepository;
 
-    public OrderRepository(ItemRepository itemRepository) {
+    public OrderService(ItemService itemRepository) {
         this.itemRepository = itemRepository;
     }
 
@@ -54,8 +54,8 @@ public class OrderRepository {
 
             return new GroupedOrdersDTO().groupedBids(bids).groupedAsks(asks);
     
-        }).abortIfNull()
-        .syncLast(result -> onComplete.accept(result))
+        })
+        .asyncLast(result -> onComplete.accept(result))
         .execute();
     }
 
