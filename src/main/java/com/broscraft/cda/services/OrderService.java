@@ -1,7 +1,9 @@
 package com.broscraft.cda.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -14,30 +16,40 @@ import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.OrderObserver;
+import com.broscraft.cda.observers.OrderUpdateObserver;
 
 import org.bukkit.Material;
 
 
 public class OrderService {
-    private List<OrderObserver> observers = new ArrayList<>();
+    private OrderObserver orderObserver;
+    private Map<UUID, OrderUpdateObserver> orderUpdateObservers = new HashMap<>();
     private ItemService itemService;
 
-    public OrderService(ItemService itemService) {
+    public OrderService(ItemService itemService, OrderObserver orderObserver) {
         this.itemService = itemService;
+        this.orderObserver = orderObserver;
     }
 
-    public void addObserver(OrderObserver observer) {
-        this.observers.add(observer);
+    public void addOrderUpdateObserver(UUID playerUUID, OrderUpdateObserver orderUpdateObserver) {
+        orderUpdateObservers.put(playerUUID, orderUpdateObserver);
     }
 
-    private void notifyNewOrderObservers(NewOrderDTO newOrderDTO) {
-        observers.forEach(o -> o.onNewOrder(newOrderDTO));
-        
+    public void removeOrderUpdateObserver(UUID playerUUID) {
+        orderUpdateObservers.remove(playerUUID);
     }
 
-    private void notifyRemoveOrderObservers(OrderDTO orderDTO, Float nextBestPrice) {
-        observers.forEach(o -> o.onRemoveOrder(orderDTO, nextBestPrice));
+    private void notifyOrderUpdateObserver(UUID playerUUID, OrderDTO orderDTO) {
+        OrderUpdateObserver o = orderUpdateObservers.get(playerUUID);
+        if (o != null) o.onOrderUpdate(orderDTO);
+    }
 
+    private void notifyNewOrderObserver(NewOrderDTO newOrderDTO) {
+        orderObserver.onNewOrder(newOrderDTO);
+    }
+
+    private void notifyRemoveOrderObserver(OrderDTO orderDTO, Float nextBestPrice) {
+        orderObserver.onRemoveOrder(orderDTO, nextBestPrice);
     }
 
     public void getOrders(Long itemId, Consumer<GroupedOrdersDTO> onComplete) {
@@ -113,7 +125,7 @@ public class OrderService {
 
             // TODO: Submit order request
 
-            notifyNewOrderObservers(newOrderDTO);
+            notifyNewOrderObserver(newOrderDTO);
         }).execute();
     }
 
@@ -122,13 +134,16 @@ public class OrderService {
             //TODO: load next best price
             Float nextBestPrice = 3.3f;
             System.out.println("Cancelling order " + orderDTO.getItem().getId());
-            notifyRemoveOrderObservers(orderDTO, nextBestPrice);
+            notifyRemoveOrderObserver(orderDTO, nextBestPrice);
             onComplete.run();
         }).execute();
     }
 
-    public void collectOrder(OrderDTO orderDTO, Runnable onComplete) {
-
+    public void collectOrder(UUID playerUUID, OrderDTO orderDTO, Runnable onComplete) {
+        // NOTE: Inventory must be checked before submitting request or else items will be lost.
+        CDAPlugin.newChain().current(() -> {
+            notifyOrderUpdateObserver(playerUUID, orderDTO);
+        });        
     }
 }
 

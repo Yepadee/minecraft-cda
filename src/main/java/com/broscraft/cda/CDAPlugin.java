@@ -57,13 +57,11 @@ public class CDAPlugin extends JavaPlugin
 
         taskChainFactory = BukkitTaskChainFactory.create(this);
         
-        itemService = new ItemService();
-        orderService = new OrderService(itemService);
-
         overviewIconsManager = new OverviewIconsManager();
+
+        itemService = new ItemService();
         itemOverviewService = new ItemOverviewService(overviewIconsManager);
-        
-        orderService.addObserver(itemOverviewService);
+        orderService = new OrderService(itemService, itemOverviewService);
 
         marketGui = new MarketGui(
             overviewIconsManager,
@@ -74,10 +72,7 @@ public class CDAPlugin extends JavaPlugin
         searchMarketCommand = new SearchMarketCommand(marketGui);
         newOrderCommand = new NewOrderCommand(orderService);
 
-        
-
         itemOverviewService.loadItemOverviews();
-        
         
         getLogger().info("Enabled CDA!");
         this.setupCommands();
