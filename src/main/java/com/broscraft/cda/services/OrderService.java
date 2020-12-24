@@ -80,7 +80,7 @@ public class OrderService {
             orderDTOs.add(
                 new OrderDTO()
                 .type(OrderType.ASK)
-                .price(10.0f)
+                .price(10.3f)
                 .quantity(3)
                 .quantityFilled(0)
                 .item(
@@ -91,7 +91,7 @@ public class OrderService {
             orderDTOs.add(
                 new OrderDTO()
                 .type(OrderType.BID)
-                .price(10.0f)
+                .price(5.5f)
                 .quantity(3)
                 .quantityFilled(1)
                 .item(

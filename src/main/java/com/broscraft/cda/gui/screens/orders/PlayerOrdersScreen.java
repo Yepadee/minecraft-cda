@@ -39,25 +39,35 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
 
     private List<String> getLore(OrderDTO orderDTO) {
         String quantityTxt;
+        String orderTypeTxt;
+        String collectTxt;
 
+        ChatColor color;
 
         if (orderDTO.getType().equals(OrderType.BID)) {
-            quantityTxt = ChatColor.AQUA + "Recieved: ";
+            color = ChatColor.GOLD;
+            quantityTxt = ChatColor.GRAY + "Recieved: ";
+            orderTypeTxt = color + ChatColor.UNDERLINE.toString() + "         Bid         ";
+            collectTxt = ChatColor.GRAY + "Collect Items: " + ChatColor.GREEN + orderDTO.getQuantity();
         } else {
-            quantityTxt = ChatColor.GOLD + "Sold: ";
+            color = ChatColor.AQUA;
+            quantityTxt = ChatColor.GRAY + "Sold: ";
+            orderTypeTxt = color + ChatColor.UNDERLINE.toString() + "         Ask         ";
+            collectTxt = ChatColor.GRAY + "Collect Money: " + ChatColor.GREEN + orderDTO.getQuantity() * orderDTO.getPrice();
         }
 
-        quantityTxt += orderDTO.getQuantityFilled() + "/" +
-        orderDTO.getQuantity();
+        quantityTxt += color.toString() +
+            orderDTO.getQuantityFilled() + "/" +
+            orderDTO.getQuantity();
 
         return Arrays.asList(
-            ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                      ",
-            "OrderType: " + orderDTO.getType(),
-            ChatColor.YELLOW + "Price: " + orderDTO.getPrice(),
+            orderTypeTxt,
+            collectTxt,
             quantityTxt,
+            ChatColor.GRAY + "Price: " + color.toString() + orderDTO.getPrice(),
             ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                      ",
-            ChatColor.GREEN + "Left click: Collect",
-            ChatColor.RED + "Right click: Delete"
+            ChatColor.DARK_GREEN + "Left click: Collect",
+            ChatColor.DARK_RED + "Right click: Delete"
         );
     }
 

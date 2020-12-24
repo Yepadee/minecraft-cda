@@ -113,9 +113,10 @@ public class ItemOverviewService implements OrderObserver {
             case ASK:
                 int supply = itemOverview.getSupply();
                 itemOverview.setSupply(supply - orderQuantityRemaining);
-                itemOverview.setBestBid(nextBestPrice);
+                itemOverview.setBestAsk(nextBestPrice);
+                break;
             case BID:
-                int demand = itemOverview.getSupply();
+                int demand = itemOverview.getDemand();
                 itemOverview.setDemand(demand - orderQuantityRemaining);
                 itemOverview.setBestBid(nextBestPrice);
                 break;

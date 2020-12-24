@@ -6,7 +6,6 @@ import java.util.function.Function;
 import com.broscraft.cda.gui.utils.Styles;
 import com.broscraft.cda.observers.NewIconObserver;
 
-import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -22,7 +21,7 @@ public class AllItemsScreen extends MarketOverviewScreen implements NewIconObser
         GuiAction<InventoryClickEvent> onMyOrdersBtnClick,
         Function<ItemStack, GuiAction<InventoryClickEvent>> onItemClick
     ) {
-        super("All Items", icons, onItemClick);
+        super("Market Overview", icons, onItemClick);
         this.createNavbar(onSearchBtnClick, onMyOrdersBtnClick);
         this.onItemClick = onItemClick;
     }
