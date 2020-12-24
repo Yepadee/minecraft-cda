@@ -1,4 +1,5 @@
 package com.broscraft.cda.commands;
+import com.broscraft.cda.gui.utils.Styles;
 import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.orders.OrderType;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
@@ -74,7 +75,7 @@ public class NewOrderCommand implements CommandExecutor {
     
             sender.sendMessage(ChatColor.GREEN.toString() + "Created " + ChatColor.BOLD.toString()
             + orderType + ChatColor.RESET.toString() + ChatColor.GREEN.toString() + " order for "
-            + quantity + " " + itemStack.getType() + " at " + newOrderDto.getPrice());
+            + quantity + " " + itemStack.getType() + " at " + Styles.formatPrice(newOrderDto.getPrice()));
             
             //orderService.submitOrder(newOrderDto);
             try {

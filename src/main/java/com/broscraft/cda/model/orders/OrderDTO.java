@@ -11,17 +11,19 @@ public class OrderDTO {
     private Float price;
     private Integer quantity;
     private Integer quantityFilled;
+    private Integer toCollect;
 
     public OrderDTO() {
     }
 
-    public OrderDTO(Long id, ItemDTO item, OrderType type, Float price, Integer quantity, Integer quantityFilled) {
+    public OrderDTO(Long id, ItemDTO item, OrderType type, Float price, Integer quantity, Integer quantityFilled, Integer toCollect) {
         this.id = id;
         this.item = item;
         this.type = type;
         this.price = price;
         this.quantity = quantity;
         this.quantityFilled = quantityFilled;
+        this.toCollect = toCollect;
     }
 
     public Long getId() {
@@ -72,6 +74,14 @@ public class OrderDTO {
         this.quantityFilled = quantityFilled;
     }
 
+    public Integer getToCollect() {
+        return this.toCollect;
+    }
+
+    public void setToCollect(Integer toCollect) {
+        this.toCollect = toCollect;
+    }
+
     public OrderDTO id(Long id) {
         this.id = id;
         return this;
@@ -102,6 +112,11 @@ public class OrderDTO {
         return this;
     }
 
+    public OrderDTO toCollect(Integer toCollect) {
+        this.toCollect = toCollect;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this)
@@ -110,12 +125,12 @@ public class OrderDTO {
             return false;
         }
         OrderDTO orderDTO = (OrderDTO) o;
-        return Objects.equals(id, orderDTO.id) && Objects.equals(item, orderDTO.item) && Objects.equals(type, orderDTO.type) && Objects.equals(price, orderDTO.price) && Objects.equals(quantity, orderDTO.quantity) && Objects.equals(quantityFilled, orderDTO.quantityFilled);
+        return Objects.equals(id, orderDTO.id) && Objects.equals(item, orderDTO.item) && Objects.equals(type, orderDTO.type) && Objects.equals(price, orderDTO.price) && Objects.equals(quantity, orderDTO.quantity) && Objects.equals(quantityFilled, orderDTO.quantityFilled) && Objects.equals(toCollect, orderDTO.toCollect);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, item, type, price, quantity, quantityFilled);
+        return Objects.hash(id, item, type, price, quantity, quantityFilled, toCollect);
     }
 
     @Override
@@ -127,6 +142,7 @@ public class OrderDTO {
             ", price='" + getPrice() + "'" +
             ", quantity='" + getQuantity() + "'" +
             ", quantityFilled='" + getQuantityFilled() + "'" +
+            ", toCollect='" + getToCollect() + "'" +
             "}";
     }
 

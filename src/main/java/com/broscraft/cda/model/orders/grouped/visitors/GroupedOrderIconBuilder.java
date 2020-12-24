@@ -1,5 +1,6 @@
 package com.broscraft.cda.model.orders.grouped.visitors;
 
+import com.broscraft.cda.gui.utils.Styles;
 import com.broscraft.cda.model.orders.grouped.GroupedAskDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
 import com.broscraft.cda.utils.ItemUtils;
@@ -19,7 +20,7 @@ public class GroupedOrderIconBuilder extends GroupedOrderVisitor {
             ItemBuilder.from(GROUPED_ORDER_ICON_MATERIAL)
             .setName("Bid")
             .setLore(
-                "Price: " + groupedBid.getPrice(),
+                "Price: " + Styles.formatPrice(groupedBid.getPrice()),
                 "Demand: " + groupedBid.getQuantity()
             )
             .build()
@@ -33,7 +34,7 @@ public class GroupedOrderIconBuilder extends GroupedOrderVisitor {
             ItemBuilder.from(GROUPED_ORDER_ICON_MATERIAL)
             .setName("Ask")
             .setLore(
-                "Price: " + groupedAsk.getPrice(),
+                "Price: " + Styles.formatPrice(groupedAsk.getPrice()),
                 "Supply: " + groupedAsk.getQuantity()
             )
             .build()

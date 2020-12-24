@@ -1,5 +1,9 @@
 package com.broscraft.cda.gui.utils;
 
+import java.math.BigDecimal;
+
+import com.earth2me.essentials.api.Economy;
+
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -16,4 +20,8 @@ public class Styles {
 
     public static ItemStack SEARCH_ICON = ItemBuilder.from(Material.COMPASS).setName(ChatColor.GREEN + "Search").build();
     public static ItemStack MY_ORDERS_ICON = ItemBuilder.from(Material.WRITABLE_BOOK).setName(ChatColor.GOLD + "My Orders").build();
+
+    public static String formatPrice(float price) {
+        return Economy.format(BigDecimal.valueOf(price));
+    }
 }

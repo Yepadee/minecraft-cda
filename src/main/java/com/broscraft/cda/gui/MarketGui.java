@@ -56,6 +56,12 @@ public class MarketGui {
             e -> openAllItemsScreen(player)
         );
         loadPlayerOrders(playerOrdersScreen, player);
+        orderService.addOrderUpdateObserver(player.getUniqueId(), playerOrdersScreen);
+        playerOrdersScreen.setOnClose(
+            e -> {
+                orderService.removeOrderUpdateObserver(player.getUniqueId());
+            }
+        );
         playerOrdersScreen.open(player);
     }
 

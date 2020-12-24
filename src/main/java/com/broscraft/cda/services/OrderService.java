@@ -94,7 +94,8 @@ public class OrderService {
                 .type(OrderType.ASK)
                 .price(10.3f)
                 .quantity(3)
-                .quantityFilled(0)
+                .quantityFilled(2)
+                .toCollect(2)
                 .item(
                     new ItemDTO().id(1L).material(Material.STONE)
                 )
@@ -105,7 +106,8 @@ public class OrderService {
                 .type(OrderType.BID)
                 .price(5.5f)
                 .quantity(3)
-                .quantityFilled(1)
+                .quantityFilled(3)
+                .toCollect(1)
                 .item(
                     new ItemDTO().id(2L).material(Material.DIAMOND_BLOCK)
                 )

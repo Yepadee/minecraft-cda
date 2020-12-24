@@ -2,6 +2,7 @@ name: Continuous-Double-Auctions
 main: com.broscraft.cda.CDAPlugin
 version: 0.0.1
 api-version: 1.16
+softdepend: [Vault, Essentials]
 commands:
   market:
     description: Open the market GUI.

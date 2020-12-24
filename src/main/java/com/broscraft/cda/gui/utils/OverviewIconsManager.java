@@ -114,12 +114,12 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
             "",
             ChatColor.GOLD.toString() + ChatColor.UNDERLINE + "     Bids      ",
             ChatColor.GRAY + "Best Bid: " +
-            (bestBid != null ? ChatColor.GOLD.toString() + ChatColor.BOLD + bestBid : notAvailable),
+            (bestBid != null ? ChatColor.GOLD.toString() + ChatColor.BOLD + Styles.formatPrice(bestBid) : notAvailable),
             ChatColor.GRAY + "Demand: " + ChatColor.GOLD + ChatColor.BOLD + demand,
             "",
             ChatColor.AQUA.toString() + ChatColor.UNDERLINE + "     Asks     ",
             ChatColor.GRAY + "Best Ask: " +
-            (bestAsk != null ? ChatColor.AQUA.toString() + ChatColor.BOLD + bestAsk : notAvailable),
+            (bestAsk != null ? ChatColor.AQUA.toString() + ChatColor.BOLD + Styles.formatPrice(bestAsk) : notAvailable),
             ChatColor.GRAY + "Supply: " + ChatColor.AQUA + ChatColor.BOLD + supply
         );
         return lore;
