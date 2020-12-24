@@ -21,6 +21,16 @@ public class Styles {
     public static ItemStack SEARCH_ICON = ItemBuilder.from(Material.COMPASS).setName(ChatColor.GREEN + "Search").build();
     public static ItemStack MY_ORDERS_ICON = ItemBuilder.from(Material.WRITABLE_BOOK).setName(ChatColor.GOLD + "My Orders").build();
 
+
+    public static GuiItem BID_ORDERS_ICON = ItemBuilder.from(Material.GOLD_INGOT).setName(ChatColor.GOLD + "Bids").asGuiItem();
+    public static GuiItem ASK_ORDERS_ICON = ItemBuilder.from(Material.DIAMOND).setName(ChatColor.AQUA + "Asks").asGuiItem();
+
+    public static ItemStack NEW_BID_ICON = ItemBuilder.from(Material.PAPER).setName(ChatColor.GOLD + "New Bid").setLore("Creates a new bid").build();
+    public static ItemStack NEW_ASK_ICON = ItemBuilder.from(Material.PAPER).setName(ChatColor.AQUA + "New Ask").setLore("Creates a new ask").build();
+
+    public static GuiItem BEST_ORDER_ICON = ItemBuilder.from(Material.LIME_STAINED_GLASS_PANE).setName(ChatColor.GREEN + "Best Price").asGuiItem();
+    public static GuiItem OTHER_ORDER_ICON = ItemBuilder.from(Material.RED_STAINED_GLASS_PANE).setName(ChatColor.RED + "Other Prices").asGuiItem();
+
     public static String formatPrice(float price) {
         return Economy.format(BigDecimal.valueOf(price));
     }

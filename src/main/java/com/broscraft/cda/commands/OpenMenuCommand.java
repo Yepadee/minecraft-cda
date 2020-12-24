@@ -16,8 +16,8 @@ public class OpenMenuCommand implements CommandExecutor {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // TODO: check sender is human.
         marketGui.openAllItemsScreen((HumanEntity) sender);
-        
         return true;
     }
 }

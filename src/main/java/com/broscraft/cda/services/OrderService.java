@@ -61,18 +61,18 @@ public class OrderService {
             List<GroupedAskDTO> asks = new ArrayList<>();
             for (int i = 1; i <= 15; ++i) {
                 GroupedBidDTO bid1 = new GroupedBidDTO();
-                bid1.setPrice(i*2.0f);
+                bid1.setPrice(3.0f / i);
                 bid1.setQuantity(100 / i);
                 bids.add(bid1);
         
                 GroupedAskDTO ask1 = new GroupedAskDTO();
-                ask1.setPrice(i * 3.0f);
+                ask1.setPrice(i * 3.0f + 0.1f);
                 ask1.setQuantity(120 / i);
                 asks.add(ask1);
             }
 
             GroupedAskDTO ask1 = new GroupedAskDTO();
-            ask1.setPrice(20.0f);
+            ask1.setPrice(100.0f);
             ask1.setQuantity(120);
             asks.add(ask1);
 
