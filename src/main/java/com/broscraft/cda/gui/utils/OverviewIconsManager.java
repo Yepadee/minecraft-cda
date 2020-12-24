@@ -80,6 +80,7 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
         });
     }
 
+    // TODO: use itemBuilder to make
     private ItemStack createIcon(ItemOverviewDTO itemOverview) {
         ItemStack icon = ItemUtils.createIcon(itemOverview.getItem());
         List<String> lore = this.getLore(itemOverview);

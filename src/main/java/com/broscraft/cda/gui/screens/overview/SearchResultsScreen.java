@@ -12,7 +12,12 @@ import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
 
 public class SearchResultsScreen extends MarketOverviewScreen {
-    public SearchResultsScreen(String name, Collection<ItemStack> icons, GuiAction<InventoryClickEvent> onBackBtnClick, Function<ItemStack, GuiAction<InventoryClickEvent>> onItemClick) {
+    public SearchResultsScreen(
+        String name,
+        Collection<ItemStack> icons,
+        GuiAction<InventoryClickEvent> onBackBtnClick,
+        Function<ItemStack, GuiAction<InventoryClickEvent>> onItemClick
+    ) {
         super(name, icons, onItemClick);
         this.createNavbar(onBackBtnClick);
     }

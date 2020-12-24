@@ -126,5 +126,9 @@ public class OrderService {
             onComplete.run();
         }).execute();
     }
+
+    public void collectOrder(OrderDTO orderDTO, Runnable onComplete) {
+
+    }
 }
 
