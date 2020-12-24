@@ -78,9 +78,10 @@ public class CDAPlugin extends JavaPlugin
         this.setupCommands();
     }
 
-    public void setupCommands() {
+    private void setupCommands() {
         Objects.requireNonNull(this.getCommand("market")).setExecutor(openMenuCommand);
         Objects.requireNonNull(this.getCommand("searchmarket")).setExecutor(searchMarketCommand);
         Objects.requireNonNull(this.getCommand("neworder")).setExecutor(newOrderCommand);
     }
+
 }
