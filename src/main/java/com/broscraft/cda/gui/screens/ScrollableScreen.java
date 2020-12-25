@@ -131,14 +131,14 @@ public abstract class ScrollableScreen {
         guiItems.forEach(gui::addItem);
         numItems = guiItems.size();
         numScrollNotches = getNumScrollNotches();
-        if (numScrollNotches > 0) showNextBtn();
+        if (numScrollNotches > 0 && currentScrollNotch < numScrollNotches) showNextBtn(); //TODO Test this!!!
     }
 
     protected void addItem(GuiItem guiItem) {
         gui.addItem(guiItem);
         numItems++;
         numScrollNotches = getNumScrollNotches();
-        if (numScrollNotches > 0) showNextBtn(); //TODO (Dont show when at last scrollNotch!)
+        if (numScrollNotches > 0 && currentScrollNotch < numScrollNotches) showNextBtn(); //TODO Test this!!!
         // Do we need an update here?
     }
 
