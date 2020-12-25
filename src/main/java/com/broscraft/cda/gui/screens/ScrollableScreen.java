@@ -4,10 +4,10 @@ import java.util.List;
 
 import com.broscraft.cda.gui.utils.Styles;
 
-import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.ItemStack;
 
 import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
@@ -20,8 +20,20 @@ public abstract class ScrollableScreen {
 
     protected static int WIDTH = 9;
     protected static int HEIGHT = 6;
-    private static Material NEXT_MATERIAL = Material.GLOWSTONE_DUST;
-    private static Material PREV_MATERIAL = Material.REDSTONE;
+    protected static int ITEM_WINDOW_SIZE = (WIDTH - 2) * (HEIGHT - 2);
+
+    private int prevBtnRow = HEIGHT,
+                prevBtnCol = 1,
+                nextBtnRow = HEIGHT,
+                nextBtnCol = WIDTH;
+
+    private ItemStack prevIcon;
+    private ItemStack nextIcon;
+
+    private int currentScrollNotch = 0;
+    private int numScrollNotches = 0;
+    private int scrollNotchSize = 0;
+    private int numItems = 0;
 
 
     public ScrollableScreen(String name, ScrollType scrollType) {
@@ -50,40 +62,83 @@ public abstract class ScrollableScreen {
     }
 
     private void addNavigationButtons(ScrollType scrollType) {
-        int prevBtnRow = HEIGHT,
-            prevBtnCol = 1,
-            nextBtnRow = HEIGHT,
-            nextBtnCol = WIDTH;
-
-        String prevBtnTxt = "Previous",
-               nextBtnTxt = "Next";
-
         if (scrollType.equals(ScrollType.VERTICAL)) {
             prevBtnRow = 1;
             prevBtnCol = WIDTH;
-            prevBtnTxt = "Scroll Up";
-            nextBtnTxt = "Scroll Down";
+            prevIcon = Styles.SCROLL_UP_ICON;
+            nextIcon = Styles.SCROLL_DOWN_ICON;
+            scrollNotchSize = WIDTH;
+        } else {
+            prevIcon = Styles.PREV_ICON;
+            nextIcon = Styles.NEXT_ICON;
+            scrollNotchSize = HEIGHT;
         }
 
-        gui.setItem(prevBtnRow, prevBtnCol, ItemBuilder.from(PREV_MATERIAL).setName(prevBtnTxt).asGuiItem(this::onPrevBtnClick));
-        gui.setItem(nextBtnRow, nextBtnCol, ItemBuilder.from(NEXT_MATERIAL).setName(nextBtnTxt).asGuiItem(this::onNextBtnClick));
     }
 
-    private void onPrevBtnClick(InventoryClickEvent event) {
+    private GuiItem getPrevBtn() {
+        return ItemBuilder.from(Styles.PREV_ICON).asGuiItem(e -> onPrevBtnClick());
+    }
+
+    private GuiItem getNextBtn() {
+        return ItemBuilder.from(Styles.NEXT_ICON).asGuiItem(e -> onNextBtnClick()); // using this::function wont pick up on changes in class instance
+    }
+
+
+    private void hidePrevBtn() {
+        this.gui.updateItem(prevBtnRow, prevBtnCol, Styles.BACKGROUND);
+    }
+
+    private void showPrevBtn() {
+        this.gui.updateItem(prevBtnRow, prevBtnCol, getPrevBtn());
+    }
+
+    private void hideNextBtn() {
+        this.gui.updateItem(nextBtnRow, nextBtnCol, Styles.BACKGROUND);
+    }
+
+    private void showNextBtn() {
+        this.gui.updateItem(nextBtnRow, nextBtnCol, getNextBtn());
+    }
+
+
+    private void onPrevBtnClick() {
+        showPrevBtn();
+        System.out.println(numScrollNotches);
         this.gui.previous();
+        if (currentScrollNotch > 0)  currentScrollNotch --;
+        if (currentScrollNotch == 0) hidePrevBtn();
+        showNextBtn();
     }
 
-    private void onNextBtnClick(InventoryClickEvent event) {
+    private void onNextBtnClick() {
+        showNextBtn();
+        System.out.println(numScrollNotches);
         this.gui.next();
+        if (currentScrollNotch < numScrollNotches) currentScrollNotch ++;
+        if (currentScrollNotch == numScrollNotches) hideNextBtn();
+        showPrevBtn();
+    }
+
+    private int getNumScrollNotches() {
+        int numScrollNotches = numItems > ITEM_WINDOW_SIZE ? (numItems - ITEM_WINDOW_SIZE + scrollNotchSize - 1) / scrollNotchSize : 0;
+        if (numScrollNotches > 0 && numScrollNotches % scrollNotchSize == 0) numScrollNotches ++;
+        return numScrollNotches;
     }
 
     protected void setItems(List<GuiItem> guiItems) {
         guiItems.forEach(gui::addItem);
+        numItems = guiItems.size();
+        numScrollNotches = getNumScrollNotches();
+        if (numScrollNotches > 0) showNextBtn();
     }
 
     protected void addItem(GuiItem guiItem) {
         gui.addItem(guiItem);
-        this.update();
+        numItems++;
+        numScrollNotches = getNumScrollNotches();
+        if (numScrollNotches > 0) showNextBtn();
+        // Do we need an update here?
     }
 
     protected void update() {

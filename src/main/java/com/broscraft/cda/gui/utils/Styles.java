@@ -31,6 +31,11 @@ public class Styles {
     public static GuiItem BEST_ORDER_ICON = ItemBuilder.from(Material.LIME_STAINED_GLASS_PANE).setName(ChatColor.GREEN + "Best Price").asGuiItem();
     public static GuiItem OTHER_ORDER_ICON = ItemBuilder.from(Material.RED_STAINED_GLASS_PANE).setName(ChatColor.RED + "Other Prices").asGuiItem();
 
+    public static ItemStack NEXT_ICON = ItemBuilder.from(Material.GLOWSTONE_DUST).setName("Next").build();
+    public static ItemStack PREV_ICON = ItemBuilder.from(Material.REDSTONE).setName("Previous").build();
+    public static ItemStack SCROLL_DOWN_ICON = ItemBuilder.from(Material.GLOWSTONE_DUST).setName("Scroll Down").build();
+    public static ItemStack SCROLL_UP_ICON = ItemBuilder.from(Material.REDSTONE).setName("Scroll Up").build();
+
     public static String formatPrice(float price) {
         return Economy.format(BigDecimal.valueOf(price));
     }
