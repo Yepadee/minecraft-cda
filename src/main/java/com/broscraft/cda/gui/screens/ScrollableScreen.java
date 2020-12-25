@@ -20,15 +20,14 @@ public abstract class ScrollableScreen {
 
     protected static int WIDTH = 9;
     protected static int HEIGHT = 6;
-    protected static int ITEM_WINDOW_SIZE = (WIDTH - 2) * (HEIGHT - 2);
+
+    private int itemWindowWidth, itemWindowHeight;
+    private int itemWindowSize;
 
     private int prevBtnRow = HEIGHT,
                 prevBtnCol = 1,
                 nextBtnRow = HEIGHT,
                 nextBtnCol = WIDTH;
-
-    private ItemStack prevIcon;
-    private ItemStack nextIcon;
 
     private int currentScrollNotch = 0;
     private int numScrollNotches = 0;
@@ -37,6 +36,13 @@ public abstract class ScrollableScreen {
 
 
     public ScrollableScreen(String name, ScrollType scrollType) {
+        this(name, scrollType, 7, 4);
+    }
+
+    public ScrollableScreen(String name, ScrollType scrollType, int itemWindowWidth, int itemWindowHeight) {
+        this.itemWindowWidth = itemWindowWidth;
+        this.itemWindowHeight = itemWindowHeight;
+        this.itemWindowSize = itemWindowWidth * itemWindowHeight;
         this.gui = new ScrollingGui(HEIGHT, name, scrollType);
         gui.setDefaultClickAction(event -> {
             event.setCancelled(true);
@@ -65,13 +71,9 @@ public abstract class ScrollableScreen {
         if (scrollType.equals(ScrollType.VERTICAL)) {
             prevBtnRow = 1;
             prevBtnCol = WIDTH;
-            prevIcon = Styles.SCROLL_UP_ICON;
-            nextIcon = Styles.SCROLL_DOWN_ICON;
-            scrollNotchSize = WIDTH;
+            scrollNotchSize = itemWindowWidth;
         } else {
-            prevIcon = Styles.PREV_ICON;
-            nextIcon = Styles.NEXT_ICON;
-            scrollNotchSize = HEIGHT;
+            scrollNotchSize = itemWindowHeight;
         }
 
     }
@@ -101,7 +103,6 @@ public abstract class ScrollableScreen {
         this.gui.updateItem(nextBtnRow, nextBtnCol, getNextBtn());
     }
 
-
     private void onPrevBtnClick() {
         showPrevBtn();
         System.out.println(numScrollNotches);
@@ -121,8 +122,8 @@ public abstract class ScrollableScreen {
     }
 
     private int getNumScrollNotches() {
-        int numScrollNotches = numItems > ITEM_WINDOW_SIZE ? (numItems - ITEM_WINDOW_SIZE + scrollNotchSize - 1) / scrollNotchSize : 0;
-        if (numScrollNotches > 0 && numScrollNotches % scrollNotchSize == 0) numScrollNotches ++;
+        int numScrollNotches = numItems > itemWindowSize ? (numItems - itemWindowSize + scrollNotchSize - 1) / scrollNotchSize : 0;
+        if (numScrollNotches > 0 && ((numItems % scrollNotchSize) == 0)) numScrollNotches ++;
         return numScrollNotches;
     }
 
@@ -137,7 +138,7 @@ public abstract class ScrollableScreen {
         gui.addItem(guiItem);
         numItems++;
         numScrollNotches = getNumScrollNotches();
-        if (numScrollNotches > 0) showNextBtn();
+        if (numScrollNotches > 0) showNextBtn(); //TODO (Dont show when at last scrollNotch!)
         // Do we need an update here?
     }
 
