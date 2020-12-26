@@ -5,9 +5,7 @@ import java.util.List;
 import com.broscraft.cda.gui.utils.Styles;
 
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.ItemStack;
 
 import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
@@ -104,8 +102,6 @@ public abstract class ScrollableScreen {
     }
 
     private void onPrevBtnClick() {
-        showPrevBtn();
-        System.out.println(numScrollNotches);
         this.gui.previous();
         if (currentScrollNotch > 0)  currentScrollNotch --;
         if (currentScrollNotch == 0) hidePrevBtn();
@@ -113,8 +109,6 @@ public abstract class ScrollableScreen {
     }
 
     private void onNextBtnClick() {
-        showNextBtn();
-        System.out.println(numScrollNotches);
         this.gui.next();
         if (currentScrollNotch < numScrollNotches) currentScrollNotch ++;
         if (currentScrollNotch == numScrollNotches) hideNextBtn();
