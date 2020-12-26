@@ -126,13 +126,9 @@ public class MarketGui {
     private Function<OrderDTO, GuiAction<InventoryClickEvent>> onOrderClick(HumanEntity player) {
         return order -> e -> {
             if (e.getClick().isLeftClick()) {
-                player.sendMessage("clicked collect btn for item " + order.getItem().getId());
-                orderService.collectOrder(player, order, () -> {
-                    player.sendMessage("Collected Items!");
-                });
+                orderService.collectOrder(player, order);
             }
             if (e.getClick().isRightClick()) {
-                player.sendMessage("clicked cancel btn for item " + order.getItem().getId());
                 confirmCancelOrder(order, player);
             }
         };

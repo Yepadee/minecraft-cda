@@ -12,7 +12,7 @@ import com.broscraft.cda.model.items.EnchantedItemDTO;
 import com.broscraft.cda.model.items.EnchantmentDTO;
 import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.items.PotionDTO;
-import com.broscraft.cda.model.items.visitors.IconBuilder;
+import com.broscraft.cda.model.items.visitors.ItemStackBuilder;
 import com.broscraft.cda.model.items.visitors.ItemNameBuilder;
 import com.broscraft.cda.model.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.model.orders.grouped.visitors.GroupedOrderIconBuilder;
@@ -20,6 +20,7 @@ import com.broscraft.cda.model.orders.grouped.visitors.GroupedOrderIconBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -29,12 +30,13 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionType;
 
+
 public class ItemUtils {
     private static final ItemNameBuilder itemNameBuilder = new ItemNameBuilder();
-    private static final IconBuilder iconBuilder = new IconBuilder();
+    private static final ItemStackBuilder itemStackBuilder = new ItemStackBuilder();
     private static final GroupedOrderIconBuilder groupedOrderIconBuilder = new GroupedOrderIconBuilder();
 
-    private static final NamespacedKey ICON_ID_KEY = new NamespacedKey(JavaPlugin.getProvidingPlugin(IconBuilder.class), "icon_id");
+    private static final NamespacedKey ICON_ID_KEY = new NamespacedKey(JavaPlugin.getProvidingPlugin(ItemStackBuilder.class), "icon_id");
 
     private static final Set<String> NAME_CONTAINS_BLACKLIST = new HashSet<>(
         Arrays.asList("LEGACY",
@@ -122,9 +124,9 @@ public class ItemUtils {
         return itemNameBuilder.getItemName();
     }
 
-    public static ItemStack createIcon(ItemDTO itemDTO) {
-        itemDTO.accept(iconBuilder);
-        return iconBuilder.getIcon();
+    public static ItemStack buildItemStack(ItemDTO itemDTO) {
+        itemDTO.accept(itemStackBuilder);
+        return itemStackBuilder.getIcon();
     }
 
     public static ItemStack createGroupedOrderIcon(GroupedOrderDTO groupedOrderDTO) {
@@ -188,5 +190,19 @@ public class ItemUtils {
 
         itemDTO.setMaterial(itemStack.getType());
         return itemDTO;
+    }
+
+    public static void givePlayerItems(HumanEntity player, ItemStack item, int n) {
+        int maxStackSize = item.getMaxStackSize();
+        int numStacks = n / maxStackSize;
+        int lastStackSize = n % maxStackSize;
+
+        item.setAmount(maxStackSize);
+        for (int i = 0; i < numStacks; ++i) {
+            player.getInventory().addItem(item);
+        }
+        item.setAmount(lastStackSize);
+        player.getInventory().addItem(item);
+
     }
 }

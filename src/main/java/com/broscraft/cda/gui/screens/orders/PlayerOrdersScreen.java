@@ -84,7 +84,7 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
     public void setOrders(List<OrderDTO> orders, Function<OrderDTO, GuiAction<InventoryClickEvent>> onOrderClick) {
         orders.forEach(order -> {
             ItemStack orderIcon = ItemUtils.hideAttributes(
-                ItemBuilder.from(ItemUtils.createIcon(order.getItem()))
+                ItemBuilder.from(ItemUtils.buildItemStack(order.getItem()))
                 .setLore(this.getLore(order))
                 .build()
             );

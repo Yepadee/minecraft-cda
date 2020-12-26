@@ -19,10 +19,14 @@ import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OrderUpdateObserver;
 import com.broscraft.cda.utils.InventoryUtils;
+import com.broscraft.cda.utils.ItemUtils;
 import com.earth2me.essentials.api.Economy;
 
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.inventory.ItemStack;
+
+import net.md_5.bungee.api.ChatColor;
 
 public class OrderService {
     private OrderObserver orderObserver;
@@ -122,25 +126,28 @@ public class OrderService {
         }).execute();
     }
 
-    public void collectOrder(HumanEntity player, OrderDTO orderDTO, Runnable onComplete) {
+    public void collectOrder(HumanEntity player, OrderDTO orderDTO) {
         // NOTE: Inventory must be checked before submitting request or else items will
         // be lost.
         CDAPlugin.newChain().async(() -> {
-            player.sendMessage("Collecting order...");
             int numToGive;
             int numToCollect = orderDTO.getToCollect();
             boolean failure = false;
             if (orderDTO.getType().equals(OrderType.BID)) {
-                int invSpace = InventoryUtils.getInvSpace(player);
-                numToGive = invSpace > numToCollect ? numToCollect : invSpace;
+                int invItemSpace = 64 * InventoryUtils.getInvSpace(player);
+                numToGive = invItemSpace > numToCollect ? numToCollect : invItemSpace;
+                ItemStack itemToGive = ItemUtils.buildItemStack(orderDTO.getItem());
+                ItemUtils.givePlayerItems(player, itemToGive, numToGive);
+                player.sendMessage(ChatColor.GOLD + "Collected " + ChatColor.GREEN + numToGive + ChatColor.GRAY + " items!");
             } else {
                 numToGive = numToCollect;
                 BigDecimal toPay = BigDecimal.valueOf(numToGive * orderDTO.getPrice());
                 try {
                     Economy.add(player.getUniqueId(), toPay);
+                    player.sendMessage(ChatColor.AQUA + "Collected " + ChatColor.GREEN + Economy.format(toPay) + ChatColor.GRAY + "!");
                 } catch (Exception e) {
                     // TODO: undo collection on payment fail.
-                    player.sendMessage("Error collecting money");
+                    player.sendMessage(ChatColor.RED + "Error collecting money");
                     failure = true;
                 }
             }
@@ -148,7 +155,6 @@ public class OrderService {
             if (!failure) {
                 orderDTO.setToCollect(numToCollect - numToGive);
                 notifyOrderUpdateObserver(player.getUniqueId(), orderDTO);
-                onComplete.run();
             } 
             
             // TOOD: submit request collecting items

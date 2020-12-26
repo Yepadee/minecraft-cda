@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 
-public class IconBuilder extends ItemVisitor {
+public class ItemStackBuilder extends ItemVisitor {
     private ItemStack icon;
 
     private void initialiseItem(ItemDTO itemDto) {
