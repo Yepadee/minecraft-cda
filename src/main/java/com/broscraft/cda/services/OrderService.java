@@ -18,14 +18,16 @@ import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OrderUpdateObserver;
-import com.broscraft.cda.utils.InventoryUtils;
 import com.broscraft.cda.utils.ItemUtils;
 import com.earth2me.essentials.api.Economy;
 
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import co.aikar.taskchain.BukkitTaskChainFactory;
+import co.aikar.taskchain.TaskChain;
 import net.md_5.bungee.api.ChatColor;
 
 public class OrderService {
@@ -94,11 +96,11 @@ public class OrderService {
             // TODO: Actually load orders
             System.out.println("Loading orders for player " + playerUUID + "!");
             List<OrderDTO> orderDTOs = new ArrayList<>();
-            orderDTOs.add(new OrderDTO().id(1L).type(OrderType.ASK).price(10.3f).quantity(3).quantityFilled(2).toCollect(2)
-                    .item(new ItemDTO().id(1L).material(Material.STONE)));
+            orderDTOs.add(new OrderDTO().id(1L).type(OrderType.ASK).price(10.3f).quantity(3).quantityFilled(2)
+                    .toCollect(2).item(new ItemDTO().id(1L).material(Material.STONE)));
 
-            orderDTOs.add(new OrderDTO().id(2L).type(OrderType.BID).price(5.5f).quantity(3).quantityFilled(3).toCollect(1)
-                    .item(new ItemDTO().id(2L).material(Material.DIAMOND_BLOCK)));
+            orderDTOs.add(new OrderDTO().id(2L).type(OrderType.BID).price(5.5f).quantity(3).quantityFilled(3)
+                    .toCollect(1).item(new ItemDTO().id(2L).material(Material.DIAMOND_BLOCK)));
 
             return orderDTOs;
 
@@ -127,39 +129,52 @@ public class OrderService {
     }
 
     public void collectOrder(HumanEntity player, OrderDTO orderDTO) {
-        // NOTE: Inventory must be checked before submitting request or else items will
-        // be lost.
-        CDAPlugin.newChain().async(() -> {
-            int numToGive;
-            int numToCollect = orderDTO.getToCollect();
-            boolean failure = false;
-            if (orderDTO.getType().equals(OrderType.BID)) {
-                int invItemSpace = 64 * InventoryUtils.getInvSpace(player);
-                numToGive = invItemSpace > numToCollect ? numToCollect : invItemSpace;
-                ItemStack itemToGive = ItemUtils.buildItemStack(orderDTO.getItem());
-                ItemUtils.givePlayerItems(player, itemToGive, numToGive);
-                player.sendMessage(ChatColor.GOLD + "Collected " + ChatColor.GREEN + numToGive + ChatColor.GRAY + " items!");
-            } else {
-                numToGive = numToCollect;
-                BigDecimal toPay = BigDecimal.valueOf(numToGive * orderDTO.getPrice());
+        int availableToCollect = orderDTO.getToCollect();
+        if (availableToCollect == 0) return;
+
+        TaskChain<?> chain = CDAPlugin.newChain();
+
+        if (orderDTO.getType().equals(OrderType.BID)) {
+            chain.asyncFirst(() -> {
+                ItemStack itemsToGive = ItemUtils.buildItemStack(orderDTO.getItem());
+                int maxStackSize = itemsToGive.getMaxStackSize();
+                int numToCollect = availableToCollect > maxStackSize ? maxStackSize : availableToCollect;
+                // TODO: Submit request then on complete =>
+                itemsToGive.setAmount(numToCollect);
+                return itemsToGive;
+            }).abortIfNull(BukkitTaskChainFactory.MESSAGE, (Player) player, "Sorry, something failed!")
+            .syncLast(itemsCollected -> {
+
+                player.getWorld().dropItem(player.getLocation().add(0, 1, 0), itemsCollected);
+                int numCollected = itemsCollected.getAmount();
+                player.sendMessage(
+                    ChatColor.GOLD + "Collected " +
+                    ChatColor.GREEN + numCollected +
+                    ChatColor.GRAY + " items!"
+                );
+                orderDTO.setToCollect(availableToCollect - numCollected);
+                notifyOrderUpdateObserver(player.getUniqueId(), orderDTO);
+            });
+        } else {
+            chain.asyncFirst(() -> {
+                BigDecimal toPay = BigDecimal.valueOf(availableToCollect * orderDTO.getPrice());
+                //TODO: send collection request here!
+                return toPay;
+            }).asyncLast(toPay -> {
                 try {
                     Economy.add(player.getUniqueId(), toPay);
-                    player.sendMessage(ChatColor.AQUA + "Collected " + ChatColor.GREEN + Economy.format(toPay) + ChatColor.GRAY + "!");
+                    player.sendMessage(ChatColor.AQUA + "Collected " + ChatColor.GREEN + Economy.format(toPay)
+                            + ChatColor.GRAY + "!");
                 } catch (Exception e) {
                     // TODO: undo collection on payment fail.
                     player.sendMessage(ChatColor.RED + "Error collecting money");
-                    failure = true;
                 }
-            }
-
-            if (!failure) {
-                orderDTO.setToCollect(numToCollect - numToGive);
+                orderDTO.setToCollect(0);
                 notifyOrderUpdateObserver(player.getUniqueId(), orderDTO);
-            } 
-            
-            // TOOD: submit request collecting items
+            });
+        }
 
-        }).execute();
+        chain.execute();
     }
 }
 

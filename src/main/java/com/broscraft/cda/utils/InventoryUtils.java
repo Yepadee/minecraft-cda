@@ -1,16 +1,46 @@
 package com.broscraft.cda.utils;
 
+import java.util.Arrays;
+import java.util.Map;
+
+import com.earth2me.essentials.craftbukkit.InventoryWorkaround;
+
+import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+
+import me.mattstudios.mfgui.gui.components.ItemBuilder;
 
 public class InventoryUtils {
-    private static int INVENTORY_SIZE = 36;
+    private static final int USABLE_PLAYER_INV_SIZE = 36;
+    
+    private static Inventory makeTruncatedPlayerInventory(final PlayerInventory playerInventory) {
+        final Inventory fakeInventory = Bukkit.getServer().createInventory(null, USABLE_PLAYER_INV_SIZE);
+        fakeInventory.setContents(Arrays.copyOf(playerInventory.getContents(), fakeInventory.getSize()));
+        return fakeInventory;
+    }
+    
+    public static int getItemOverflow(final HumanEntity player, final ItemStack item, int amount) {
+        ItemStack itemsToGive = ItemBuilder.from(item).setAmount(amount).build();
 
-    public static int getInvSpace(HumanEntity player) {
-        int count = 0;
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item != null) count ++;
-        }
-        return INVENTORY_SIZE - count;
+        Map<Integer, ItemStack> leftovers = InventoryWorkaround.addItems(
+            makeTruncatedPlayerInventory(player.getInventory()),
+            itemsToGive
+        );
+
+        return leftovers.size();
+    }
+
+
+    public static void givePlayerItems(HumanEntity player, ItemStack item, int amount) {
+        ItemStack itemsToGive = ItemBuilder.from(item).setAmount(amount).build();
+
+        item.setAmount(amount);
+        InventoryWorkaround.addItems(
+            player.getInventory(),
+            itemsToGive
+        );
     }
 }

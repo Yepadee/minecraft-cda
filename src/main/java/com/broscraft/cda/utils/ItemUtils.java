@@ -20,7 +20,6 @@ import com.broscraft.cda.model.orders.grouped.visitors.GroupedOrderIconBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -192,17 +191,4 @@ public class ItemUtils {
         return itemDTO;
     }
 
-    public static void givePlayerItems(HumanEntity player, ItemStack item, int n) {
-        int maxStackSize = item.getMaxStackSize();
-        int numStacks = n / maxStackSize;
-        int lastStackSize = n % maxStackSize;
-
-        item.setAmount(maxStackSize);
-        for (int i = 0; i < numStacks; ++i) {
-            player.getInventory().addItem(item);
-        }
-        item.setAmount(lastStackSize);
-        player.getInventory().addItem(item);
-
-    }
 }

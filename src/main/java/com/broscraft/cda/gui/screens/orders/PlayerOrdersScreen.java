@@ -44,17 +44,19 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
         String collectTxt;
 
         ChatColor color;
+        ChatColor toCollectColor = ChatColor.GREEN;
+        if (orderDTO.getToCollect() == 0) toCollectColor = ChatColor.RED;
 
         if (orderDTO.getType().equals(OrderType.BID)) {
             color = ChatColor.GOLD;
             quantityTxt = ChatColor.GRAY + "Recieved: ";
             orderTypeTxt = color + ChatColor.UNDERLINE.toString() + "         Bid         ";
-            collectTxt = ChatColor.GRAY + "Collect Items: " + ChatColor.GREEN + orderDTO.getToCollect();
+            collectTxt = ChatColor.GRAY + "Collect Items: " + toCollectColor + orderDTO.getToCollect();
         } else {
             color = ChatColor.AQUA;
             quantityTxt = ChatColor.GRAY + "Sold: ";
             orderTypeTxt = color + ChatColor.UNDERLINE.toString() + "         Ask         ";
-            collectTxt = ChatColor.GRAY + "Collect Money: " + ChatColor.GREEN + orderDTO.getToCollect() * orderDTO.getPrice();
+            collectTxt = ChatColor.GRAY + "Collect Money: " + toCollectColor + Styles.formatPrice(orderDTO.getToCollect() * orderDTO.getPrice());
         }
 
         quantityTxt += color.toString() +
@@ -65,7 +67,7 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
             orderTypeTxt,
             collectTxt,
             quantityTxt,
-            ChatColor.GRAY + "Price: " + color.toString() + orderDTO.getPrice(),
+            ChatColor.GRAY + "Price: " + color.toString() + Styles.formatPrice(orderDTO.getPrice()),
             ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                      ",
             ChatColor.DARK_GREEN + "Left click: Collect",
             ChatColor.DARK_RED + "Right click: Delete"
@@ -98,7 +100,6 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
 
     @Override
     public void onOrderUpdate(OrderDTO orderDTO) {
-        System.out.println(orderDTO.getId());
         GuiItem orderBtn = Objects.requireNonNull(orderBtns.get(orderDTO.getId()));
         updateOrderIcon(orderBtn, orderDTO);
 
