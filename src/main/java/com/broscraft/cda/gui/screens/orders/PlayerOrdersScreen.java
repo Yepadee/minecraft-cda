@@ -21,10 +21,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
 import me.mattstudios.mfgui.gui.components.ScrollType;
+import me.mattstudios.mfgui.gui.guis.GuiItem;
 import net.md_5.bungee.api.ChatColor;
 
 public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateObserver {
-    Map<Long, ItemStack> orderBtns = new HashMap<>();
+    Map<Long, GuiItem> orderBtns = new HashMap<>();
 
     public PlayerOrdersScreen(GuiAction<InventoryClickEvent> onBackBtnClick) {
         super("My Orders", ScrollType.VERTICAL);
@@ -71,10 +72,13 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
         );
     }
 
-    private void updateOrderIcon(ItemStack orderIcon, OrderDTO orderDTO) {
+    private void updateOrderIcon(GuiItem orderBtn, OrderDTO orderDTO) {
+        ItemStack orderIcon = orderBtn.getItemStack();
         ItemMeta meta = orderIcon.getItemMeta();
         meta.setLore(getLore(orderDTO));
         orderIcon.setItemMeta(meta);
+        orderBtn.setItemStack(orderIcon);
+        this.update();
     }
 
     public void setOrders(List<OrderDTO> orders, Function<OrderDTO, GuiAction<InventoryClickEvent>> onOrderClick) {
@@ -84,16 +88,19 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
                 .setLore(this.getLore(order))
                 .build()
             );
-            this.orderBtns.put(order.getId(), orderIcon);
-            this.gui.addItem(ItemBuilder.from(orderIcon).asGuiItem(onOrderClick.apply(order)));
+
+            GuiItem orderBtn = ItemBuilder.from(orderIcon).asGuiItem(onOrderClick.apply(order));
+            this.orderBtns.put(order.getId(), orderBtn);
+            this.gui.addItem(orderBtn);
         });
         this.gui.update();
     }
 
     @Override
     public void onOrderUpdate(OrderDTO orderDTO) {
-        ItemStack orderIcon = Objects.requireNonNull(orderBtns.get(orderDTO.getId()));
-        updateOrderIcon(orderIcon, orderDTO);
+        System.out.println(orderDTO.getId());
+        GuiItem orderBtn = Objects.requireNonNull(orderBtns.get(orderDTO.getId()));
+        updateOrderIcon(orderBtn, orderDTO);
 
     }
 

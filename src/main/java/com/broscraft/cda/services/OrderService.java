@@ -90,10 +90,10 @@ public class OrderService {
             // TODO: Actually load orders
             System.out.println("Loading orders for player " + playerUUID + "!");
             List<OrderDTO> orderDTOs = new ArrayList<>();
-            orderDTOs.add(new OrderDTO().type(OrderType.ASK).price(10.3f).quantity(3).quantityFilled(2).toCollect(2)
+            orderDTOs.add(new OrderDTO().id(1L).type(OrderType.ASK).price(10.3f).quantity(3).quantityFilled(2).toCollect(2)
                     .item(new ItemDTO().id(1L).material(Material.STONE)));
 
-            orderDTOs.add(new OrderDTO().type(OrderType.BID).price(5.5f).quantity(3).quantityFilled(3).toCollect(1)
+            orderDTOs.add(new OrderDTO().id(2L).type(OrderType.BID).price(5.5f).quantity(3).quantityFilled(3).toCollect(1)
                     .item(new ItemDTO().id(2L).material(Material.DIAMOND_BLOCK)));
 
             return orderDTOs;

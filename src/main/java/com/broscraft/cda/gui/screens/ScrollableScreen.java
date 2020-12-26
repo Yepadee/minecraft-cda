@@ -84,7 +84,6 @@ public abstract class ScrollableScreen {
         return ItemBuilder.from(Styles.NEXT_ICON).asGuiItem(e -> onNextBtnClick()); // using this::function wont pick up on changes in class instance
     }
 
-
     private void hidePrevBtn() {
         this.gui.updateItem(prevBtnRow, prevBtnCol, Styles.BACKGROUND);
     }
@@ -120,6 +119,7 @@ public abstract class ScrollableScreen {
         if (numScrollNotches > 0 && ((numItems % scrollNotchSize) == 0)) numScrollNotches ++;
         return numScrollNotches;
     }
+
 
     protected void setItems(List<GuiItem> guiItems) {
         guiItems.forEach(gui::addItem);

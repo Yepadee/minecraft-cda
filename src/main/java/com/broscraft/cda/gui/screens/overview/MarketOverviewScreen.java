@@ -44,7 +44,8 @@ public abstract class MarketOverviewScreen extends ScrollableScreen implements I
     }
 
     @Override
-    public void onIconUpdate() {
+    public void onIconUpdate(Long itemId, ItemStack itemStack) {
+        guiItems.get(itemId).setItemStack(itemStack);
         CDAPlugin.newChain().async(this::update).execute();
     }
     

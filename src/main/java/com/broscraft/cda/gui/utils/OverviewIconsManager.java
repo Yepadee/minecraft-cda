@@ -47,8 +47,8 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
     }
 
 
-    private void notifyIconUpdateObservers() {
-        iconUpdateObservers.forEach(o ->  o.onIconUpdate());
+    private void notifyIconUpdateObservers(Long itemId, ItemStack icon) {
+        iconUpdateObservers.forEach(o ->  o.onIconUpdate(itemId, icon));
     }
 
     private void notifyNewIconObservers(ItemStack icon) {
@@ -95,13 +95,14 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
         return icon;
     }
 
-    private void updateIcon(ItemOverviewDTO itemOverviewDTO) {
+    private ItemStack updateIcon(ItemOverviewDTO itemOverviewDTO) {
         Long itemId = Objects.requireNonNull(itemOverviewDTO.getItem().getId());
         ItemStack icon = this.icons.get(itemId);
         List<String> lore = this.getLore(itemOverviewDTO);
         ItemMeta meta = icon.getItemMeta();
         meta.setLore(lore);
         icon.setItemMeta(meta);
+        return icon;
     }
 
     private List<String> getLore(ItemOverviewDTO itemOverview) {
@@ -130,12 +131,11 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
         // Update icon lore when data changes
         Long itemId = Objects.requireNonNull(itemOverviewDTO.getItem().getId());
 
-        if (this.icons.containsKey(itemId)) {
-            this.updateIcon(itemOverviewDTO);
-            this.notifyIconUpdateObservers();
+        if (icons.containsKey(itemId)) {
+            notifyIconUpdateObservers(itemId, updateIcon(itemOverviewDTO));
         } else {
             ItemStack icon = createIcon(itemOverviewDTO);
-            this.notifyNewIconObservers(icon);
+            notifyNewIconObservers(icon);
         }
     }
 
