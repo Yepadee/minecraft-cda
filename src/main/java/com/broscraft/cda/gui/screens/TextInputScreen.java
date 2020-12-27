@@ -2,6 +2,9 @@ package com.broscraft.cda.gui.screens;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import com.broscraft.cda.CDAPlugin;
+
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -43,7 +46,7 @@ public abstract class TextInputScreen {
             onConfirmBtnClick.accept(p, text);
             return AnvilGUI.Response.close();
         })
-        .onClose(onClose);
+        .onClose(p -> CDAPlugin.runTask(() -> onClose.accept(p)));
     }
 
     protected void setOnClose(Consumer<Player> onClose) {

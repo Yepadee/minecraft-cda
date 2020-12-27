@@ -1,11 +1,13 @@
 package com.broscraft.cda.model.orders;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import com.broscraft.cda.model.items.ItemDTO;
 
 public class OrderDTO {
     private Long id;
+    private UUID playerUUID;
     private ItemDTO item;
     private OrderType type;
     private Float price;
@@ -16,8 +18,9 @@ public class OrderDTO {
     public OrderDTO() {
     }
 
-    public OrderDTO(Long id, ItemDTO item, OrderType type, Float price, Integer quantity, Integer quantityFilled, Integer toCollect) {
+    public OrderDTO(Long id, UUID playerUUID, ItemDTO item, OrderType type, Float price, Integer quantity, Integer quantityFilled, Integer toCollect) {
         this.id = id;
+        this.playerUUID = playerUUID;
         this.item = item;
         this.type = type;
         this.price = price;
@@ -32,6 +35,14 @@ public class OrderDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public UUID getPlayerUUID() {
+        return this.playerUUID;
+    }
+
+    public void setPlayerUUID(UUID playerUUID) {
+        this.playerUUID = playerUUID;
     }
 
     public ItemDTO getItem() {
@@ -87,6 +98,11 @@ public class OrderDTO {
         return this;
     }
 
+    public OrderDTO playerUUID(UUID playerUUID) {
+        this.playerUUID = playerUUID;
+        return this;
+    }
+
     public OrderDTO item(ItemDTO item) {
         this.item = item;
         return this;
@@ -125,18 +141,19 @@ public class OrderDTO {
             return false;
         }
         OrderDTO orderDTO = (OrderDTO) o;
-        return Objects.equals(id, orderDTO.id) && Objects.equals(item, orderDTO.item) && Objects.equals(type, orderDTO.type) && Objects.equals(price, orderDTO.price) && Objects.equals(quantity, orderDTO.quantity) && Objects.equals(quantityFilled, orderDTO.quantityFilled) && Objects.equals(toCollect, orderDTO.toCollect);
+        return Objects.equals(id, orderDTO.id) && Objects.equals(playerUUID, orderDTO.playerUUID) && Objects.equals(item, orderDTO.item) && Objects.equals(type, orderDTO.type) && Objects.equals(price, orderDTO.price) && Objects.equals(quantity, orderDTO.quantity) && Objects.equals(quantityFilled, orderDTO.quantityFilled) && Objects.equals(toCollect, orderDTO.toCollect);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, item, type, price, quantity, quantityFilled, toCollect);
+        return Objects.hash(id, playerUUID, item, type, price, quantity, quantityFilled, toCollect);
     }
 
     @Override
     public String toString() {
         return "{" +
             " id='" + getId() + "'" +
+            ", playerUUID='" + getPlayerUUID() + "'" +
             ", item='" + getItem() + "'" +
             ", type='" + getType() + "'" +
             ", price='" + getPrice() + "'" +

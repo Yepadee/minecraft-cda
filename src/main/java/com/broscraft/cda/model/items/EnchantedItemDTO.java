@@ -43,7 +43,7 @@ public class EnchantedItemDTO extends ItemDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(enchantments);
+        return Objects.hash(this.getMaterial(), enchantments);
     }
 
     @Override

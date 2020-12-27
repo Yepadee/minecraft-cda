@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -14,6 +15,7 @@ import com.broscraft.cda.model.orders.OrderDTO;
 import com.broscraft.cda.model.orders.OrderType;
 import com.broscraft.cda.model.orders.grouped.GroupedAskDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
+import com.broscraft.cda.model.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.OrderObserver;
@@ -32,8 +34,8 @@ import net.md_5.bungee.api.ChatColor;
 
 public class OrderService {
     private OrderObserver orderObserver;
-    private Map<UUID, OrderUpdateObserver> orderUpdateObservers = new HashMap<>();
     private ItemService itemService;
+    private Map<UUID, OrderUpdateObserver> orderUpdateObservers = new HashMap<>();
 
     public OrderService(ItemService itemService, OrderObserver orderObserver) {
         this.itemService = itemService;
@@ -63,6 +65,7 @@ public class OrderService {
         orderObserver.onRemoveOrder(orderDTO, nextBestPrice);
     }
 
+
     public void getOrders(Long itemId, Consumer<GroupedOrdersDTO> onComplete) {
         CDAPlugin.newChain().asyncFirst(() -> {
             // TODO: Actually load orders
@@ -88,7 +91,10 @@ public class OrderService {
 
             return new GroupedOrdersDTO().groupedBids(bids).groupedAsks(asks);
 
-        }).abortIfNull().syncLast(result -> onComplete.accept(result)).execute();
+        })
+        .abortIfNull()
+        .syncLast(result -> onComplete.accept(result))
+        .execute();
     }
 
     public void getPlayerOrders(UUID playerUUID, Consumer<List<OrderDTO>> onComplete) {
@@ -97,14 +103,19 @@ public class OrderService {
             System.out.println("Loading orders for player " + playerUUID + "!");
             List<OrderDTO> orderDTOs = new ArrayList<>();
             orderDTOs.add(new OrderDTO().id(1L).type(OrderType.ASK).price(10.3f).quantity(3).quantityFilled(2)
-                    .toCollect(2).item(new ItemDTO().id(1L).material(Material.STONE)));
+                .playerUUID(UUID.fromString("ff5b7624-5859-455e-b708-e7cb227e114d"))
+                .toCollect(2).item(new ItemDTO().id(1L).material(Material.STONE)));
 
             orderDTOs.add(new OrderDTO().id(2L).type(OrderType.BID).price(5.5f).quantity(3).quantityFilled(3)
-                    .toCollect(1).item(new ItemDTO().id(2L).material(Material.DIAMOND_BLOCK)));
+                .playerUUID(UUID.fromString("ff5b7624-5859-455e-b708-e7cb227e114d"))
+                .toCollect(1).item(new ItemDTO().id(2L).material(Material.DIAMOND_BLOCK)));
 
             return orderDTOs;
 
-        }).abortIfNull().syncLast(result -> onComplete.accept(result)).execute();
+        })
+        .abortIfNull()
+        .syncLast(result -> onComplete.accept(result))
+        .execute();
     }
 
     public void submitOrder(NewOrderDTO newOrderDTO) {
@@ -124,8 +135,10 @@ public class OrderService {
             Float nextBestPrice = 3.3f;
             System.out.println("Cancelling order " + orderDTO.getItem().getId());
             notifyRemoveOrderObserver(orderDTO, nextBestPrice);
-            onComplete.run();
-        }).execute();
+            
+        })
+        .sync(() -> onComplete.run())
+        .execute();
     }
 
     public void collectOrder(HumanEntity player, OrderDTO orderDTO) {
@@ -175,6 +188,27 @@ public class OrderService {
         }
 
         chain.execute();
+    }
+
+    public void fillOrder(int quantity, GroupedOrderDTO groupedOrderDTO, Runnable onComplete) {
+        
+        CDAPlugin.newSharedChain("fillOrder")
+        .asyncFirst(() -> {
+            // TODO: send request to fill order and retrieve affected orders
+            List<OrderDTO> affectedOrders = new ArrayList<>();
+            return affectedOrders;
+        })
+        .abortIfNull()
+        .asyncLast(affectedOrders -> {
+            affectedOrders.forEach(order -> {
+                UUID playerUUID = Objects.requireNonNull(order.getPlayerUUID());
+                notifyOrderUpdateObserver(playerUUID, order);
+            });
+        })
+        .sync(() -> onComplete.run())
+        .execute();
+
+
     }
 }
 

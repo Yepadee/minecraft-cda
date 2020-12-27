@@ -57,7 +57,7 @@ public class ItemDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, material);
+        return Objects.hash(material);
     }
 
     @Override
