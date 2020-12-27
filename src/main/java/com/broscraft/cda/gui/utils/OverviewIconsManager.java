@@ -65,7 +65,7 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
         .asyncFirst(
             () -> icons.keySet().stream().filter(k -> {
                 String iconName = this.iconNames.get(k);
-                return iconName.contains(searchQuery);
+                return iconName.contains(searchQuery.toLowerCase());
             }).map(k -> this.icons.get(k))
             .collect(Collectors.toList())
         )

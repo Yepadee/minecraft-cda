@@ -32,7 +32,7 @@ public class NewOrderCommand implements CommandExecutor {
             Player player = (Player) sender;
 
             if (args.length < 2) return false;
-            String orderType = args[0];
+            String orderType = args[0].toLowerCase();
             NewOrderDTO newOrderDto = new NewOrderDTO();
             try {
                 newOrderDto.setType(OrderType.valueOf(orderType.toUpperCase()));
@@ -86,9 +86,9 @@ public class NewOrderCommand implements CommandExecutor {
                 orderTypeColor = ChatColor.GOLD;
             }
     
-            sender.sendMessage(ChatColor.GRAY.toString() + "Created " + orderTypeColor
-            + orderType + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " order for "
-            + quantity + ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" +
+            sender.sendMessage(ChatColor.GRAY.toString() + "Created " + orderTypeColor +
+            orderType + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
+            orderTypeColor + quantity + ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" +
             ChatColor.GRAY + " at " + ChatColor.GREEN + Styles.formatPrice(newOrderDto.getPrice()));
             
             orderService.submitOrder(newOrderDto);
