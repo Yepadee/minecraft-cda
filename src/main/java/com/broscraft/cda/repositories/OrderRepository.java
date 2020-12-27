@@ -58,4 +58,12 @@ public class OrderRepository {
     public void createOrder(NewOrderDTO newOrderDTO) {
         System.out.println("Created new order:" + newOrderDTO);
     }
+
+    public float getBestPrice(OrderType orderType) {
+        return 3.69f;
+    }
+
+    public void delete(Long orderId) {
+        // TODO: submit delete request
+    }
 }

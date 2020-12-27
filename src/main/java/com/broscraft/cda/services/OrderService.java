@@ -108,10 +108,11 @@ public class OrderService {
 
     public void cancelOrder(OrderDTO orderDTO, Runnable onComplete) {
         CDAPlugin.newSharedChain("cancelOrder").async(() -> {
-            // TODO: load next best price
-            Float nextBestPrice = 3.3f;
-            System.out.println("Cancelling order " + orderDTO.getItem().getId());
-            notifyRemoveOrderObserver(orderDTO, nextBestPrice);
+            orderRepository.delete(orderDTO.getId());
+            notifyRemoveOrderObserver(
+                orderDTO,
+                orderRepository.getBestPrice(orderDTO.getType())
+            );
             
         })
         .sync(() -> onComplete.run())
