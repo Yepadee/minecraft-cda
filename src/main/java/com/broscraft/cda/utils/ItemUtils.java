@@ -200,13 +200,10 @@ public class ItemUtils {
     }
 
     public static boolean isDamaged(ItemStack item) {
-        if (item instanceof Damageable) {
-            System.out.println("isDamagable");
+        if (item.getItemMeta() instanceof Damageable) {
             Damageable meta = (Damageable) item.getItemMeta();
-            System.out.println(meta.hasDamage());
             return meta.hasDamage();
         } else {
-            System.out.println("notDamagable");
             return false;
         }
     }

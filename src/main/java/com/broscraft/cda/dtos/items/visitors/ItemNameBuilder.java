@@ -6,12 +6,14 @@ import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.items.PotionDTO;
 import com.broscraft.cda.utils.RomanNumber;
 
+import org.apache.commons.lang.WordUtils;
+
 public class ItemNameBuilder extends ItemVisitor {
     private StringBuilder builder;
 
 
     public String getItemName() {
-        return builder.toString();
+        return WordUtils.capitalize(builder.toString());
     }
 
     public void setMaterialName(ItemDTO itemEntity) {
@@ -30,7 +32,7 @@ public class ItemNameBuilder extends ItemVisitor {
         enchantedItemDto.getEnchantments().forEach(enchantment -> {
             String enchantmentName = enchantment.getEnchantment().replaceAll("[_\\s]", " ").toLowerCase();
             builder.append(" " + enchantmentName)
-                   .append(" " + RomanNumber.toRoman(enchantment.getLevel()));
+                   .append(" " + RomanNumber.toRoman(enchantment.getLevel()).toUpperCase());
         });
     }
 
@@ -40,7 +42,7 @@ public class ItemNameBuilder extends ItemVisitor {
         String potionName = potionDto.getType().name().replace("_", " ").toLowerCase();
         builder.append(" " + potionName);
         if (potionDto.getUpgraded()) {
-            builder.append(" ii");
+            builder.append(" II");
         }
     }
     

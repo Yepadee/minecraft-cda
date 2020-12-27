@@ -26,7 +26,6 @@ public class AskLiftQuantityInputScreen extends TextInputScreen {
             onConfirmBtnClick,
             onClose
         );
-        // TODO Auto-generated constructor stub
     }
     
 }
