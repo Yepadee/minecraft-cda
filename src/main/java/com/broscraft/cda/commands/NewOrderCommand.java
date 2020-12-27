@@ -1,8 +1,8 @@
 package com.broscraft.cda.commands;
+import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.orders.OrderType;
+import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.gui.utils.Styles;
-import com.broscraft.cda.model.items.ItemDTO;
-import com.broscraft.cda.model.orders.OrderType;
-import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.ItemUtils;
 

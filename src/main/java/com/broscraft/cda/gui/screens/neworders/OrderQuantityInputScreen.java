@@ -12,17 +12,16 @@ import org.bukkit.inventory.ItemStack;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
 import net.md_5.bungee.api.ChatColor;
 
-public class QuantityInputScreen extends TextInputScreen {
-    private static ItemStack SEARCH_ICON = ItemBuilder.from(Material.COMPASS).setName("").build();
-    private static String PLACEHOLDER = ChatColor.GRAY + "1";
+public class OrderQuantityInputScreen extends TextInputScreen {
+    private static ItemStack SEARCH_ICON = ItemBuilder.from(Material.PAPER).setName("").build();
+    private static String PLACEHOLDER = ChatColor.GRAY + "quantity";
 
-    public QuantityInputScreen(
-        int maxQuantity,
+    public OrderQuantityInputScreen(
         BiConsumer<Player, String> onConfirmBtnClick,
         Consumer<Player> onClose
     ) {
         super(
-            "Enter Quantitiy " + ChatColor.RED + ChatColor.BOLD + "(MAX: " + maxQuantity + ")",
+            "Enter Quantitiy",
             PLACEHOLDER,
             SEARCH_ICON,
             onConfirmBtnClick,

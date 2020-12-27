@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.broscraft.cda.model.items.ItemDTO;
-import com.broscraft.cda.model.orders.OrderDTO;
-import com.broscraft.cda.model.orders.OrderType;
-import com.broscraft.cda.model.orders.grouped.GroupedAskDTO;
-import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
-import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
-import com.broscraft.cda.model.orders.input.NewOrderDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.orders.OrderDTO;
+import com.broscraft.cda.dtos.orders.OrderType;
+import com.broscraft.cda.dtos.orders.grouped.GroupedAskDTO;
+import com.broscraft.cda.dtos.orders.grouped.GroupedBidDTO;
+import com.broscraft.cda.dtos.orders.grouped.GroupedOrdersDTO;
+import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 
 import org.bukkit.Material;
 

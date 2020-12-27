@@ -1,4 +1,4 @@
-package com.broscraft.cda.model.orders.grouped;
+package com.broscraft.cda.dtos.orders.grouped;
 
 import java.util.List;
 import java.util.Objects;

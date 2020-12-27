@@ -1,9 +1,9 @@
-package com.broscraft.cda.model.orders;
+package com.broscraft.cda.dtos.orders;
 
 import java.util.Objects;
 import java.util.UUID;
 
-import com.broscraft.cda.model.items.ItemDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
 
 public class OrderDTO {
     private Long id;

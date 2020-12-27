@@ -1,4 +1,4 @@
-package com.broscraft.cda.model.items;
+package com.broscraft.cda.dtos.items;
 
 import java.util.Objects;
 

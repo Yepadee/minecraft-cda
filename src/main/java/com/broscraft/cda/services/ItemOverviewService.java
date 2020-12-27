@@ -2,12 +2,12 @@ package com.broscraft.cda.services;
 
 import java.util.Objects;
 
-import com.broscraft.cda.model.orders.OrderDTO;
-import com.broscraft.cda.model.orders.input.NewOrderDTO;
+import com.broscraft.cda.dtos.ItemOverviewDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.orders.OrderDTO;
+import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
-import com.broscraft.cda.model.ItemOverviewDTO;
-import com.broscraft.cda.model.items.ItemDTO;
 
 public class ItemOverviewService implements OrderObserver {
     private ItemService itemService;

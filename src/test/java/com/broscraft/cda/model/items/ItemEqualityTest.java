@@ -5,6 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.broscraft.cda.dtos.items.EnchantedItemDTO;
+import com.broscraft.cda.dtos.items.EnchantmentDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
+
 import org.bukkit.Material;
 import org.junit.Test;
 

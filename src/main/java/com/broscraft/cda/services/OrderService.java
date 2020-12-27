@@ -10,12 +10,12 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import com.broscraft.cda.CDAPlugin;
-import com.broscraft.cda.model.items.ItemDTO;
-import com.broscraft.cda.model.orders.OrderDTO;
-import com.broscraft.cda.model.orders.OrderType;
-import com.broscraft.cda.model.orders.grouped.GroupedOrderDTO;
-import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
-import com.broscraft.cda.model.orders.input.NewOrderDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.orders.OrderDTO;
+import com.broscraft.cda.dtos.orders.OrderType;
+import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
+import com.broscraft.cda.dtos.orders.grouped.GroupedOrdersDTO;
+import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OrderUpdateObserver;
 import com.broscraft.cda.repositories.OrderRepository;

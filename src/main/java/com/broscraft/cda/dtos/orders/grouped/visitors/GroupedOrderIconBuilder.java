@@ -1,8 +1,8 @@
-package com.broscraft.cda.model.orders.grouped.visitors;
+package com.broscraft.cda.dtos.orders.grouped.visitors;
 
+import com.broscraft.cda.dtos.orders.grouped.GroupedAskDTO;
+import com.broscraft.cda.dtos.orders.grouped.GroupedBidDTO;
 import com.broscraft.cda.gui.utils.Styles;
-import com.broscraft.cda.model.orders.grouped.GroupedAskDTO;
-import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
 import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.Material;

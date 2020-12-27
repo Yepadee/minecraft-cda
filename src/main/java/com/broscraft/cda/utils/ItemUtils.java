@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.broscraft.cda.model.items.EnchantedItemDTO;
-import com.broscraft.cda.model.items.EnchantmentDTO;
-import com.broscraft.cda.model.items.ItemDTO;
-import com.broscraft.cda.model.items.PotionDTO;
-import com.broscraft.cda.model.items.visitors.ItemStackBuilder;
-import com.broscraft.cda.model.items.visitors.ItemNameBuilder;
-import com.broscraft.cda.model.orders.grouped.GroupedOrderDTO;
-import com.broscraft.cda.model.orders.grouped.visitors.GroupedOrderIconBuilder;
+import com.broscraft.cda.dtos.items.EnchantedItemDTO;
+import com.broscraft.cda.dtos.items.EnchantmentDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.items.PotionDTO;
+import com.broscraft.cda.dtos.items.visitors.ItemNameBuilder;
+import com.broscraft.cda.dtos.items.visitors.ItemStackBuilder;
+import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
+import com.broscraft.cda.dtos.orders.grouped.visitors.GroupedOrderIconBuilder;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;

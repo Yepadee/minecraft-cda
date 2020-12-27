@@ -1,10 +1,10 @@
-package com.broscraft.cda.model.items;
+package com.broscraft.cda.dtos.items;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.broscraft.cda.model.items.visitors.ItemVisitor;
+import com.broscraft.cda.dtos.items.visitors.ItemVisitor;
 
 public class EnchantedItemDTO extends ItemDTO {
     private List<EnchantmentDTO> enchantments = new ArrayList<>();

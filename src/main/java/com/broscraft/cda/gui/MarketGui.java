@@ -2,16 +2,17 @@ package com.broscraft.cda.gui;
 
 import java.util.Objects;
 
+import com.broscraft.cda.dtos.orders.OrderDTO;
+import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.gui.screens.ConfirmScreen;
+import com.broscraft.cda.gui.screens.fillOrders.AskLiftQuantityInputScreen;
+import com.broscraft.cda.gui.screens.fillOrders.BidHitItemInputScreen;
 import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
-import com.broscraft.cda.gui.screens.neworders.QuantityInputScreen;
 import com.broscraft.cda.gui.screens.orders.PlayerOrdersScreen;
 import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.screens.search.SearchInputScreen;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
-import com.broscraft.cda.model.orders.OrderDTO;
-import com.broscraft.cda.model.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.ItemUtils;
 import com.google.common.base.Function;
@@ -143,9 +144,8 @@ public class MarketGui {
         });
     }
 
-    private void openQuantityInputScreen(GroupedOrderDTO groupedOrderDTO, ItemStack item, int maxQuantity, HumanEntity player) {
-        new QuantityInputScreen(
-            maxQuantity,
+    private void openAskLiftQuantityInputScreen(GroupedOrderDTO groupedOrderDTO, ItemStack item, int maxQuantity, HumanEntity player) {
+        new AskLiftQuantityInputScreen(
             (e, quantityTxt) -> {
                 try {
                     int quantity = Integer.parseInt(quantityTxt);
@@ -155,12 +155,15 @@ public class MarketGui {
                 } catch (NumberFormatException ex){
                     player.sendMessage(ChatColor.RED + "Invalid quantity, please try again!");
                     // TODO: is this safe?
-                    openQuantityInputScreen(groupedOrderDTO, item, maxQuantity, player);
+                    openAskLiftQuantityInputScreen(groupedOrderDTO, item, maxQuantity, player);
                 }
-
-                
             },
             p -> openItemOrdersScreen(item, player)
+        ).open(player);
+    }
+
+    private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, ItemStack item, int maxQuantity, HumanEntity player) {
+        new BidHitItemInputScreen(
         ).open(player);
     }
 
@@ -179,7 +182,9 @@ public class MarketGui {
         orderService.getOrders(itemId, orders -> {
             itemOrdersScreen.setOrders(
                 orders,
-                order -> e -> openQuantityInputScreen(order, item, 1, player)
+                bid -> e -> openBidHitItemInputScreen(bid, item, 1, player),
+                ask -> e -> openAskLiftQuantityInputScreen(ask, item, 1, player)
+                
             );
         });
 

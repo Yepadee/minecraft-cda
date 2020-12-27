@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.broscraft.cda.model.ItemOverviewDTO;
-import com.broscraft.cda.model.items.ItemDTO;
+import com.broscraft.cda.dtos.ItemOverviewDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.repositories.ItemRepository;
 
 public class ItemService {

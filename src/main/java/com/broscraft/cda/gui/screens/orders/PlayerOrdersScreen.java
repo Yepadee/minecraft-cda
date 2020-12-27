@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.broscraft.cda.dtos.orders.OrderDTO;
+import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.gui.screens.ScrollableScreen;
 import com.broscraft.cda.gui.utils.Styles;
-import com.broscraft.cda.model.orders.OrderDTO;
-import com.broscraft.cda.model.orders.OrderType;
 import com.broscraft.cda.observers.OrderUpdateObserver;
 import com.broscraft.cda.utils.ItemUtils;
 import com.google.common.base.Function;

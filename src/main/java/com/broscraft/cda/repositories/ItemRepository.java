@@ -3,8 +3,8 @@ package com.broscraft.cda.repositories;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.broscraft.cda.model.ItemOverviewDTO;
-import com.broscraft.cda.model.items.ItemDTO;
+import com.broscraft.cda.dtos.ItemOverviewDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
 
 import org.bukkit.Material;
 

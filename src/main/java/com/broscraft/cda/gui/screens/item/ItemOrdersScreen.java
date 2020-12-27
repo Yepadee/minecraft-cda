@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import com.broscraft.cda.dtos.orders.grouped.GroupedAskDTO;
+import com.broscraft.cda.dtos.orders.grouped.GroupedBidDTO;
+import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
+import com.broscraft.cda.dtos.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.gui.screens.ScrollableScreen;
 import com.broscraft.cda.gui.utils.Styles;
-import com.broscraft.cda.model.orders.grouped.GroupedAskDTO;
-import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
-import com.broscraft.cda.model.orders.grouped.GroupedOrderDTO;
-import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.Material;
@@ -67,8 +67,9 @@ public class ItemOrdersScreen extends ScrollableScreen {
 
 
     public void setOrders(
-        GroupedOrdersDTO groupedOrders, Function<GroupedOrderDTO,
-        GuiAction<InventoryClickEvent>> onOrderClick
+        GroupedOrdersDTO groupedOrders,
+        Function<GroupedOrderDTO, GuiAction<InventoryClickEvent>> onBidClick,
+        Function<GroupedOrderDTO, GuiAction<InventoryClickEvent>> onAskClick
     ) {
         // This is a very aids way of doing the UI, but necessary give the lack of "Panes" in this gui framework :(
         List<GroupedBidDTO> groupedBids = groupedOrders.getGroupedBids();
@@ -83,20 +84,20 @@ public class ItemOrdersScreen extends ScrollableScreen {
             icons.add(Styles.BEST_ORDER_ICON);
             GroupedBidDTO groupedBid = groupedBids.get(0);
             GroupedAskDTO groupedAsk = groupedAsks.get(0);
-            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem(onOrderClick.apply(groupedBid)));
-            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(true).asGuiItem(onOrderClick.apply(groupedAsk)));
+            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem(onBidClick.apply(groupedBid)));
+            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(true).asGuiItem(onAskClick.apply(groupedAsk)));
         } else {
             if (numAsks == 0) {
                 GroupedBidDTO groupedBid = groupedBids.get(0);
                 icons.add(Styles.BEST_ORDER_ICON);
-                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem(onOrderClick.apply(groupedBid)));
+                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem(onBidClick.apply(groupedBid)));
                 icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
                 
             } else if (numBids == 0) {
                 GroupedAskDTO groupedAsk = groupedAsks.get(0);
                 icons.add(Styles.BEST_ORDER_ICON);
                 icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
-                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(true).asGuiItem(onOrderClick.apply(groupedAsk)));
+                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(true).asGuiItem(onAskClick.apply(groupedAsk)));
             }
         }
 
@@ -105,8 +106,8 @@ public class ItemOrdersScreen extends ScrollableScreen {
             GroupedBidDTO groupedBid = groupedBids.get(i);
             GroupedAskDTO groupedAsk = groupedAsks.get(i);
             icons.add(Styles.OTHER_ORDER_ICON);
-            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem(onOrderClick.apply(groupedBid)));
-            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(i % 2 == 0).asGuiItem(onOrderClick.apply(groupedAsk)));
+            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem(onBidClick.apply(groupedBid)));
+            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(i % 2 == 0).asGuiItem(onAskClick.apply(groupedAsk)));
         }
         if (smallest == numBids) {
             if (smallest == 0) smallest ++;
@@ -114,14 +115,14 @@ public class ItemOrdersScreen extends ScrollableScreen {
                 GroupedAskDTO groupedAsk = groupedAsks.get(i);
                 icons.add(Styles.OTHER_ORDER_ICON);
                 icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
-                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(i % 2 == 0).asGuiItem(onOrderClick.apply(groupedAsk)));
+                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(i % 2 == 0).asGuiItem(onAskClick.apply(groupedAsk)));
             }
         } else {
             if (smallest == 0) smallest ++;
             for (int i = smallest; i < numBids; ++i) {
                 GroupedBidDTO groupedBid = groupedBids.get(i);
                 icons.add(Styles.OTHER_ORDER_ICON);
-                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem(onOrderClick.apply(groupedBid)));
+                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem(onBidClick.apply(groupedBid)));
                 icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
             }
         }

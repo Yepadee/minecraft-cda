@@ -1,10 +1,10 @@
-package com.broscraft.cda.model.items.visitors;
+package com.broscraft.cda.dtos.items.visitors;
 
 import java.util.Arrays;
 
-import com.broscraft.cda.model.items.EnchantedItemDTO;
-import com.broscraft.cda.model.items.ItemDTO;
-import com.broscraft.cda.model.items.PotionDTO;
+import com.broscraft.cda.dtos.items.EnchantedItemDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.items.PotionDTO;
 
 public class ItemNameBuilder extends ItemVisitor {
     private StringBuilder builder;

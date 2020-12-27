@@ -1,9 +1,9 @@
-package com.broscraft.cda.model.orders.input;
+package com.broscraft.cda.dtos.orders.input;
 
 import java.util.Objects;
 
-import com.broscraft.cda.model.items.ItemDTO;
-import com.broscraft.cda.model.orders.OrderType;
+import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.orders.OrderType;
 
 public class NewOrderDTO {
     private ItemDTO item;

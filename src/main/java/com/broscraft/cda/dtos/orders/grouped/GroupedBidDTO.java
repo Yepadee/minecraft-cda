@@ -1,6 +1,6 @@
-package com.broscraft.cda.model.orders.grouped;
+package com.broscraft.cda.dtos.orders.grouped;
 
-import com.broscraft.cda.model.orders.grouped.visitors.GroupedOrderVisitor;
+import com.broscraft.cda.dtos.orders.grouped.visitors.GroupedOrderVisitor;
 
 public class GroupedBidDTO extends GroupedOrderDTO {
     

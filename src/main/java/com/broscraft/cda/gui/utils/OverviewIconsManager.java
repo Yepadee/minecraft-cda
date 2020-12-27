@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.broscraft.cda.CDAPlugin;
-import com.broscraft.cda.model.ItemOverviewDTO;
+import com.broscraft.cda.dtos.ItemOverviewDTO;
 import com.broscraft.cda.observers.IconUpdateObserver;
 import com.broscraft.cda.observers.NewIconObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;

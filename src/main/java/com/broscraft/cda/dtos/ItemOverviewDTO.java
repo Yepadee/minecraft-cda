@@ -1,6 +1,6 @@
-package com.broscraft.cda.model;
+package com.broscraft.cda.dtos;
 
-import com.broscraft.cda.model.items.ItemDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
 
 public class ItemOverviewDTO {
     private ItemDTO item;
