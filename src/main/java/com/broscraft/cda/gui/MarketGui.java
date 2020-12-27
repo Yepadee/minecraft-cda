@@ -164,6 +164,11 @@ public class MarketGui {
 
     private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, ItemStack item, int maxQuantity, HumanEntity player) {
         new BidHitItemInputScreen(
+            item,
+            e -> openItemOrdersScreen(item, player),
+            e -> {
+                System.out.println("Confirm btn Pressed!");
+            }
         ).open(player);
     }
 

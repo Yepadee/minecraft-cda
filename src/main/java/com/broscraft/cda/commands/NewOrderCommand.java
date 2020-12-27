@@ -55,6 +55,12 @@ public class NewOrderCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED.toString() + "You must be holding an item to create an order for");
                 return false;
             }
+
+            if (ItemUtils.isDamaged(itemStack) && newOrderDto.getType().equals(OrderType.ASK)) {
+                sender.sendMessage(ChatColor.RED.toString() + "Cannot ask orders for damaged items!");
+                return false; 
+            }
+
             ItemDTO itemDTO = ItemUtils.parseItemStack(itemStack);
             newOrderDto.setItem(itemDTO);
 
@@ -72,17 +78,20 @@ public class NewOrderCommand implements CommandExecutor {
                 quantity = itemStack.getAmount();
             }
             newOrderDto.setQuantity(quantity);
-    
-            sender.sendMessage(ChatColor.GREEN.toString() + "Created " + ChatColor.BOLD.toString()
-            + orderType + ChatColor.RESET.toString() + ChatColor.GREEN.toString() + " order for "
-            + quantity + " " + itemStack.getType() + " at " + Styles.formatPrice(newOrderDto.getPrice()));
-            
-            //orderService.submitOrder(newOrderDto);
-            try {
-                orderService.submitOrder(newOrderDto);
-            } catch (Exception e) {
-                sender.sendMessage(ChatColor.RED.toString() + e.getMessage());
+
+            ChatColor orderTypeColor;
+            if (newOrderDto.getType().equals(OrderType.ASK)) {
+                orderTypeColor = ChatColor.AQUA;
+            } else {
+                orderTypeColor = ChatColor.GOLD;
             }
+    
+            sender.sendMessage(ChatColor.GRAY.toString() + "Created " + orderTypeColor
+            + orderType + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " order for "
+            + quantity + ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" +
+            ChatColor.GRAY + " at " + ChatColor.GREEN + Styles.formatPrice(newOrderDto.getPrice()));
+            
+            orderService.submitOrder(newOrderDto);
 
             return true;
         } 

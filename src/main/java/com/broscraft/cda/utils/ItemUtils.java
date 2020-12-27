@@ -12,6 +12,7 @@ import com.broscraft.cda.dtos.items.EnchantedItemDTO;
 import com.broscraft.cda.dtos.items.EnchantmentDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.items.PotionDTO;
+import com.broscraft.cda.dtos.items.visitors.SearchableNameBuilder;
 import com.broscraft.cda.dtos.items.visitors.ItemNameBuilder;
 import com.broscraft.cda.dtos.items.visitors.ItemStackBuilder;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
@@ -22,6 +23,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -32,6 +34,7 @@ import org.bukkit.potion.PotionType;
 
 public class ItemUtils {
     private static final ItemNameBuilder itemNameBuilder = new ItemNameBuilder();
+    private static final SearchableNameBuilder searchableNameBuilder = new SearchableNameBuilder();
     private static final ItemStackBuilder itemStackBuilder = new ItemStackBuilder();
     private static final GroupedOrderIconBuilder groupedOrderIconBuilder = new GroupedOrderIconBuilder();
 
@@ -123,6 +126,11 @@ public class ItemUtils {
         return itemNameBuilder.getItemName();
     }
 
+    public static String getSearchableName(ItemDTO itemDTO) {
+        itemDTO.accept(searchableNameBuilder);
+        return searchableNameBuilder.getSearchableName();
+    }
+
     public static ItemStack buildItemStack(ItemDTO itemDTO) {
         itemDTO.accept(itemStackBuilder);
         return itemStackBuilder.getIcon();
@@ -189,6 +197,18 @@ public class ItemUtils {
 
         itemDTO.setMaterial(itemStack.getType());
         return itemDTO;
+    }
+
+    public static boolean isDamaged(ItemStack item) {
+        if (item instanceof Damageable) {
+            System.out.println("isDamagable");
+            Damageable meta = (Damageable) item.getItemMeta();
+            System.out.println(meta.hasDamage());
+            return meta.hasDamage();
+        } else {
+            System.out.println("notDamagable");
+            return false;
+        }
     }
 
 }

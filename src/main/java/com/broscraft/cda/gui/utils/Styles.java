@@ -36,6 +36,9 @@ public class Styles {
     public static ItemStack SCROLL_DOWN_ICON = ItemBuilder.from(Material.GLOWSTONE_DUST).setName("Scroll Down").build();
     public static ItemStack SCROLL_UP_ICON = ItemBuilder.from(Material.REDSTONE).setName("Scroll Up").build();
 
+    public static ItemStack CONFIRM_ICON = ItemBuilder.from(Material.LIME_STAINED_GLASS_PANE).setName(ChatColor.GREEN + "Confirm").build();
+    public static ItemStack CANCEL_ICON = ItemBuilder.from(Material.RED_STAINED_GLASS_PANE).setName(ChatColor.RED + "Cancel").build();
+
     public static String formatPrice(float price) {
         return Economy.format(BigDecimal.valueOf(price));
     }

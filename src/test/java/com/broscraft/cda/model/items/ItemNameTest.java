@@ -14,7 +14,7 @@ public class ItemNameTest {
     {
         List<ItemDTO> items = ItemUtils.buildAllItems();
         for (ItemDTO item : items) {
-            System.out.println(ItemUtils.getItemName(item));
+            System.out.println(ItemUtils.getSearchableName(item));
         }
     }
 }

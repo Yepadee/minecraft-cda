@@ -20,7 +20,7 @@ public class AskLiftQuantityInputScreen extends TextInputScreen {
         BiConsumer<Player, String> onConfirmBtnClick, Consumer<Player> onClose
     ) {
         super(
-            ChatColor.AQUA + "Enter quantity to buy",
+            ChatColor.BOLD + ChatColor.AQUA.toString() + "Enter quantity to buy",
             PLACEHOLDER,
             CONFIRM_ICON,
             onConfirmBtnClick,

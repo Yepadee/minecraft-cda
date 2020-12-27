@@ -90,7 +90,7 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
 
         meta.setLore(lore);
         icon.setItemMeta(meta);
-        iconNames.put(id, ItemUtils.getItemName(itemOverview.getItem()));
+        iconNames.put(id, ItemUtils.getSearchableName(itemOverview.getItem()));
         icons.put(id, icon);
         return icon;
     }
