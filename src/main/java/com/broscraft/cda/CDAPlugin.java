@@ -8,6 +8,7 @@ import com.broscraft.cda.commands.SearchMarketCommand;
 import com.broscraft.cda.gui.MarketGui;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
 import com.broscraft.cda.repositories.ItemRepository;
+import com.broscraft.cda.repositories.OrderRepository;
 import com.broscraft.cda.services.ItemOverviewService;
 import com.broscraft.cda.services.ItemService;
 import com.broscraft.cda.services.OrderService;
@@ -30,6 +31,7 @@ public class CDAPlugin extends JavaPlugin
     private NewOrderCommand newOrderCommand;
 
     private ItemRepository itemRepository;
+    private OrderRepository orderRepository;
 
     private ItemService itemService;
     private OrderService orderService;
@@ -63,9 +65,11 @@ public class CDAPlugin extends JavaPlugin
         overviewIconsManager = new OverviewIconsManager();
 
         itemRepository = new ItemRepository();
+        orderRepository = new OrderRepository();
 
-        itemOverviewService = new ItemOverviewService(itemRepository, overviewIconsManager);
-        orderService = new OrderService(itemService, itemOverviewService);
+        itemService = new ItemService(itemRepository);
+        itemOverviewService = new ItemOverviewService(itemService, overviewIconsManager);
+        orderService = new OrderService(orderRepository, itemService, itemOverviewService);
 
         marketGui = new MarketGui(
             overviewIconsManager,
@@ -75,8 +79,6 @@ public class CDAPlugin extends JavaPlugin
         openMenuCommand = new OpenMenuCommand(marketGui);
         searchMarketCommand = new SearchMarketCommand(marketGui);
         newOrderCommand = new NewOrderCommand(orderService);
-
-        itemOverviewService.loadItemOverviews();
         
         getLogger().info("Enabled CDA!");
         this.setupCommands();

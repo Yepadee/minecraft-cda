@@ -9,10 +9,10 @@ import com.broscraft.cda.model.items.ItemDTO;
 import org.bukkit.Material;
 
 public class ItemRepository {
-    private Map<ItemDTO, Long> itemIds = new HashMap<>();
 
-    public Map<Long, ItemOverviewDTO> getAllItemOverviews() {
+    public Map<Long, ItemOverviewDTO> getItemOverviews() {
         Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
+
         // TODO
         ItemDTO item1 = new ItemDTO();
         item1.setId(1L);
@@ -39,24 +39,14 @@ public class ItemRepository {
         itemOverviews.put(item1.getId(), overview1);
         itemOverviews.put(item2.getId(), overview2);
 
-        itemOverviews.forEach((itemId, itemOverview) -> {
-            itemIds.put(itemOverview.getItem(), itemId);
-        });
-
         return itemOverviews;
-    }
-
-    public Long getItemId(ItemDTO itemDTO) {
-        return itemIds.get(itemDTO);
     }
 
     public Long create(ItemDTO itemDTO) {
         //TODO: submit request creating item and retrieve it's id;
         //TODO: MAKE SURE ID IS NOT NULL!!!
-        
+
         Long itemId = 3L;
-        itemIds.put(itemDTO, itemId);
-        
         return itemId;
     }
 }

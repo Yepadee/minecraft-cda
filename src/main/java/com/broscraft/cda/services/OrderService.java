@@ -20,6 +20,7 @@ import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OrderUpdateObserver;
+import com.broscraft.cda.repositories.OrderRepository;
 import com.broscraft.cda.utils.ItemUtils;
 import com.earth2me.essentials.api.Economy;
 
@@ -33,11 +34,14 @@ import co.aikar.taskchain.TaskChain;
 import net.md_5.bungee.api.ChatColor;
 
 public class OrderService {
+    private OrderRepository orderRepository;
+
     private OrderObserver orderObserver;
     private ItemService itemService;
     private Map<UUID, OrderUpdateObserver> orderUpdateObservers = new HashMap<>();
 
-    public OrderService(ItemService itemService, OrderObserver orderObserver) {
+    public OrderService(OrderRepository orderRepository, ItemService itemService, OrderObserver orderObserver) {
+        this.orderRepository = orderRepository;
         this.itemService = itemService;
         this.orderObserver = orderObserver;
     }

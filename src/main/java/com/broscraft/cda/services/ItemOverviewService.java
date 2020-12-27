@@ -1,50 +1,35 @@
 package com.broscraft.cda.services;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import com.broscraft.cda.model.orders.OrderDTO;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
-import com.broscraft.cda.repositories.ItemRepository;
-
-import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.model.ItemOverviewDTO;
+import com.broscraft.cda.model.items.ItemDTO;
 
 public class ItemOverviewService implements OrderObserver {
-    private ItemRepository itemRepository;
-    Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
-
-    OverviewUpdateObserver overviewUpdateObserver;
+    private ItemService itemService;
+    private OverviewUpdateObserver overviewUpdateObserver;
 
     public ItemOverviewService(
-        ItemRepository itemRepository,
+        ItemService itemService,
         OverviewUpdateObserver overviewUpdateObserver
     ) {
-        this.itemRepository = itemRepository;
+        this.itemService = itemService;
         this.overviewUpdateObserver = overviewUpdateObserver;
-    }
-
-    public void loadItemOverviews() {
-        CDAPlugin.newChain()
-        .asyncFirst(() -> {
-            return itemRepository.getAllItemOverviews();
-        })
-        .syncLast(itemOverviews -> {
-            this.itemOverviews = itemOverviews;
-            overviewUpdateObserver.onOverviewLoad(itemOverviews.values());
-        }).execute();
+        
+        overviewUpdateObserver.onOverviewLoad(itemService.getItemOverviews());
     }
 
     @Override
     public void onNewOrder(NewOrderDTO newOrderDTO) {
-        Long itemId = Objects.requireNonNull(newOrderDTO.getItem().getId());
-        System.out.println("New order itemID: " + itemId);
+        ItemDTO itemDTO = newOrderDTO.getItem();
         ItemOverviewDTO itemOverview;
-        if (this.itemOverviews.containsKey(itemId)) {
-            itemOverview = this.itemOverviews.get(itemId);
+        if (itemService.exists(itemDTO)) {
+            Long itemId = itemService.getItemId(itemDTO);
+            itemOverview = itemService.getItemOverview(itemId);
 
             switch (newOrderDTO.getType()) {
                 case ASK:
@@ -67,8 +52,11 @@ public class ItemOverviewService implements OrderObserver {
                     break;
             }
         } else {
+            Long itemId = itemService.createItem(itemDTO);
+            itemDTO.setId(itemId); // Set items id!
+
             itemOverview = new ItemOverviewDTO();
-            itemOverview.setItem(newOrderDTO.getItem());
+            itemOverview.setItem(itemDTO);
             switch (newOrderDTO.getType()) {
                 case ASK:
                     itemOverview.setSupply(newOrderDTO.getQuantity());
@@ -81,16 +69,16 @@ public class ItemOverviewService implements OrderObserver {
                     itemOverview.setBestBid(newOrderDTO.getPrice());
                     break;
             }
-            this.itemOverviews.put(itemId, itemOverview);
+            itemService.addItemOverview(itemOverview);
         }
 
-        this.overviewUpdateObserver.onOverviewUpdate(itemOverview);
+        overviewUpdateObserver.onOverviewUpdate(itemOverview);
     }
 
     @Override
     public void onRemoveOrder(OrderDTO orderDTO, Float nextBestPrice) {
         Long itemId = Objects.requireNonNull(orderDTO.getItem().getId());
-        ItemOverviewDTO itemOverview = Objects.requireNonNull(this.itemOverviews.get(itemId));
+        ItemOverviewDTO itemOverview = Objects.requireNonNull(itemService.getItemOverview(itemId));
         int orderQuantityRemaining = orderDTO.getQuantity() - orderDTO.getQuantityFilled();
         switch (orderDTO.getType()) {
             case ASK:
