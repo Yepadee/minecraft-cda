@@ -57,7 +57,7 @@ public class NewOrderCommand implements CommandExecutor {
             }
 
             if (ItemUtils.isDamaged(itemStack) && newOrderDto.getType().equals(OrderType.ASK)) {
-                sender.sendMessage(ChatColor.RED.toString() + "Cannot ask orders for damaged items!");
+                sender.sendMessage(ChatColor.RED.toString() + "Cannot create ask orders for damaged items!");
                 return false; 
             }
 
