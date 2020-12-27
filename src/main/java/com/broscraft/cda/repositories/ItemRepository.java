@@ -10,6 +10,8 @@ import org.bukkit.Material;
 
 public class ItemRepository {
 
+    Long nextId = 3L;
+
     public Map<Long, ItemOverviewDTO> getItemOverviews() {
         Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
 
@@ -46,7 +48,8 @@ public class ItemRepository {
         //TODO: submit request creating item and retrieve it's id;
         //TODO: MAKE SURE ID IS NOT NULL!!!
 
-        Long itemId = 3L;
+        Long itemId = nextId;
+        nextId ++;
         return itemId;
     }
 }

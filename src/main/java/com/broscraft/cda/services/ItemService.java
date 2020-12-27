@@ -30,12 +30,7 @@ public class ItemService {
     public ItemOverviewDTO getItemOverview(Long itemId) {
         return this.itemOverviews.get(itemId);
     }
-
-    public void addItemOverview(ItemOverviewDTO itemOverviewDTO) {
-        
-    }
     
-
     public Long getItemId(ItemDTO itemDTO) {
         Long itemId = itemIds.get(itemDTO);
         return itemId;
@@ -48,6 +43,10 @@ public class ItemService {
     public Long createItem(ItemDTO itemDTO) {
         Long itemId = itemRepository.create(itemDTO);
         itemIds.put(itemDTO, itemId);
+
+        ItemOverviewDTO itemOverview = new ItemOverviewDTO();
+        itemOverview.setItem(itemDTO);
+        itemOverviews.put(itemId, itemOverview);
         return itemId;
     }
 }

@@ -13,8 +13,6 @@ import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.model.items.ItemDTO;
 import com.broscraft.cda.model.orders.OrderDTO;
 import com.broscraft.cda.model.orders.OrderType;
-import com.broscraft.cda.model.orders.grouped.GroupedAskDTO;
-import com.broscraft.cda.model.orders.grouped.GroupedBidDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.model.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.model.orders.input.NewOrderDTO;
@@ -24,7 +22,6 @@ import com.broscraft.cda.repositories.OrderRepository;
 import com.broscraft.cda.utils.ItemUtils;
 import com.earth2me.essentials.api.Economy;
 
-import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -65,6 +62,10 @@ public class OrderService {
         orderObserver.onNewOrder(newOrderDTO);
     }
 
+    private void notifyNewOrderNewItemObserver(NewOrderDTO newOrderDTO) {
+        orderObserver.onNewOrder(newOrderDTO);
+    }
+
     private void notifyRemoveOrderObserver(OrderDTO orderDTO, Float nextBestPrice) {
         orderObserver.onRemoveOrder(orderDTO, nextBestPrice);
     }
@@ -72,29 +73,7 @@ public class OrderService {
 
     public void getOrders(Long itemId, Consumer<GroupedOrdersDTO> onComplete) {
         CDAPlugin.newChain().asyncFirst(() -> {
-            // TODO: Actually load orders
-            System.out.println("Loading orders for item " + itemId + "!");
-            List<GroupedBidDTO> bids = new ArrayList<>();
-            List<GroupedAskDTO> asks = new ArrayList<>();
-            for (int i = 1; i <= 15; ++i) {
-                GroupedBidDTO bid1 = new GroupedBidDTO();
-                bid1.setPrice(3.0f / i);
-                bid1.setQuantity(100 / i);
-                bids.add(bid1);
-
-                GroupedAskDTO ask1 = new GroupedAskDTO();
-                ask1.setPrice(i * 3.0f + 0.1f);
-                ask1.setQuantity(120 / i);
-                asks.add(ask1);
-            }
-
-            GroupedAskDTO ask1 = new GroupedAskDTO();
-            ask1.setPrice(100.0f);
-            ask1.setQuantity(120);
-            asks.add(ask1);
-
-            return new GroupedOrdersDTO().groupedBids(bids).groupedAsks(asks);
-
+            return orderRepository.getOrders(itemId);
         })
         .abortIfNull()
         .syncLast(result -> onComplete.accept(result))
@@ -103,19 +82,7 @@ public class OrderService {
 
     public void getPlayerOrders(UUID playerUUID, Consumer<List<OrderDTO>> onComplete) {
         CDAPlugin.newChain().asyncFirst(() -> {
-            // TODO: Actually load orders
-            System.out.println("Loading orders for player " + playerUUID + "!");
-            List<OrderDTO> orderDTOs = new ArrayList<>();
-            orderDTOs.add(new OrderDTO().id(1L).type(OrderType.ASK).price(10.3f).quantity(3).quantityFilled(2)
-                .playerUUID(UUID.fromString("ff5b7624-5859-455e-b708-e7cb227e114d"))
-                .toCollect(2).item(new ItemDTO().id(1L).material(Material.STONE)));
-
-            orderDTOs.add(new OrderDTO().id(2L).type(OrderType.BID).price(5.5f).quantity(3).quantityFilled(3)
-                .playerUUID(UUID.fromString("ff5b7624-5859-455e-b708-e7cb227e114d"))
-                .toCollect(1).item(new ItemDTO().id(2L).material(Material.DIAMOND_BLOCK)));
-
-            return orderDTOs;
-
+            return orderRepository.getPlayerOrders(playerUUID);
         })
         .abortIfNull()
         .syncLast(result -> onComplete.accept(result))
@@ -124,12 +91,18 @@ public class OrderService {
 
     public void submitOrder(NewOrderDTO newOrderDTO) {
         CDAPlugin.newSharedChain("submitOrder").async(() -> {
-            Long itemId = itemService.getItemId(newOrderDTO.getItem());
-            newOrderDTO.getItem().setId(itemId);
-
-            // TODO: Submit order request
-
-            notifyNewOrderObserver(newOrderDTO);
+            ItemDTO itemDTO = newOrderDTO.getItem();
+            if (itemService.exists(itemDTO)) {
+                Long itemId = itemService.getItemId(itemDTO);
+                itemDTO.setId(itemId);
+                orderRepository.createOrder(newOrderDTO);
+                notifyNewOrderObserver(newOrderDTO);
+            } else {
+                Long itemId = itemService.createItem(itemDTO);
+                itemDTO.setId(itemId);
+                orderRepository.createOrder(newOrderDTO);
+                notifyNewOrderNewItemObserver(newOrderDTO);
+            }  
         }).execute();
     }
 

@@ -6,8 +6,8 @@ public class ItemOverviewDTO {
     private ItemDTO item;
     private Float bestBid;
     private Float bestAsk;
-    private Integer demand;
-    private Integer supply;
+    private int demand;
+    private int supply;
 
     public ItemOverviewDTO() {}
 
@@ -35,19 +35,19 @@ public class ItemOverviewDTO {
         this.bestAsk = bestAsk;
     }
     
-    public Integer getDemand() {
+    public int getDemand() {
         return this.demand;
     }
 
-    public void setDemand(Integer demand) {
+    public void setDemand(int demand) {
         this.demand = demand;
     }
 
-    public Integer getSupply() {
+    public int getSupply() {
         return this.supply;
     }
 
-    public void setSupply(Integer supply) {
+    public void setSupply(int supply) {
         this.supply = supply;
     }
 

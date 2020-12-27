@@ -26,50 +26,29 @@ public class ItemOverviewService implements OrderObserver {
     @Override
     public void onNewOrder(NewOrderDTO newOrderDTO) {
         ItemDTO itemDTO = newOrderDTO.getItem();
-        ItemOverviewDTO itemOverview;
-        if (itemService.exists(itemDTO)) {
-            Long itemId = itemService.getItemId(itemDTO);
-            itemOverview = itemService.getItemOverview(itemId);
 
-            switch (newOrderDTO.getType()) {
-                case ASK:
-                    Float bestAsk = itemOverview.getBestAsk();
-                    int supply = itemOverview.getSupply();
-                    itemOverview.setSupply(supply + newOrderDTO.getQuantity());
-                    if (bestAsk == null)
-                        itemOverview.setBestAsk(newOrderDTO.getPrice());
-                    else if (newOrderDTO.getPrice() < bestAsk)
-                        itemOverview.setBestAsk(newOrderDTO.getPrice());
-                    break;
-                case BID:
-                    Float bestBid = itemOverview.getBestBid();
-                    int demand = itemOverview.getDemand();
-                    itemOverview.setDemand(demand + newOrderDTO.getQuantity());
-                    if (bestBid == null)
-                        itemOverview.setBestBid(newOrderDTO.getPrice());
-                    else if (newOrderDTO.getPrice() > bestBid)
-                        itemOverview.setBestBid(newOrderDTO.getPrice());
-                    break;
-            }
-        } else {
-            Long itemId = itemService.createItem(itemDTO);
-            itemDTO.setId(itemId); // Set items id!
+        Long itemId = itemDTO.getId();
+        ItemOverviewDTO itemOverview = itemService.getItemOverview(itemId);
 
-            itemOverview = new ItemOverviewDTO();
-            itemOverview.setItem(itemDTO);
-            switch (newOrderDTO.getType()) {
-                case ASK:
-                    itemOverview.setSupply(newOrderDTO.getQuantity());
-                    itemOverview.setDemand(0);
+        switch (newOrderDTO.getType()) {
+            case ASK:
+                Float bestAsk = itemOverview.getBestAsk();
+                int supply = itemOverview.getSupply();
+                itemOverview.setSupply(supply + newOrderDTO.getQuantity());
+                if (bestAsk == null)
                     itemOverview.setBestAsk(newOrderDTO.getPrice());
-                    break;
-                case BID:
-                    itemOverview.setDemand(newOrderDTO.getQuantity());
-                    itemOverview.setSupply(0);
+                else if (newOrderDTO.getPrice() < bestAsk)
+                    itemOverview.setBestAsk(newOrderDTO.getPrice());
+                break;
+            case BID:
+                Float bestBid = itemOverview.getBestBid();
+                int demand = itemOverview.getDemand();
+                itemOverview.setDemand(demand + newOrderDTO.getQuantity());
+                if (bestBid == null)
                     itemOverview.setBestBid(newOrderDTO.getPrice());
-                    break;
-            }
-            itemService.addItemOverview(itemOverview);
+                else if (newOrderDTO.getPrice() > bestBid)
+                    itemOverview.setBestBid(newOrderDTO.getPrice());
+                break;
         }
 
         overviewUpdateObserver.onOverviewUpdate(itemOverview);
