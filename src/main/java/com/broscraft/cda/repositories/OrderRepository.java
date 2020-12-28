@@ -44,11 +44,11 @@ public class OrderRepository {
         // TODO: Actually load orders
         System.out.println("Loading orders for player " + playerUUID + "!");
         List<OrderDTO> orderDTOs = new ArrayList<>();
-        orderDTOs.add(new OrderDTO().id(1L).type(OrderType.ASK).price(10.3f).quantity(3).quantityFilled(2)
+        orderDTOs.add(new OrderDTO().id(1L).type(OrderType.ASK).price(10.3f).quantity(3).quantityFilled(1)
             .playerUUID(UUID.fromString("ff5b7624-5859-455e-b708-e7cb227e114d"))
             .toCollect(2).item(new ItemDTO().id(1L).material(Material.STONE)));
 
-        orderDTOs.add(new OrderDTO().id(2L).type(OrderType.BID).price(5.5f).quantity(3).quantityFilled(3)
+        orderDTOs.add(new OrderDTO().id(2L).type(OrderType.BID).price(5.5f).quantity(3).quantityFilled(2)
             .playerUUID(UUID.fromString("ff5b7624-5859-455e-b708-e7cb227e114d"))
             .toCollect(1).item(new ItemDTO().id(2L).material(Material.DIAMOND_BLOCK)));
 
@@ -65,5 +65,14 @@ public class OrderRepository {
 
     public void delete(Long orderId) {
         // TODO: submit delete request
+    }
+
+    public List<OrderDTO> fillOrder(float price, int quantity) {
+        // TODO: send request to fill order and retrieve affected orders
+        return new ArrayList<>();
+    }
+
+    public void collectOrder(Long orderId, int quantity) {
+
     }
 }

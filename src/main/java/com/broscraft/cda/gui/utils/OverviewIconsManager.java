@@ -16,6 +16,7 @@ import com.broscraft.cda.observers.IconUpdateObserver;
 import com.broscraft.cda.observers.NewIconObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
 import com.broscraft.cda.utils.ItemUtils;
+import com.broscraft.cda.utils.PriceUtils;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -115,12 +116,12 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
             "",
             ChatColor.GOLD.toString() + ChatColor.UNDERLINE + "     Bids      ",
             ChatColor.GRAY + "Best Bid: " +
-            (bestBid != null ? ChatColor.GOLD.toString() + ChatColor.BOLD + Styles.formatPrice(bestBid) : notAvailable),
+            (bestBid != null ? ChatColor.GOLD.toString() + ChatColor.BOLD + PriceUtils.formatPriceCurrency(bestBid) : notAvailable),
             ChatColor.GRAY + "Demand: " + ChatColor.GOLD + ChatColor.BOLD + demand,
             "",
             ChatColor.AQUA.toString() + ChatColor.UNDERLINE + "     Asks     ",
             ChatColor.GRAY + "Best Ask: " +
-            (bestAsk != null ? ChatColor.AQUA.toString() + ChatColor.BOLD + Styles.formatPrice(bestAsk) : notAvailable),
+            (bestAsk != null ? ChatColor.AQUA.toString() + ChatColor.BOLD + PriceUtils.formatPriceCurrency(bestAsk) : notAvailable),
             ChatColor.GRAY + "Supply: " + ChatColor.AQUA + ChatColor.BOLD + supply
         );
         return lore;

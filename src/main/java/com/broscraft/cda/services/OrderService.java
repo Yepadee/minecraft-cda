@@ -1,7 +1,5 @@
 package com.broscraft.cda.services;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +18,7 @@ import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OrderUpdateObserver;
 import com.broscraft.cda.repositories.OrderRepository;
 import com.broscraft.cda.utils.ItemUtils;
-import com.earth2me.essentials.api.Economy;
+import com.broscraft.cda.utils.PriceUtils;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -89,7 +87,7 @@ public class OrderService {
         .execute();
     }
 
-    public void submitOrder(NewOrderDTO newOrderDTO) {
+    public void submitOrder(Player player, NewOrderDTO newOrderDTO) {
         CDAPlugin.newSharedChain("submitOrder").async(() -> {
             ItemDTO itemDTO = newOrderDTO.getItem();
             if (itemService.exists(itemDTO)) {
@@ -102,8 +100,23 @@ public class OrderService {
                 itemDTO.setId(itemId);
                 orderRepository.createOrder(newOrderDTO);
                 notifyNewOrderNewItemObserver(newOrderDTO);
-            }  
-        }).execute();
+            }
+        })
+        .sync(() -> {
+            OrderType orderType = newOrderDTO.getType();
+            switch (orderType) {
+                case BID:
+                    float totalPrice = newOrderDTO.getPrice() * newOrderDTO.getQuantity();
+                    PriceUtils.charge(player, totalPrice);
+                    break;
+                case ASK:
+                    // TODO: take items from player
+                    break;
+            }
+        })
+        .execute();
+
+        
     }
 
     public void cancelOrder(OrderDTO orderDTO, Runnable onComplete) {
@@ -113,7 +126,19 @@ public class OrderService {
                 orderDTO,
                 orderRepository.getBestPrice(orderDTO.getType())
             );
-            
+        })
+        .sync(() -> {
+            OrderType orderType = Objects.requireNonNull(orderDTO.getType());
+            switch (orderType) {
+                case BID:
+                    float totalPrice = orderDTO.getPrice() * (orderDTO.getQuantity() - orderDTO.getQuantityFilled());
+                    PriceUtils.pay(orderDTO.getPlayerUUID(), totalPrice);
+                    System.out.println(totalPrice);
+                    break;
+                case ASK:
+                    // TODO: take items from player
+                    break;
+            }
         })
         .sync(() -> onComplete.run())
         .execute();
@@ -123,6 +148,8 @@ public class OrderService {
         int availableToCollect = orderDTO.getToCollect();
         if (availableToCollect == 0) return;
 
+        Long orderId = orderDTO.getId();
+
         TaskChain<?> chain = CDAPlugin.newChain();
 
         if (orderDTO.getType().equals(OrderType.BID)) {
@@ -130,12 +157,11 @@ public class OrderService {
                 ItemStack itemsToGive = ItemUtils.buildItemStack(orderDTO.getItem());
                 int maxStackSize = itemsToGive.getMaxStackSize();
                 int numToCollect = availableToCollect > maxStackSize ? maxStackSize : availableToCollect;
-                // TODO: Submit request then on complete =>
+                orderRepository.collectOrder(orderId, numToCollect);
                 itemsToGive.setAmount(numToCollect);
                 return itemsToGive;
             }).abortIfNull(BukkitTaskChainFactory.MESSAGE, (Player) player, "Sorry, something failed!")
             .syncLast(itemsCollected -> {
-
                 player.getWorld().dropItem(player.getLocation().add(0, 1, 0), itemsCollected);
                 int numCollected = itemsCollected.getAmount();
                 player.sendMessage(
@@ -148,18 +174,15 @@ public class OrderService {
             });
         } else {
             chain.asyncFirst(() -> {
-                BigDecimal toPay = BigDecimal.valueOf(availableToCollect * orderDTO.getPrice());
-                //TODO: send collection request here!
-                return toPay;
-            }).asyncLast(toPay -> {
-                try {
-                    Economy.add(player.getUniqueId(), toPay);
-                    player.sendMessage(ChatColor.AQUA + "Collected " + ChatColor.GREEN + Economy.format(toPay)
-                            + ChatColor.GRAY + "!");
-                } catch (Exception e) {
-                    // TODO: undo collection on payment fail.
-                    player.sendMessage(ChatColor.RED + "Error collecting money");
-                }
+                orderRepository.collectOrder(orderId, availableToCollect);
+                return availableToCollect;
+            }).abortIfNull(BukkitTaskChainFactory.MESSAGE, (Player) player, "Sorry, something failed!")
+            .asyncLast(numCollected -> {
+                float moneyCollected = orderDTO.getPrice() * numCollected;
+                PriceUtils.pay(player, moneyCollected);
+                
+                player.sendMessage(ChatColor.AQUA + "Collected " + ChatColor.GREEN + PriceUtils.formatPriceCurrency(moneyCollected) + ChatColor.GRAY + "!");
+
                 orderDTO.setToCollect(0);
                 notifyOrderUpdateObserver(player.getUniqueId(), orderDTO);
             });
@@ -172,8 +195,7 @@ public class OrderService {
         
         CDAPlugin.newSharedChain("fillOrder")
         .asyncFirst(() -> {
-            // TODO: send request to fill order and retrieve affected orders
-            List<OrderDTO> affectedOrders = new ArrayList<>();
+            List<OrderDTO> affectedOrders = orderRepository.fillOrder(groupedOrderDTO.getPrice(), quantity);
             return affectedOrders;
         })
         .abortIfNull()

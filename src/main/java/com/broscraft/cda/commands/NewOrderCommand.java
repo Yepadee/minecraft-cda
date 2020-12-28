@@ -2,9 +2,9 @@ package com.broscraft.cda.commands;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
-import com.broscraft.cda.gui.utils.Styles;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.ItemUtils;
+import com.broscraft.cda.utils.PriceUtils;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -29,11 +29,14 @@ public class NewOrderCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED.toString() + "Only players may use this command");
             return false;
         } else {
-            Player player = (Player) sender;
-
             if (args.length < 2) return false;
-            String orderType = args[0].toLowerCase();
             NewOrderDTO newOrderDto = new NewOrderDTO();
+
+            Player player = (Player) sender;
+            newOrderDto.setPlayerUUID(player.getUniqueId());
+            
+            String orderType = args[0].toLowerCase();
+            
             try {
                 newOrderDto.setType(OrderType.valueOf(orderType.toUpperCase()));
             } catch (Exception e) {
@@ -43,7 +46,7 @@ public class NewOrderCommand implements CommandExecutor {
             
 
             try {
-                Float price = Float.parseFloat(args[1]);
+                Float price = PriceUtils.formatPrice(args[1]);
                 newOrderDto.setPrice(price);
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED.toString() + "Invalid price specified");
@@ -89,9 +92,9 @@ public class NewOrderCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.GRAY.toString() + "Created " + orderTypeColor +
             orderType + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
             orderTypeColor + quantity + ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" +
-            ChatColor.GRAY + " at " + ChatColor.GREEN + Styles.formatPrice(newOrderDto.getPrice()));
+            ChatColor.GRAY + " at " + ChatColor.GREEN + PriceUtils.formatPriceCurrency(newOrderDto.getPrice()));
             
-            orderService.submitOrder(newOrderDto);
+            orderService.submitOrder(player, newOrderDto);
 
             return true;
         } 

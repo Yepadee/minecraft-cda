@@ -1,9 +1,5 @@
 package com.broscraft.cda.gui.utils;
 
-import java.math.BigDecimal;
-
-import com.earth2me.essentials.api.Economy;
-
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -38,8 +34,4 @@ public class Styles {
 
     public static ItemStack CONFIRM_ICON = ItemBuilder.from(Material.LIME_STAINED_GLASS_PANE).setName(ChatColor.GREEN + "Confirm").build();
     public static ItemStack CANCEL_ICON = ItemBuilder.from(Material.RED_STAINED_GLASS_PANE).setName(ChatColor.RED + "Cancel").build();
-
-    public static String formatPrice(float price) {
-        return Economy.format(BigDecimal.valueOf(price));
-    }
 }
