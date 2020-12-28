@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 
 import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.orders.BestPriceDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrdersDTO;
@@ -71,11 +72,19 @@ public class OrderService {
     }
 
 
+    public void getBestPrice(Long itemId, OrderType orderType, Consumer<BestPriceDTO> onComplete) {
+        CDAPlugin.newChain().asyncFirst(() -> {
+            return orderRepository.getBestPrice(itemId, orderType);
+        }).abortIfNull() // TODO: handle error
+        .syncLast(result -> onComplete.accept(result))
+        .execute();
+    }
+
     public void getOrders(Long itemId, Consumer<GroupedOrdersDTO> onComplete) {
         CDAPlugin.newChain().asyncFirst(() -> {
             return orderRepository.getOrders(itemId);
         })
-        .abortIfNull()
+        .abortIfNull() // TODO: handle error
         .syncLast(result -> onComplete.accept(result))
         .execute();
     }
@@ -106,14 +115,9 @@ public class OrderService {
         })
         .sync(() -> {
             OrderType orderType = newOrderDTO.getType();
-            switch (orderType) {
-                case BID:
-                    float totalPrice = newOrderDTO.getPrice() * newOrderDTO.getQuantity();
-                    EcoUtils.charge(player, totalPrice);
-                    break;
-                case ASK:
-                    // TODO: take items from player
-                    break;
+            if (orderType.equals(OrderType.BID)) {
+                float totalPrice = newOrderDTO.getPrice() * newOrderDTO.getQuantity();
+                EcoUtils.charge(player, totalPrice);
             }
         })
         .execute();
@@ -127,7 +131,7 @@ public class OrderService {
             orderRepository.delete(orderDTO.getId());
             notifyRemoveOrderObserver(
                 orderDTO,
-                orderRepository.getBestPrice(orderDTO.getType())
+                orderRepository.getBestPrice(orderDTO.getItem().getId(), orderDTO.getType()).getPrice()
             );
             return true;
         })

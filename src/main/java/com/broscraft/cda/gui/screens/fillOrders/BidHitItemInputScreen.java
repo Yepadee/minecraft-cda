@@ -25,12 +25,11 @@ public class BidHitItemInputScreen extends ItemInputScreen {
         super(
             6,
             ChatColor.BOLD + ChatColor.GOLD.toString() + "Insert Items: " + ChatColor.RED + "(MAX: " + groupedOrderDTO.getQuantity() + ")",
-            onBack,
-            onConfirm,
             acceptedItem
         );
         setAcceptedItemIcon(groupedOrderDTO, acceptedItem);
-        
+        setBackBtn(onBack);
+        setConfirmBtn(onConfirm);
     }
 
     private void setAcceptedItemIcon(GroupedOrderDTO groupedOrderDTO, ItemStack acceptedItem) {

@@ -23,7 +23,7 @@ public abstract class ItemInputScreen {
 
     private ItemDTO acceptedItem;
 
-    public ItemInputScreen(int height, String name, GuiAction<InventoryClickEvent> onBack, Consumer<ItemStack> onConfirm, ItemStack acceptedItem) {
+    public ItemInputScreen(int height, String name, ItemStack acceptedItem) {
         this.gui = new Gui(height, name);
         this.height = height;
         this.gui.setDefaultClickAction(e -> {
@@ -32,8 +32,6 @@ public abstract class ItemInputScreen {
         });
 
         setBorder();
-        setBackBtn(onBack);
-        setConfirmBtn(onConfirm);
         setAcceptedItem(acceptedItem);
 
         this.gui.setCloseGuiAction(e -> {
@@ -41,7 +39,7 @@ public abstract class ItemInputScreen {
         });
         
     }
-
+    
     private void onItemClick(InventoryClickEvent e) {
         ItemStack item = e.getCurrentItem();
         if (item == null) return;
@@ -53,7 +51,7 @@ public abstract class ItemInputScreen {
         this.acceptedItem = ItemUtils.parseItemStack(item);
     }
 
-    private void setBackBtn(GuiAction<InventoryClickEvent> onBack) {
+    public void setBackBtn(GuiAction<InventoryClickEvent> onBack) {
         this.gui.setItem(0, ItemBuilder.from(Styles.BACK_ICON).asGuiItem(onBack));
     }
 
@@ -67,7 +65,7 @@ public abstract class ItemInputScreen {
         }
     }
 
-    private void setConfirmBtn(Consumer<ItemStack> onConfirm) {
+    public void setConfirmBtn(Consumer<ItemStack> onConfirm) {
         this.gui.setItem(8, ItemBuilder.from(Styles.CONFIRM_ICON).asGuiItem(
             e -> {
                 ItemStack insertedItems = getInsertedItems();
@@ -123,5 +121,9 @@ public abstract class ItemInputScreen {
 
     public void open(HumanEntity player) {
         gui.open(player);
+    }
+
+    public void close(HumanEntity player) {
+        this.gui.close(player);
     }
 }

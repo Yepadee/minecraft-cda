@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.orders.BestPriceDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.grouped.GroupedAskDTO;
@@ -60,8 +61,11 @@ public class OrderRepository {
         System.out.println("Created new order:" + newOrderDTO);
     }
 
-    public float getBestPrice(OrderType orderType) {
-        return 3.69f;
+    public BestPriceDTO getBestPrice(Long itemId, OrderType orderType) {
+        BestPriceDTO bestPriceDTO = new BestPriceDTO();
+        bestPriceDTO.setPrice(3.69f);
+        bestPriceDTO.setQuantity(5);
+        return bestPriceDTO;
     }
 
     public void delete(Long orderId) {
@@ -72,7 +76,7 @@ public class OrderRepository {
         TransactionSummaryDTO transactionSummary = new TransactionSummaryDTO();
         // TODO: send request to fill order and retrieve affected orders
         List<OrderDTO> affectedOrders = new ArrayList<>();
-        
+
         transactionSummary.setAffectedOrders(affectedOrders);
         transactionSummary.setNumFilled(quantity);
         return transactionSummary;

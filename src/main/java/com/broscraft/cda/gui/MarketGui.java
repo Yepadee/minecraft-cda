@@ -188,6 +188,12 @@ public class MarketGui {
             item,
             back -> openItemOrdersScreen(item, player),
             insertedItems -> {
+                if (insertedItems == null) {
+                    player.sendMessage(
+                        ChatColor.RED + "No items selected!"
+                    );
+                    return;
+                }
                 int quantityToSell = insertedItems.getAmount();
                 float price = groupedOrderDTO.getPrice();
                 String totalPriceStr = EcoUtils.formatPriceCurrency(price * quantityToSell);
