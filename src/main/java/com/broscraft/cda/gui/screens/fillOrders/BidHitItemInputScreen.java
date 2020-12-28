@@ -17,14 +17,12 @@ public class BidHitItemInputScreen extends ItemInputScreen {
     public BidHitItemInputScreen(
         GroupedOrderDTO groupedOrderDTO,
         ItemStack acceptedItem,
-        GuiAction<InventoryClickEvent> onBack,
-        GuiAction<InventoryClickEvent> onConfirm
+        GuiAction<InventoryClickEvent> onBack
     ) {
         super(
             6,
-            ChatColor.BOLD + ChatColor.GOLD.toString() + "Insert Items",
-            onBack,
-            onConfirm
+            ChatColor.BOLD + ChatColor.GOLD.toString() + "Insert Items: " + ChatColor.RED + "(MAX: " + groupedOrderDTO.getQuantity() + ")",
+            onBack
         );
         setAcceptedItem(acceptedItem);
         setAcceptedItemIcon(groupedOrderDTO, acceptedItem);

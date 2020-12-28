@@ -163,14 +163,18 @@ public class MarketGui {
     }
 
     private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, ItemStack item, int maxQuantity, HumanEntity player) {
-        new BidHitItemInputScreen(
+        BidHitItemInputScreen inputScreen = new BidHitItemInputScreen(
             groupedOrderDTO,
             item,
-            e -> openItemOrdersScreen(item, player),
+            e -> openItemOrdersScreen(item, player)
+        );
+        inputScreen.setConfirmBtn(
             e -> {
-                System.out.println("Confirm btn Pressed!");
+                System.out.println("Confirm btn Pressed!" + inputScreen.countItems());
             }
-        ).open(player);
+        );
+        
+        inputScreen.open(player);
     }
 
     private void openItemOrdersScreen(ItemStack item, HumanEntity player) {
