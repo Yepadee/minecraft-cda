@@ -98,7 +98,14 @@ public class OrderService {
         .execute();
     }
 
-    public void submitOrder(Player player, NewOrderDTO newOrderDTO) {
+    public void submitOrder(Player player, final NewOrderDTO newOrderDTO, Runnable onComplete) {
+        float totalPrice = newOrderDTO.getPrice() * newOrderDTO.getQuantity();
+        OrderType orderType = newOrderDTO.getType();
+        if (orderType.equals(OrderType.BID) && !EcoUtils.hasMoney(player, totalPrice)) {
+            player.sendMessage(ChatColor.RED + "You do not have enough money!");
+            return;
+        }
+        
         CDAPlugin.newSharedChain("submitOrder").async(() -> {
             ItemDTO itemDTO = newOrderDTO.getItem();
             if (itemService.exists(itemDTO)) {
@@ -114,15 +121,12 @@ public class OrderService {
             }
         })
         .sync(() -> {
-            OrderType orderType = newOrderDTO.getType();
             if (orderType.equals(OrderType.BID)) {
-                float totalPrice = newOrderDTO.getPrice() * newOrderDTO.getQuantity();
                 EcoUtils.charge(player, totalPrice);
             }
+            onComplete.run();
         })
-        .execute();
-
-        
+        .execute();   
     }
 
     public void cancelOrder(OrderDTO orderDTO, Runnable onComplete) {

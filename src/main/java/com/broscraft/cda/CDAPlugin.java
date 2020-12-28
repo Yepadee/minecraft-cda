@@ -78,7 +78,7 @@ public class CDAPlugin extends JavaPlugin
 
         openMenuCommand = new OpenMenuCommand(marketGui);
         searchMarketCommand = new SearchMarketCommand(marketGui);
-        newOrderCommand = new NewOrderCommand(orderService, itemService);
+        newOrderCommand = new NewOrderCommand(orderService, itemService, marketGui);
         
         getLogger().info("Enabled CDA!");
         this.setupCommands();

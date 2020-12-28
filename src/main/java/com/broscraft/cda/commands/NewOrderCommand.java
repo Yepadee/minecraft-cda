@@ -1,15 +1,12 @@
 package com.broscraft.cda.commands;
 import com.broscraft.cda.dtos.items.ItemDTO;
-import com.broscraft.cda.dtos.orders.BestPriceDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
-import com.broscraft.cda.gui.screens.ConfirmScreen;
-import com.broscraft.cda.gui.screens.neworders.NewAskItemInputScreen;
+import com.broscraft.cda.gui.MarketGui;
 import com.broscraft.cda.services.ItemService;
 import com.broscraft.cda.services.OrderService;
-import com.broscraft.cda.utils.ItemUtils;
 import com.broscraft.cda.utils.EcoUtils;
-import com.broscraft.cda.utils.InventoryUtils;
+import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -24,12 +21,14 @@ public class NewOrderCommand implements CommandExecutor {
 
     private OrderService orderService;
     private ItemService itemService;
+    private MarketGui marketGui;
 
     private float MAX_PRICE = 1000000;
 
-    public NewOrderCommand(OrderService orderService, ItemService itemService) {
+    public NewOrderCommand(OrderService orderService, ItemService itemService, MarketGui marketGui) {
         this.orderService = orderService;
         this.itemService = itemService;
+        this.marketGui = marketGui;
     }
 
     @Override
@@ -83,8 +82,6 @@ public class NewOrderCommand implements CommandExecutor {
             ItemDTO itemDTO = ItemUtils.parseItemStack(itemStack);
             newOrderDto.setItem(itemDTO);
 
-
-
             if (newOrderDto.getType().equals(OrderType.BID)) {
                 Integer quantity;
                 if (args.length > 2) {
@@ -96,72 +93,28 @@ public class NewOrderCommand implements CommandExecutor {
                         return false;
                     }
                 } else {
-                    quantity = itemStack.getAmount();
+                    sender.sendMessage(ChatColor.RED.toString() + "No quantity specified");
+                    return false;
                 }
                 newOrderDto.setQuantity(quantity);
-                orderService.submitOrder(player, newOrderDto);
-                sendOnCompleteMessage(newOrderDto, player);
+
+                orderService.submitOrder(player, newOrderDto, () -> {
+                    player.sendMessage(ChatColor.GRAY.toString() + "Created " + ChatColor.GOLD +
+                    "Bid"+ ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
+                    ChatColor.GOLD + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
+                    ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()));
+                });
             } else {
                 Long itemId = itemService.getItemId(itemDTO);
                 if (itemId != null) orderService.getBestPrice(
                     itemId,
                     newOrderDto.getType(),
-                    bestPrice -> openNewAskItemInputScreen(bestPrice, itemStack, newOrderDto, player));
-                else openNewAskItemInputScreen(null, itemStack, newOrderDto, player);
+                    bestPrice -> marketGui.openNewAskItemInputScreen(bestPrice, itemStack, newOrderDto, player));
+                else marketGui.openNewAskItemInputScreen(null, itemStack, newOrderDto, player);
             }
 
             return true;
         } 
     }
 
-    private void sendOnCompleteMessage(NewOrderDTO newOrderDTO, Player player) {
-        ChatColor orderTypeColor;
-        if (newOrderDTO.getType().equals(OrderType.ASK)) {
-            orderTypeColor = ChatColor.AQUA;
-        } else {
-            orderTypeColor = ChatColor.GOLD;
-        }
-        player.sendMessage(ChatColor.GRAY.toString() + "Created " + orderTypeColor +
-        newOrderDTO.getType().toString().toLowerCase() + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
-        orderTypeColor + newOrderDTO.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDTO.getItem()) + "'" +
-        ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDTO.getPrice()));
-    }
-
-    private void openNewAskItemInputScreen(BestPriceDTO bestPrice, ItemStack itemStack, NewOrderDTO newOrderDto, Player player) {
-        NewAskItemInputScreen screen = new NewAskItemInputScreen(
-            itemStack,
-            bestPrice,
-            newOrderDto.getPrice()
-        );
-        screen.setBackBtn(e -> screen.close(player));
-        screen.setConfirmBtn(insertedItems -> {
-            if (insertedItems == null) {
-                player.sendMessage(
-                    ChatColor.RED + "No items selected!"
-                );
-                return;
-            }
-            newOrderDto.setQuantity(insertedItems.getAmount());
-
-            new ConfirmScreen(
-                "Sell " + newOrderDto.getQuantity() +
-                " at " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
-                " each?",
-                confirm -> {
-                    orderService.submitOrder(player, newOrderDto);
-                    screen.close(player);
-                    sendOnCompleteMessage(newOrderDto, player);
-                },
-                cancel -> {
-                    InventoryUtils.dropPlayerItems(player, insertedItems);
-                    screen.close(player);
-                }
-            ).open(player);
-            
-
-            
-            
-        });
-        screen.open(player);
-    }
 }

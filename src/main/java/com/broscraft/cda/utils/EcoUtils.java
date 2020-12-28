@@ -31,7 +31,6 @@ public class EcoUtils {
         return Economy.format(BigDecimal.valueOf(price));
     }
 
-
     public static void pay(HumanEntity player, float price) {
         try {
             Economy.add(player.getUniqueId(), BigDecimal.valueOf(price));
@@ -47,6 +46,18 @@ public class EcoUtils {
         } catch (NoLoanPermittedException | ArithmeticException | UserDoesNotExistException e) {
             player.sendMessage("Failed to subtract funds! Please contact an admin.");
             e.printStackTrace();
+        }
+    }
+
+    public static boolean hasMoney(HumanEntity player, float money) {
+        try {
+            return Economy.hasEnough(player.getUniqueId(), BigDecimal.valueOf(money));
+        } catch (ArithmeticException e) {
+            e.printStackTrace();
+            return false;
+        } catch (UserDoesNotExistException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

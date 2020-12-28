@@ -2,12 +2,15 @@ package com.broscraft.cda.gui;
 
 import java.util.Objects;
 
+import com.broscraft.cda.dtos.orders.BestPriceDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
+import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.gui.screens.ConfirmScreen;
 import com.broscraft.cda.gui.screens.fillOrders.AskLiftQuantityInputScreen;
 import com.broscraft.cda.gui.screens.fillOrders.BidHitItemInputScreen;
 import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
+import com.broscraft.cda.gui.screens.neworders.NewAskItemInputScreen;
 import com.broscraft.cda.gui.screens.orders.PlayerOrdersScreen;
 import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
@@ -20,6 +23,7 @@ import com.broscraft.cda.utils.ItemUtils;
 import com.google.common.base.Function;
 
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -94,8 +98,46 @@ public class MarketGui {
         player.sendMessage("New Bid Button Clicked!!!");
     }
 
-    public void openNewAskScreen(HumanEntity player) {
-        player.sendMessage("New Ask Button Clicked!!!");
+    public void openNewAskItemInputScreen(BestPriceDTO bestPrice, ItemStack itemStack, NewOrderDTO newOrderDto, Player player) {
+        NewAskItemInputScreen screen = new NewAskItemInputScreen(
+            itemStack,
+            bestPrice,
+            newOrderDto.getPrice()
+        );
+        screen.setBackBtn(e -> screen.close(player));
+        screen.setConfirmBtn(insertedItems -> {
+            if (insertedItems == null) {
+                player.sendMessage(
+                    ChatColor.RED + "No items selected!"
+                );
+                return;
+            }
+            newOrderDto.setQuantity(insertedItems.getAmount());
+
+            new ConfirmScreen(
+                "Sell " + newOrderDto.getQuantity() +
+                " at " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
+                " each?",
+                confirm -> {
+                    orderService.submitOrder(player, newOrderDto, () -> {
+                        screen.close(player);
+                        player.sendMessage(
+                            ChatColor.GRAY.toString() + "Created " + ChatColor.AQUA +
+                            "Ask" + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
+                            ChatColor.AQUA + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
+                            ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice())
+                        );
+                    });
+
+                },
+                cancel -> {
+                    InventoryUtils.dropPlayerItems(player, insertedItems);
+                    screen.close(player);
+                }
+            ).open(player);
+            
+        });
+        screen.open(player);
     }
 
 
