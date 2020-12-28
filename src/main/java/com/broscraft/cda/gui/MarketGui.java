@@ -164,6 +164,7 @@ public class MarketGui {
 
     private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, ItemStack item, int maxQuantity, HumanEntity player) {
         new BidHitItemInputScreen(
+            groupedOrderDTO,
             item,
             e -> openItemOrdersScreen(item, player),
             e -> {

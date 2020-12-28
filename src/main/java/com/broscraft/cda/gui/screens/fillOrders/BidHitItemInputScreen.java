@@ -1,6 +1,8 @@
 package com.broscraft.cda.gui.screens.fillOrders;
 
+import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.gui.screens.ItemInputScreen;
+import com.broscraft.cda.utils.PriceUtils;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -12,7 +14,12 @@ import net.md_5.bungee.api.ChatColor;
 
 public class BidHitItemInputScreen extends ItemInputScreen {
 
-    public BidHitItemInputScreen(ItemStack acceptedItem, GuiAction<InventoryClickEvent> onBack, GuiAction<InventoryClickEvent> onConfirm) {
+    public BidHitItemInputScreen(
+        GroupedOrderDTO groupedOrderDTO,
+        ItemStack acceptedItem,
+        GuiAction<InventoryClickEvent> onBack,
+        GuiAction<InventoryClickEvent> onConfirm
+    ) {
         super(
             6,
             ChatColor.BOLD + ChatColor.GOLD.toString() + "Insert Items",
@@ -20,14 +27,15 @@ public class BidHitItemInputScreen extends ItemInputScreen {
             onConfirm
         );
         setAcceptedItem(acceptedItem);
-        setAcceptedItemIcon(acceptedItem);
+        setAcceptedItemIcon(groupedOrderDTO, acceptedItem);
         
     }
 
-    private void setAcceptedItemIcon(ItemStack acceptedItem) {
-        GuiItem itemIcon = ItemBuilder.from(acceptedItem)
+    private void setAcceptedItemIcon(GroupedOrderDTO groupedOrderDTO, ItemStack acceptedItem) {
+        GuiItem itemIcon = ItemBuilder.from(acceptedItem.clone())
         .setLore(
-            ChatColor.GOLD + "Accepted Item"
+            ChatColor.GRAY + "Price per unit: " + ChatColor.GREEN + PriceUtils.formatPriceCurrency(groupedOrderDTO.getPrice()),
+            ChatColor.GRAY + "Available to sell: " + ChatColor.GOLD + groupedOrderDTO.getQuantity()
         )
         .asGuiItem();
         this.gui.setItem(4, itemIcon);
