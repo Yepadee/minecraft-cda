@@ -14,7 +14,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class AskLiftQuantityInputScreen extends TextInputScreen {
     private static ItemStack CONFIRM_ICON = ItemBuilder.from(Material.PAPER).setName("").build();
-    private static String PLACEHOLDER = ChatColor.GRAY + "quantity";
+    private static String PLACEHOLDER = ChatColor.GRAY + "_";
 
     public AskLiftQuantityInputScreen(
         BiConsumer<Player, String> onConfirmBtnClick, Consumer<Player> onClose

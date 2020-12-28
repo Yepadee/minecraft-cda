@@ -151,35 +151,52 @@ public class MarketGui {
             (e, quantityTxt) -> {
                 try {
                     int quantity = Integer.parseInt(quantityTxt);
-                    orderService.fillOrder(quantity, groupedOrderDTO, () -> {
-                        openItemOrdersScreen(item, player);
-                    });
-                } catch (NumberFormatException ex){
+                    float price = groupedOrderDTO.getPrice();
+                    float totalPrice = quantity * quantity;
+                    player.sendMessage(
+                        ChatColor.RED + "Buying " + quantity + " for " + totalPrice
+                    );
+                    new ConfirmScreen(
+                        "Buy " + quantity + " for " + totalPrice + "?",
+                        confirm -> {
+                            orderService.fillOrder(quantity, price, () -> {
+                                player.sendMessage(
+                                    ChatColor.RED + "Bought " + quantity + " for " + totalPrice
+                                );
+                                openItemOrdersScreen(item, player);
+                            });
+                        },
+                        cancel -> openItemOrdersScreen(item, player)
+                        
+                    ).open(player);
+
+                } catch (NumberFormatException ex) {
                     player.sendMessage(ChatColor.RED + "Invalid quantity, please try again!");
-                    // TODO: is this safe?
-                    openAskLiftQuantityInputScreen(groupedOrderDTO, item, maxQuantity, player);
+                    openAskLiftQuantityInputScreen(groupedOrderDTO, item, maxQuantity, player); // TODO: is this safe?
                 }
             },
-            p -> openItemOrdersScreen(item, player)
+            onClose -> openItemOrdersScreen(item, player)
         ).open(player);
     }
 
     private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, final ItemStack item, int maxQuantity, HumanEntity player) {
-        Long itemId = Objects.requireNonNull(ItemUtils.getId(item));
         BidHitItemInputScreen inputScreen = new BidHitItemInputScreen(
             groupedOrderDTO,
             item,
             back -> openItemOrdersScreen(item, player),
             insertedItems -> {
                 int quantityToSell = insertedItems.getAmount();
-                float ppu = groupedOrderDTO.getPrice();
-                String totalPrice = EcoUtils.formatPriceCurrency(ppu * quantityToSell);
+                float price = groupedOrderDTO.getPrice();
+                String totalPrice = EcoUtils.formatPriceCurrency(price * quantityToSell);
                 new ConfirmScreen(
                     "Sell " + insertedItems.getAmount() + " for " + totalPrice + "?",
                     confirm -> {
-                        player.sendMessage(
-                            "Sell " + insertedItems.getAmount() + " " + itemId
-                        );
+                        orderService.fillOrder(quantityToSell, price, () -> {
+                            player.sendMessage(
+                                ChatColor.GREEN + "Sold " + insertedItems.getAmount() + " for " + totalPrice
+                            );
+                            openItemOrdersScreen(item, player);
+                        }); // TODO: on fail return items!
                     },
                     cancel -> {
                         InventoryUtils.dropPlayerItems(player, insertedItems);

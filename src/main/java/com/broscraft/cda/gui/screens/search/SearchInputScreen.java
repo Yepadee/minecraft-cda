@@ -14,7 +14,7 @@ import me.mattstudios.mfgui.gui.components.ItemBuilder;
 
 public class SearchInputScreen extends TextInputScreen {
     private static ItemStack SEARCH_ICON = ItemBuilder.from(Material.COMPASS).setName("").build();
-    private static String PLACEHOLDER = ChatColor.GRAY + "query";
+    private static String PLACEHOLDER = ChatColor.GRAY + "_";
 
     public SearchInputScreen(
         BiConsumer<Player, String> onConfirmBtnClick, Consumer<Player> onClose

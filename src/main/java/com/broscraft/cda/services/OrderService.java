@@ -11,15 +11,14 @@ import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
-import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OrderUpdateObserver;
 import com.broscraft.cda.repositories.OrderRepository;
+import com.broscraft.cda.utils.EcoUtils;
 import com.broscraft.cda.utils.InventoryUtils;
 import com.broscraft.cda.utils.ItemUtils;
-import com.broscraft.cda.utils.EcoUtils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -213,11 +212,10 @@ public class OrderService {
         chain.execute();
     }
 
-    public void fillOrder(int quantity, GroupedOrderDTO groupedOrderDTO, Runnable onComplete) {
-        
+    public void fillOrder(int quantity, float price, Runnable onComplete) {
         CDAPlugin.newSharedChain("fillOrder")
         .asyncFirst(() -> {
-            List<OrderDTO> affectedOrders = orderRepository.fillOrder(groupedOrderDTO.getPrice(), quantity);
+            List<OrderDTO> affectedOrders = orderRepository.fillOrder(price, quantity);
             return affectedOrders;
         })
         .abortIfNull()

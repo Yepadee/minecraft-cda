@@ -14,6 +14,7 @@ import net.wesjd.anvilgui.AnvilGUI;
 
 public abstract class TextInputScreen {
     private AnvilGUI.Builder gui = new AnvilGUI.Builder();
+    private boolean closed = true;
 
     public TextInputScreen(
         String name,
@@ -43,10 +44,13 @@ public abstract class TextInputScreen {
         .text(placeholder)
         .itemLeft(confirmIcon)
         .onComplete((p, text) -> {
+            closed = false;
             onConfirmBtnClick.accept(p, text);
             return AnvilGUI.Response.close();
         })
-        .onClose(p -> CDAPlugin.runTask(() -> onClose.accept(p)));
+        .onClose(p -> {
+            if (closed) CDAPlugin.runTask(() -> onClose.accept(p));
+        });
     }
 
     protected void setOnClose(Consumer<Player> onClose) {
@@ -56,4 +60,5 @@ public abstract class TextInputScreen {
     public void open(HumanEntity player) {
         this.gui.open((Player) player);
     }
+
 }
