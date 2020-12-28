@@ -60,7 +60,7 @@ public abstract class ItemInputScreen {
             for (int col = 1; col < 8; ++ col) {
                 int slot = row * WIDTH + col;
                 ItemStack item = this.gui.getInventory().getItem(slot);
-                if (item != null)  InventoryUtils.dropPlayerItems(player, item);
+                if (item != null) InventoryUtils.dropPlayerItems(player, item);
             }
         }
     }

@@ -9,6 +9,7 @@ import com.broscraft.cda.services.ItemService;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.ItemUtils;
 import com.broscraft.cda.utils.EcoUtils;
+import com.broscraft.cda.utils.InventoryUtils;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -152,6 +153,7 @@ public class NewOrderCommand implements CommandExecutor {
                     sendOnCompleteMessage(newOrderDto, player);
                 },
                 cancel -> {
+                    InventoryUtils.dropPlayerItems(player, insertedItems);
                     screen.close(player);
                 }
             ).open(player);
