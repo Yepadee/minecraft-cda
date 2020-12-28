@@ -12,7 +12,7 @@ import com.broscraft.cda.gui.screens.ScrollableScreen;
 import com.broscraft.cda.gui.utils.Styles;
 import com.broscraft.cda.observers.OrderUpdateObserver;
 import com.broscraft.cda.utils.ItemUtils;
-import com.broscraft.cda.utils.PriceUtils;
+import com.broscraft.cda.utils.EcoUtils;
 import com.google.common.base.Function;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -57,7 +57,7 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
             color = ChatColor.AQUA;
             quantityTxt = ChatColor.GRAY + "Sold: ";
             orderTypeTxt = color + ChatColor.UNDERLINE.toString() + "         Ask         ";
-            collectTxt = ChatColor.GRAY + "Collect Money: " + toCollectColor + PriceUtils.formatPriceCurrency(orderDTO.getToCollect() * orderDTO.getPrice());
+            collectTxt = ChatColor.GRAY + "Collect Money: " + toCollectColor + EcoUtils.formatPriceCurrency(orderDTO.getToCollect() * orderDTO.getPrice());
         }
 
         quantityTxt += color.toString() +
@@ -68,7 +68,7 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
             orderTypeTxt,
             collectTxt,
             quantityTxt,
-            ChatColor.GRAY + "Price: " + color.toString() + PriceUtils.formatPriceCurrency(orderDTO.getPrice()),
+            ChatColor.GRAY + "Price: " + color.toString() + EcoUtils.formatPriceCurrency(orderDTO.getPrice()),
             ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                      ",
             ChatColor.DARK_GREEN + "Left click: Collect",
             ChatColor.DARK_RED + "Right click: Delete"

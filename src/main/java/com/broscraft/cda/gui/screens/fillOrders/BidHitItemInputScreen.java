@@ -2,7 +2,7 @@ package com.broscraft.cda.gui.screens.fillOrders;
 
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.gui.screens.ItemInputScreen;
-import com.broscraft.cda.utils.PriceUtils;
+import com.broscraft.cda.utils.EcoUtils;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -34,7 +34,7 @@ public class BidHitItemInputScreen extends ItemInputScreen {
     private void setAcceptedItemIcon(GroupedOrderDTO groupedOrderDTO, ItemStack acceptedItem) {
         GuiItem itemIcon = ItemBuilder.from(acceptedItem.clone())
         .setLore(
-            ChatColor.GRAY + "Price per unit: " + ChatColor.GREEN + PriceUtils.formatPriceCurrency(groupedOrderDTO.getPrice()),
+            ChatColor.GRAY + "Price per unit: " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(groupedOrderDTO.getPrice()),
             ChatColor.GRAY + "Available to sell: " + ChatColor.GOLD + groupedOrderDTO.getQuantity()
         )
         .asGuiItem();

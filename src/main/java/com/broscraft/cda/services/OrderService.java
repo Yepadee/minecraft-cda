@@ -17,9 +17,11 @@ import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OrderUpdateObserver;
 import com.broscraft.cda.repositories.OrderRepository;
+import com.broscraft.cda.utils.InventoryUtils;
 import com.broscraft.cda.utils.ItemUtils;
-import com.broscraft.cda.utils.PriceUtils;
+import com.broscraft.cda.utils.EcoUtils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -107,7 +109,7 @@ public class OrderService {
             switch (orderType) {
                 case BID:
                     float totalPrice = newOrderDTO.getPrice() * newOrderDTO.getQuantity();
-                    PriceUtils.charge(player, totalPrice);
+                    EcoUtils.charge(player, totalPrice);
                     break;
                 case ASK:
                     // TODO: take items from player
@@ -120,24 +122,43 @@ public class OrderService {
     }
 
     public void cancelOrder(OrderDTO orderDTO, Runnable onComplete) {
-        CDAPlugin.newSharedChain("cancelOrder").async(() -> {
+        HumanEntity player = Bukkit.getPlayer(orderDTO.getPlayerUUID());
+        CDAPlugin.newSharedChain("cancelOrder").asyncFirst(() -> {
             orderRepository.delete(orderDTO.getId());
             notifyRemoveOrderObserver(
                 orderDTO,
                 orderRepository.getBestPrice(orderDTO.getType())
             );
+            return true;
         })
+        .abortIfNull(BukkitTaskChainFactory.MESSAGE, (Player) player, "Sorry, something failed!") //TODO handel failed request.
         .sync(() -> {
             OrderType orderType = Objects.requireNonNull(orderDTO.getType());
-            switch (orderType) {
-                case BID:
-                    float totalPrice = orderDTO.getPrice() * (orderDTO.getQuantity() - orderDTO.getQuantityFilled());
-                    PriceUtils.pay(orderDTO.getPlayerUUID(), totalPrice);
-                    System.out.println(totalPrice);
-                    break;
-                case ASK:
-                    // TODO: take items from player
-                    break;
+            int quantityUnfilled = orderDTO.getQuantity() - orderDTO.getQuantityFilled();
+            if (quantityUnfilled > 0) {
+                switch (orderType) {
+                    case BID:
+                        float totalPrice = orderDTO.getPrice() * quantityUnfilled;
+                        EcoUtils.pay(player, totalPrice);
+                        player.sendMessage(
+                            ChatColor.RED + "refunded " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(totalPrice) + ChatColor.RED + " from cancelled " +
+                            ChatColor.GOLD + "bid."
+                        );
+                        break;
+                    case ASK:
+                        ItemDTO itemDTO = orderDTO.getItem();
+                        ItemStack itemsToDrop = ItemUtils.buildItemStack(itemDTO);
+                        itemsToDrop.setAmount(quantityUnfilled);
+                        InventoryUtils.dropPlayerItems(player, itemsToDrop);
+                        player.sendMessage(
+                            ChatColor.RED + "returned " + ChatColor.GREEN + quantityUnfilled + ChatColor.RED +
+                            ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" + ChatColor.RED + " from cancelled " +
+                            ChatColor.AQUA + "ask."
+                        );
+                        break;
+                }
+            } else {
+                player.sendMessage(ChatColor.RED + "Order successfully cancelled!");
             }
         })
         .sync(() -> onComplete.run())
@@ -162,7 +183,8 @@ public class OrderService {
                 return itemsToGive;
             }).abortIfNull(BukkitTaskChainFactory.MESSAGE, (Player) player, "Sorry, something failed!")
             .syncLast(itemsCollected -> {
-                player.getWorld().dropItem(player.getLocation().add(0, 1, 0), itemsCollected);
+                InventoryUtils.dropPlayerItems(player, itemsCollected);
+
                 int numCollected = itemsCollected.getAmount();
                 player.sendMessage(
                     ChatColor.GOLD + "Collected " +
@@ -179,9 +201,9 @@ public class OrderService {
             }).abortIfNull(BukkitTaskChainFactory.MESSAGE, (Player) player, "Sorry, something failed!")
             .asyncLast(numCollected -> {
                 float moneyCollected = orderDTO.getPrice() * numCollected;
-                PriceUtils.pay(player, moneyCollected);
+                EcoUtils.pay(player, moneyCollected);
                 
-                player.sendMessage(ChatColor.AQUA + "Collected " + ChatColor.GREEN + PriceUtils.formatPriceCurrency(moneyCollected) + ChatColor.GRAY + "!");
+                player.sendMessage(ChatColor.AQUA + "Collected " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(moneyCollected) + ChatColor.GRAY + "!");
 
                 orderDTO.setToCollect(0);
                 notifyOrderUpdateObserver(player.getUniqueId(), orderDTO);

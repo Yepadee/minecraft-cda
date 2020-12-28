@@ -4,7 +4,7 @@ import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.ItemUtils;
-import com.broscraft.cda.utils.PriceUtils;
+import com.broscraft.cda.utils.EcoUtils;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -46,7 +46,7 @@ public class NewOrderCommand implements CommandExecutor {
             
 
             try {
-                Float price = PriceUtils.formatPrice(args[1]);
+                Float price = EcoUtils.formatPrice(args[1]);
                 newOrderDto.setPrice(price);
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED.toString() + "Invalid price specified");
@@ -92,7 +92,7 @@ public class NewOrderCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.GRAY.toString() + "Created " + orderTypeColor +
             orderType + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
             orderTypeColor + quantity + ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" +
-            ChatColor.GRAY + " at " + ChatColor.GREEN + PriceUtils.formatPriceCurrency(newOrderDto.getPrice()));
+            ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()));
             
             orderService.submitOrder(player, newOrderDto);
 

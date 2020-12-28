@@ -3,7 +3,7 @@ package com.broscraft.cda.dtos.orders.grouped.visitors;
 import com.broscraft.cda.dtos.orders.grouped.GroupedAskDTO;
 import com.broscraft.cda.dtos.orders.grouped.GroupedBidDTO;
 import com.broscraft.cda.utils.ItemUtils;
-import com.broscraft.cda.utils.PriceUtils;
+import com.broscraft.cda.utils.EcoUtils;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -21,7 +21,7 @@ public class GroupedOrderIconBuilder extends GroupedOrderVisitor {
             ItemBuilder.from(GROUPED_ORDER_ICON_MATERIAL)
             .setName(ChatColor.GOLD + "Bid")
             .setLore(
-                ChatColor.GRAY + "Price: " + ChatColor.GREEN + PriceUtils.formatPriceCurrency(groupedBid.getPrice()),
+                ChatColor.GRAY + "Price: " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(groupedBid.getPrice()),
                 ChatColor.GRAY + "Demand: " + ChatColor.GOLD + groupedBid.getQuantity()
             )
             .build()
@@ -35,7 +35,7 @@ public class GroupedOrderIconBuilder extends GroupedOrderVisitor {
             ItemBuilder.from(GROUPED_ORDER_ICON_MATERIAL)
             .setName(ChatColor.AQUA + "Ask")
             .setLore(
-                ChatColor.GRAY + "Price: " + ChatColor.GREEN + PriceUtils.formatPriceCurrency(groupedAsk.getPrice()),
+                ChatColor.GRAY + "Price: " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(groupedAsk.getPrice()),
                 ChatColor.GRAY + "Supply: " + ChatColor.AQUA + groupedAsk.getQuantity()
             )
             .build()
