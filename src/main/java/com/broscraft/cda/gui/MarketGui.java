@@ -14,6 +14,7 @@ import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.screens.search.SearchInputScreen;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
 import com.broscraft.cda.services.OrderService;
+import com.broscraft.cda.utils.InventoryUtils;
 import com.broscraft.cda.utils.ItemUtils;
 import com.google.common.base.Function;
 
@@ -39,9 +40,9 @@ public class MarketGui {
     public void openAllItemsScreen(HumanEntity player) {
         AllItemsScreen allItemsScreen = new AllItemsScreen(
             overviewIconsManager.getAllIcons(),
-            e -> openSearchInputScreen(e.getWhoClicked()),
-            e -> openMyOrdersScreen(e.getWhoClicked()),
-            itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
+            search -> openSearchInputScreen(search.getWhoClicked()),
+            myOrders -> openMyOrdersScreen(myOrders.getWhoClicked()),
+            itemStack -> e -> openItemOrdersScreen(itemStack, player)
         );
 
         overviewIconsManager.addIconUpdateObserver(allItemsScreen);
@@ -56,12 +57,12 @@ public class MarketGui {
 
     public void openMyOrdersScreen(HumanEntity player) {
         PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen(
-            e -> openAllItemsScreen(player)
+            back -> openAllItemsScreen(player)
         );
         loadPlayerOrders(playerOrdersScreen, player);
         orderService.addOrderUpdateObserver(player.getUniqueId(), playerOrdersScreen);
         playerOrdersScreen.setOnClose(
-            e -> {
+            close -> {
                 orderService.removeOrderUpdateObserver(player.getUniqueId());
             }
         );
@@ -73,8 +74,8 @@ public class MarketGui {
             SearchResultsScreen searchResultsScreen = new SearchResultsScreen(
                 "Items matching '" + searchQuery + "'",
                 searchResults,
-                e -> openAllItemsScreen(e.getWhoClicked()),
-                itemStack -> e -> openItemOrdersScreen(itemStack, e.getWhoClicked())
+                back -> openAllItemsScreen(player),
+                itemStack -> e -> openItemOrdersScreen(itemStack, player)
             );
     
             overviewIconsManager.addIconUpdateObserver(searchResultsScreen);
@@ -109,16 +110,16 @@ public class MarketGui {
     private void confirmCancelOrder(OrderDTO orderDTO, HumanEntity player) {
         new ConfirmScreen(
             "Cancel Order?",
-            e -> {
+            confirm -> {
                 PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen(
-                    ee -> openAllItemsScreen(player)
+                   back -> openAllItemsScreen(player)
                 );
                 orderService.cancelOrder(orderDTO, () -> {
                     loadPlayerOrders(playerOrdersScreen, player);
                 });
                 playerOrdersScreen.open(player);
             },
-            e -> {
+            cancel -> {
                 openMyOrdersScreen(player);
             }
         ).open(player);
@@ -162,15 +163,26 @@ public class MarketGui {
         ).open(player);
     }
 
-    private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, ItemStack item, int maxQuantity, HumanEntity player) {
+    private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, final ItemStack item, int maxQuantity, HumanEntity player) {
+        Long itemId = Objects.requireNonNull(ItemUtils.getId(item));
         BidHitItemInputScreen inputScreen = new BidHitItemInputScreen(
             groupedOrderDTO,
             item,
-            e -> openItemOrdersScreen(item, player)
-        );
-        inputScreen.setConfirmBtn(
-            e -> {
-                System.out.println("Confirm btn Pressed!" + inputScreen.countItems());
+            back -> openItemOrdersScreen(item, player),
+            insertedItems -> {
+                new ConfirmScreen(
+                    "Sell " + insertedItems.getAmount() + "?",
+                    confirm -> {
+                        player.sendMessage(
+                            "Sell " + insertedItems.getAmount() + " " + itemId
+                        );
+                    },
+                    cancel -> {
+                        InventoryUtils.dropPlayerItems(player, insertedItems);
+                        openItemOrdersScreen(item, player);
+                    }
+                ).open(player);
+                
             }
         );
         
@@ -181,12 +193,12 @@ public class MarketGui {
         Long itemId = Objects.requireNonNull(ItemUtils.getId(item));
         ItemOrdersScreen itemOrdersScreen = new ItemOrdersScreen(
             item,
-            e -> openAllItemsScreen(e.getWhoClicked()),
-            e -> {
-                e.getWhoClicked().sendMessage("New bid btn clicked for item " + itemId + "!");
+            back -> openAllItemsScreen(back.getWhoClicked()),
+            newBid -> {
+                newBid.getWhoClicked().sendMessage("New bid btn clicked for item " + itemId + "!");
             },
-            e -> {
-                e.getWhoClicked().sendMessage("New ask btn clicked for item " + itemId + "!");
+            newAsk -> {
+                newAsk.getWhoClicked().sendMessage("New ask btn clicked for item " + itemId + "!");
             }
         );
         orderService.getOrders(itemId, orders -> {

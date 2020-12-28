@@ -1,5 +1,7 @@
 package com.broscraft.cda.gui.screens;
 
+import java.util.function.Consumer;
+
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.gui.utils.Styles;
 import com.broscraft.cda.utils.InventoryUtils;
@@ -21,15 +23,19 @@ public abstract class ItemInputScreen {
 
     private ItemDTO acceptedItem;
 
-    public ItemInputScreen(int height, String name, GuiAction<InventoryClickEvent> onBack) {
+    public ItemInputScreen(int height, String name, GuiAction<InventoryClickEvent> onBack, Consumer<ItemStack> onConfirm, ItemStack acceptedItem) {
         this.gui = new Gui(height, name);
         this.height = height;
         this.gui.setDefaultClickAction(e -> {
             if (isOnBorder(e.getRawSlot())) e.setCancelled(true);
             else onItemClick(e);
         });
+
         setBorder();
         setBackBtn(onBack);
+        setConfirmBtn(onConfirm);
+        setAcceptedItem(acceptedItem);
+
         this.gui.setCloseGuiAction(e -> {
             dropAllItems(e.getPlayer());
         });
@@ -41,11 +47,9 @@ public abstract class ItemInputScreen {
         if (item == null) return;
         ItemDTO clickedItem = ItemUtils.parseItemStack(item);
         if (!clickedItem.equals(acceptedItem) || ItemUtils.isDamaged(item)) e.setCancelled(true);
-        int numInserted = countItems();
-        System.out.println(numInserted);
     }
 
-    protected void setAcceptedItem(ItemStack item) {
+    private void setAcceptedItem(ItemStack item) {
         this.acceptedItem = ItemUtils.parseItemStack(item);
     }
 
@@ -63,8 +67,13 @@ public abstract class ItemInputScreen {
         }
     }
 
-    public void setConfirmBtn(GuiAction<InventoryClickEvent> onConfirm) {
-        this.gui.setItem(8, ItemBuilder.from(Styles.CONFIRM_ICON).asGuiItem(onConfirm));
+    private void setConfirmBtn(Consumer<ItemStack> onConfirm) {
+        this.gui.setItem(8, ItemBuilder.from(Styles.CONFIRM_ICON).asGuiItem(
+            e -> {
+                ItemStack insertedItems = getInsertedItems();
+                clearItems();
+                onConfirm.accept(insertedItems);
+            }));
     }
 
     private boolean isOnBorder(int slot) {
@@ -86,16 +95,30 @@ public abstract class ItemInputScreen {
         }
     }
 
-    public int countItems() {
+    protected ItemStack getInsertedItems() {
         int count = 0;
+        ItemStack itemCopy = null;
         for (int row = 1; row < 5; ++ row) {
             for (int col = 1; col < 8; ++ col) {
                 int slot = row * WIDTH + col;
                 ItemStack item = this.gui.getInventory().getItem(slot);
-                if (item != null) count += item.getAmount();
+                if (item != null) {
+                    count += item.getAmount();
+                    if (itemCopy == null) itemCopy = item.clone();
+                }
             }
         }
-        return count;
+        if (itemCopy != null) itemCopy.setAmount(count);
+        return itemCopy;
+    }
+
+    protected void clearItems() {
+        for (int row = 1; row < 5; ++ row) {
+            for (int col = 1; col < 8; ++ col) {
+                int slot = row * WIDTH + col;
+                this.gui.getInventory().setItem(slot, null);
+            }
+        }   
     }
 
     public void open(HumanEntity player) {
