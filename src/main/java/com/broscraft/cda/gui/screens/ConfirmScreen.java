@@ -8,12 +8,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
 import me.mattstudios.mfgui.gui.guis.Gui;
+import net.md_5.bungee.api.ChatColor;
 
 public class ConfirmScreen {
     protected Gui gui;
 
     public ConfirmScreen(String name, GuiAction<InventoryClickEvent> onConfirm, GuiAction<InventoryClickEvent> onCancel) {
-        this.gui = new Gui(1, name);
+        this.gui = new Gui(1, ChatColor.DARK_RED.toString() + name);
         gui.setDefaultClickAction(event -> {
             event.setCancelled(true);
         });

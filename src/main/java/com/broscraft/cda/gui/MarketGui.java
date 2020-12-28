@@ -14,6 +14,7 @@ import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.screens.search.SearchInputScreen;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
 import com.broscraft.cda.services.OrderService;
+import com.broscraft.cda.utils.EcoUtils;
 import com.broscraft.cda.utils.InventoryUtils;
 import com.broscraft.cda.utils.ItemUtils;
 import com.google.common.base.Function;
@@ -170,8 +171,11 @@ public class MarketGui {
             item,
             back -> openItemOrdersScreen(item, player),
             insertedItems -> {
+                int quantityToSell = insertedItems.getAmount();
+                float ppu = groupedOrderDTO.getPrice();
+                String totalPrice = EcoUtils.formatPriceCurrency(ppu * quantityToSell);
                 new ConfirmScreen(
-                    "Sell " + insertedItems.getAmount() + "?",
+                    "Sell " + insertedItems.getAmount() + " for " + totalPrice + "?",
                     confirm -> {
                         player.sendMessage(
                             "Sell " + insertedItems.getAmount() + " " + itemId
