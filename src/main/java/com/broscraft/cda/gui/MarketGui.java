@@ -146,23 +146,26 @@ public class MarketGui {
         });
     }
 
-    private void openAskLiftQuantityInputScreen(GroupedOrderDTO groupedOrderDTO, ItemStack item, int maxQuantity, HumanEntity player) {
+    private void openAskLiftQuantityInputScreen(GroupedOrderDTO groupedOrderDTO, final ItemStack item, int maxQuantity, HumanEntity player) {
         new AskLiftQuantityInputScreen(
             (e, quantityTxt) -> {
                 try {
-                    int quantity = Integer.parseInt(quantityTxt);
+                    ItemStack itemsToGive = item.clone();
+                    int quantityToBuy = Integer.parseInt(quantityTxt);
                     float price = groupedOrderDTO.getPrice();
-                    float totalPrice = quantity * quantity;
-                    player.sendMessage(
-                        ChatColor.RED + "Buying " + quantity + " for " + totalPrice
-                    );
+                    float totalPrice = price * quantityToBuy;
                     new ConfirmScreen(
-                        "Buy " + quantity + " for " + totalPrice + "?",
+                        "Buy " + quantityToBuy + " for " + EcoUtils.formatPriceCurrency(totalPrice) + "?",
                         confirm -> {
-                            orderService.fillOrder(quantity, price, () -> {
+                            orderService.fillOrder(quantityToBuy, price, quantityBought -> {
+                                float amountToCharge = price * quantityBought;
+                                String boughtPriceStr = EcoUtils.formatPriceCurrency(amountToCharge);
                                 player.sendMessage(
-                                    ChatColor.RED + "Bought " + quantity + " for " + totalPrice
+                                    ChatColor.RED + "Bought " + quantityBought + " for " + boughtPriceStr
                                 );
+                                itemsToGive.setAmount(quantityBought);
+                                EcoUtils.charge(player, amountToCharge);
+                                InventoryUtils.dropPlayerItems(player, itemsToGive);
                                 openItemOrdersScreen(item, player);
                             });
                         },
@@ -187,14 +190,18 @@ public class MarketGui {
             insertedItems -> {
                 int quantityToSell = insertedItems.getAmount();
                 float price = groupedOrderDTO.getPrice();
-                String totalPrice = EcoUtils.formatPriceCurrency(price * quantityToSell);
+                String totalPriceStr = EcoUtils.formatPriceCurrency(price * quantityToSell);
                 new ConfirmScreen(
-                    "Sell " + insertedItems.getAmount() + " for " + totalPrice + "?",
+                    "Sell " + insertedItems.getAmount() + " for " + totalPriceStr + "?",
                     confirm -> {
-                        orderService.fillOrder(quantityToSell, price, () -> {
+                        orderService.fillOrder(quantityToSell, price, quantitySold -> {
+                            float amountToPay = price * quantitySold;
+                            String soldPriceStr = EcoUtils.formatPriceCurrency(amountToPay);
                             player.sendMessage(
-                                ChatColor.GREEN + "Sold " + insertedItems.getAmount() + " for " + totalPrice
+                                ChatColor.GREEN + "Sold " + quantitySold + " for " + soldPriceStr
                             );
+                            
+                            EcoUtils.pay(player, amountToPay);
                             openItemOrdersScreen(item, player);
                         }); // TODO: on fail return items!
                     },

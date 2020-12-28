@@ -2,15 +2,15 @@ package com.broscraft.cda.dtos.transaction;
 
 import java.util.Objects;
 
-public class TransactionDTO {
+public class NewTransactionDTO {
     private Long itemId;
     private Float price;
     private Integer quantity;
 
-    public TransactionDTO() {
+    public NewTransactionDTO() {
     }
 
-    public TransactionDTO(Long itemId, Float price, Integer quantity) {
+    public NewTransactionDTO(Long itemId, Float price, Integer quantity) {
         this.itemId = itemId;
         this.price = price;
         this.quantity = quantity;
@@ -40,17 +40,17 @@ public class TransactionDTO {
         this.quantity = quantity;
     }
 
-    public TransactionDTO itemId(Long itemId) {
+    public NewTransactionDTO itemId(Long itemId) {
         this.itemId = itemId;
         return this;
     }
 
-    public TransactionDTO price(Float price) {
+    public NewTransactionDTO price(Float price) {
         this.price = price;
         return this;
     }
 
-    public TransactionDTO quantity(Integer quantity) {
+    public NewTransactionDTO quantity(Integer quantity) {
         this.quantity = quantity;
         return this;
     }
@@ -59,10 +59,10 @@ public class TransactionDTO {
     public boolean equals(Object o) {
         if (o == this)
             return true;
-        if (!(o instanceof TransactionDTO)) {
+        if (!(o instanceof NewTransactionDTO)) {
             return false;
         }
-        TransactionDTO transactionDTO = (TransactionDTO) o;
+        NewTransactionDTO transactionDTO = (NewTransactionDTO) o;
         return Objects.equals(itemId, transactionDTO.itemId) && Objects.equals(price, transactionDTO.price) && Objects.equals(quantity, transactionDTO.quantity);
     }
 

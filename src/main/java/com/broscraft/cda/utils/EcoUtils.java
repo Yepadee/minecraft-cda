@@ -10,7 +10,6 @@ import com.earth2me.essentials.api.NoLoanPermittedException;
 import com.earth2me.essentials.api.UserDoesNotExistException;
 
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 
 public class EcoUtils {
     public static NumberFormat priceFormat = NumberFormat.getInstance(Locale.UK);
@@ -42,7 +41,7 @@ public class EcoUtils {
         }
     }
 
-    public static void charge(Player player, float price) {
+    public static void charge(HumanEntity player, float price) {
         try {
             Economy.subtract(player.getUniqueId(), BigDecimal.valueOf(price));
         } catch (NoLoanPermittedException | ArithmeticException | UserDoesNotExistException e) {

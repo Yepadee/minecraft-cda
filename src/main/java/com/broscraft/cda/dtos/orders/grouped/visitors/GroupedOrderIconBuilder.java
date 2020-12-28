@@ -22,7 +22,9 @@ public class GroupedOrderIconBuilder extends GroupedOrderVisitor {
             .setName(ChatColor.GOLD + "Bid")
             .setLore(
                 ChatColor.GRAY + "Price: " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(groupedBid.getPrice()),
-                ChatColor.GRAY + "Demand: " + ChatColor.GOLD + groupedBid.getQuantity()
+                ChatColor.GRAY + "Demand: " + ChatColor.GOLD + groupedBid.getQuantity(),
+                ChatColor.GRAY + ChatColor.STRIKETHROUGH.toString() + "                   " + ChatColor.RESET,
+                ChatColor.DARK_GREEN + "Left Click: Sell"
             )
             .build()
         );
@@ -36,7 +38,9 @@ public class GroupedOrderIconBuilder extends GroupedOrderVisitor {
             .setName(ChatColor.AQUA + "Ask")
             .setLore(
                 ChatColor.GRAY + "Price: " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(groupedAsk.getPrice()),
-                ChatColor.GRAY + "Supply: " + ChatColor.AQUA + groupedAsk.getQuantity()
+                ChatColor.GRAY + "Supply: " + ChatColor.AQUA + groupedAsk.getQuantity(),
+                ChatColor.GRAY + ChatColor.STRIKETHROUGH.toString() + "                   " + ChatColor.RESET,
+                ChatColor.DARK_RED + "Left Click: Buy"
             )
             .build()
         );

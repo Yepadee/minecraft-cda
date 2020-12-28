@@ -13,6 +13,7 @@ import com.broscraft.cda.dtos.orders.OrderDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
+import com.broscraft.cda.dtos.transaction.TransactionSummaryDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OrderUpdateObserver;
 import com.broscraft.cda.repositories.OrderRepository;
@@ -212,20 +213,20 @@ public class OrderService {
         chain.execute();
     }
 
-    public void fillOrder(int quantity, float price, Runnable onComplete) {
+    public void fillOrder(int quantity, float price, Consumer<Integer> onComplete) {
         CDAPlugin.newSharedChain("fillOrder")
         .asyncFirst(() -> {
-            List<OrderDTO> affectedOrders = orderRepository.fillOrder(price, quantity);
-            return affectedOrders;
+            TransactionSummaryDTO transactionSummary = orderRepository.fillOrder(price, quantity);
+            return transactionSummary;
         })
-        .abortIfNull()
-        .asyncLast(affectedOrders -> {
-            affectedOrders.forEach(order -> {
+        .async(transactionSummary -> {
+            transactionSummary.getAffectedOrders().forEach(order -> {
                 UUID playerUUID = Objects.requireNonNull(order.getPlayerUUID());
                 notifyOrderUpdateObserver(playerUUID, order);
             });
+            return transactionSummary.getNumFilled();
         })
-        .sync(() -> onComplete.run())
+        .syncLast(numFilled -> onComplete.accept(numFilled))
         .execute();
 
 

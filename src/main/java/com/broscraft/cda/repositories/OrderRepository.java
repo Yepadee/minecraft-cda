@@ -11,6 +11,7 @@ import com.broscraft.cda.dtos.orders.grouped.GroupedAskDTO;
 import com.broscraft.cda.dtos.orders.grouped.GroupedBidDTO;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
+import com.broscraft.cda.dtos.transaction.TransactionSummaryDTO;
 
 import org.bukkit.Material;
 
@@ -67,9 +68,14 @@ public class OrderRepository {
         // TODO: submit delete request
     }
 
-    public List<OrderDTO> fillOrder(float price, int quantity) {
+    public TransactionSummaryDTO fillOrder(float price, int quantity) {
+        TransactionSummaryDTO transactionSummary = new TransactionSummaryDTO();
         // TODO: send request to fill order and retrieve affected orders
-        return new ArrayList<>();
+        List<OrderDTO> affectedOrders = new ArrayList<>();
+        
+        transactionSummary.setAffectedOrders(affectedOrders);
+        transactionSummary.setNumFilled(quantity);
+        return transactionSummary;
     }
 
     public void collectOrder(Long orderId, int quantity) {
