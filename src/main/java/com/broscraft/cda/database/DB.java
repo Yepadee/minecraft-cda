@@ -21,6 +21,23 @@ public class DB {
         try {
             String url = DIALECT + dbFolder.getAbsolutePath() + File.separator + DB_NAME;
             con = DriverManager.getConnection(url, USER, PASS);
+            con.setAutoCommit(false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void commit() {
+        try {
+            con.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void close() {
+        try {
+            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -75,6 +92,21 @@ public class DB {
         } catch (SQLException e) {
             e.printStackTrace();
             return 0;
+        }
+    }
+
+    public static Long create(PreparedStatement stmt) {
+        try {
+            stmt.executeUpdate();
+            ResultSet rs = stmt.getGeneratedKeys();
+            Long createdKey = null;
+            if (rs.next()){
+                createdKey=rs.getLong(1);
+            }
+            return createdKey;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

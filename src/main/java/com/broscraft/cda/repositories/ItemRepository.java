@@ -3,14 +3,15 @@ package com.broscraft.cda.repositories;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.broscraft.cda.database.DB;
 import com.broscraft.cda.dtos.ItemOverviewDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.items.visitors.ItemInserterDB;
 
 import org.bukkit.Material;
 
 public class ItemRepository {
-
-    Long nextId = 3L;
+    private ItemInserterDB itemInserter = new ItemInserterDB();
 
     public Map<Long, ItemOverviewDTO> getItemOverviews() {
         Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
@@ -45,11 +46,8 @@ public class ItemRepository {
     }
 
     public Long create(ItemDTO itemDTO) {
-        //TODO: submit request creating item and retrieve it's id;
-        //TODO: MAKE SURE ID IS NOT NULL!!!
-
-        Long itemId = nextId;
-        nextId ++;
-        return itemId;
+        itemDTO.accept(itemInserter);
+        DB.commit();
+        return itemInserter.getCreatedKey();
     }
 }

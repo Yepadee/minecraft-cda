@@ -90,6 +90,11 @@ public class CDAPlugin extends JavaPlugin
         this.setupCommands();
     }
 
+    @Override
+    public void onDisable() {
+        DB.close();
+    }
+
     private void setupCommands() {
         Objects.requireNonNull(this.getCommand("market")).setExecutor(openMenuCommand);
         Objects.requireNonNull(this.getCommand("searchmarket")).setExecutor(searchMarketCommand);
@@ -102,30 +107,49 @@ public class CDAPlugin extends JavaPlugin
         DB.init(this.getDataFolder());
 
         if (!DB.tableExists("Orders")) {
-
+            DB.update(
+                "CREATE TABLE Orders " +
+                "(id INTEGER AUTOINCREMENT, " +
+                " type CHAR(3), " + 
+                " player_uuid CHAR(36), " + 
+                " item_id INTEGER NOT NULL, " + 
+                " price REAL, " + 
+                " quantity INTEGER, " +
+                " quantity_filled INTEGER, " +
+                " quantity_uncollected INTEGER, " +
+                " FOREIGN KEY (item_id) REFERENCES Items(id), " +
+                " PRIMARY KEY ( id ))"
+            );
         }
 
         if (!DB.tableExists("Items")) {
-            
+            DB.update(
+                "CREATE TABLE Items " +
+                "(id INTEGER AUTOINCREMENT, " +
+                " material VARCHAR(64), " + 
+                " potion_type VARCHAR(64), " + 
+                " is_upgraded TINYINT, " + 
+                " is_extended TINYINT, " + 
+                " PRIMARY KEY ( id ))"
+            );
         }
 
         if (!DB.tableExists("Enchantments")) {
-            
+            DB.update(
+                "CREATE TABLE Enchantments " +
+                "(id INTEGER AUTOINCREMENT, " +
+                " item_id INTEGER NOT NULL, " +
+                " enchantment VARCHAR(64), " + 
+                " level TINYINT, " + 
+                " FOREIGN KEY (item_id) REFERENCES Items(id), " +
+                " PRIMARY KEY ( id ))"
+            );
         }
 
         if (!DB.tableExists("Transactions")) {
             
-        }  
-
-
-        DB.update(
-            "CREATE TABLE TestTable " +
-            "(id INTEGER not NULL, " +
-            " first VARCHAR(255), " + 
-            " last VARCHAR(255), " + 
-            " age INTEGER, " + 
-            " PRIMARY KEY ( id ))"
-        );
+        }
+        
+        DB.commit();
     }
-
 }
