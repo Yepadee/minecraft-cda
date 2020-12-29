@@ -22,28 +22,57 @@ import org.bukkit.Material;
 
 public class OrderRepository {
     public GroupedOrdersDTO getItemOrders(Long itemId) {
-        // TODO: Actually load orders for the item
         System.out.println("Loading orders for item " + itemId + "!");
-        List<GroupedBidDTO> bids = new ArrayList<>();
-        List<GroupedAskDTO> asks = new ArrayList<>();
-        for (int i = 1; i <= 15; ++i) {
-            GroupedBidDTO bid1 = new GroupedBidDTO();
-            bid1.setPrice(3.0f / i);
-            bid1.setQuantity(100 / i);
-            bids.add(bid1);
 
-            GroupedAskDTO ask1 = new GroupedAskDTO();
-            ask1.setPrice(i * 3.0f + 0.1f);
-            ask1.setQuantity(120 / i);
-            asks.add(ask1);
+        
+        PreparedStatement bidStmt = DB.prepareStatement(
+            "SELECT price, SUM(quantity) total_quantity " +
+            "FROM Orders " + 
+            "WHERE item_id=? AND type='BID' " +
+            "GROUP BY price " +
+            "ORDER BY price DESC"
+        );
+
+        PreparedStatement askStmt = DB.prepareStatement(
+            "SELECT price, SUM(quantity) total_quantity " +
+            "FROM Orders " + 
+            "WHERE item_id=? AND type='ASK' " +
+            "GROUP BY price " +
+            "ORDER BY price ASC"
+        );
+
+        List<GroupedBidDTO> groupedBids = new ArrayList<>();
+        List<GroupedAskDTO> groupedAsks = new ArrayList<>();
+
+        try {
+            bidStmt.setLong(1, itemId);
+            ResultSet bidResults = DB.query(bidStmt);
+            while (bidResults.next()) {
+                float price = bidResults.getFloat(1);
+                int quantity = bidResults.getInt(2);
+                GroupedBidDTO groupedBid = new GroupedBidDTO();
+                groupedBid.price(price).quantity(quantity);
+                groupedBids.add(groupedBid);   
+            }
+            bidResults.close();
+
+            askStmt.setLong(1, itemId);
+            ResultSet askResults = DB.query(askStmt);
+            while (askResults.next()) {
+                float price = askResults.getFloat(1);
+                int quantity = askResults.getInt(2);
+                GroupedAskDTO groupedAsk = new GroupedAskDTO();
+                groupedAsk.price(price).quantity(quantity);
+                groupedAsks.add(groupedAsk);   
+            }
+            askResults.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-        GroupedAskDTO ask1 = new GroupedAskDTO();
-        ask1.setPrice(100.0f);
-        ask1.setQuantity(120);
-        asks.add(ask1);
-
-        return new GroupedOrdersDTO().groupedBids(bids).groupedAsks(asks);
+        System.out.println(groupedBids);
+        System.out.println(groupedAsks);
+        return new GroupedOrdersDTO().groupedBids(groupedBids).groupedAsks(groupedAsks);
     }
 
     public List<OrderDTO> getPlayerOrders(UUID playerUUID) {
@@ -107,9 +136,10 @@ public class OrderRepository {
                 BestPriceDTO bestPriceDTO = new BestPriceDTO();
                 bestPriceDTO.setPrice(results.getFloat(1));
                 bestPriceDTO.setQuantity(results.getInt(2));
-                System.out.println(bestPriceDTO);
+                results.close();
                 return bestPriceDTO;
             } else {
+                results.close();
                 return null;
             }  
         } catch (SQLException e) {
