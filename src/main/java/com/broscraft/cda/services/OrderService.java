@@ -81,7 +81,8 @@ public class OrderService {
         .execute();
     }
 
-    public void getOrders(Long itemId, Consumer<GroupedOrdersDTO> onComplete) {
+    public void getOrders(ItemDTO itemDTO, Consumer<GroupedOrdersDTO> onComplete) {
+        Long itemId = itemService.getItemId(itemDTO);
         CDAPlugin.newChain().asyncFirst(() -> {
             return orderRepository.getOrders(itemId);
         })
@@ -99,14 +100,7 @@ public class OrderService {
         .execute();
     }
 
-    public void submitOrder(HumanEntity player, final NewOrderDTO newOrderDTO, Runnable onComplete) {
-        float totalPrice = newOrderDTO.getPrice() * newOrderDTO.getQuantity();
-        OrderType orderType = newOrderDTO.getType();
-        if (orderType.equals(OrderType.BID) && !EcoUtils.hasMoney(player, totalPrice)) {
-            player.sendMessage(ChatColor.RED + "You do not have enough money!");
-            return;
-        }
-        
+    public void submitOrder(NewOrderDTO newOrderDTO, Runnable onComplete) {  
         CDAPlugin.newSharedChain("submitOrder").async(() -> {
             ItemDTO itemDTO = newOrderDTO.getItem();
             if (itemService.exists(itemDTO)) {
@@ -122,9 +116,6 @@ public class OrderService {
             }
         })
         .sync(() -> {
-            if (orderType.equals(OrderType.BID)) {
-                EcoUtils.charge(player, totalPrice);
-            }
             onComplete.run();
         })
         .execute();   

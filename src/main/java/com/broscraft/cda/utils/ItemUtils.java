@@ -12,14 +12,13 @@ import com.broscraft.cda.dtos.items.EnchantedItemDTO;
 import com.broscraft.cda.dtos.items.EnchantmentDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.items.PotionDTO;
-import com.broscraft.cda.dtos.items.visitors.SearchableNameBuilder;
 import com.broscraft.cda.dtos.items.visitors.ItemNameBuilder;
 import com.broscraft.cda.dtos.items.visitors.ItemStackBuilder;
+import com.broscraft.cda.dtos.items.visitors.SearchableNameBuilder;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.dtos.orders.grouped.visitors.GroupedOrderIconBuilder;
 
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -27,8 +26,6 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionType;
 
 
@@ -38,7 +35,7 @@ public class ItemUtils {
     private static final ItemStackBuilder itemStackBuilder = new ItemStackBuilder();
     private static final GroupedOrderIconBuilder groupedOrderIconBuilder = new GroupedOrderIconBuilder();
 
-    private static final NamespacedKey ICON_ID_KEY = new NamespacedKey(JavaPlugin.getProvidingPlugin(ItemStackBuilder.class), "icon_id");
+    //private static final NamespacedKey ICON_ID_KEY = new NamespacedKey(JavaPlugin.getProvidingPlugin(ItemStackBuilder.class), "icon_id");
 
     private static final Set<String> NAME_CONTAINS_BLACKLIST = new HashSet<>(
         Arrays.asList("LEGACY",
@@ -141,21 +138,21 @@ public class ItemUtils {
         return groupedOrderIconBuilder.getIcon();
     }
 
-    public static Long getId(ItemStack icon) {
-        if (icon != null && icon.getItemMeta() != null) {
-            return icon.getItemMeta().getPersistentDataContainer()
-                    .get(ICON_ID_KEY, PersistentDataType.LONG);
-        }
-        return null;
-    }
+    // public static Long getId(ItemStack icon) {
+    //     if (icon != null && icon.getItemMeta() != null) {
+    //         return icon.getItemMeta().getPersistentDataContainer()
+    //                 .get(ICON_ID_KEY, PersistentDataType.LONG);
+    //     }
+    //     return null;
+    // }
 
-    public static void setId(ItemStack icon, long id) {
-        if (icon.getItemMeta() != null) {
-            ItemMeta meta = icon.getItemMeta();
-            meta.getPersistentDataContainer().set(ICON_ID_KEY, PersistentDataType.LONG, id);
-            icon.setItemMeta(meta);
-        }
-    }
+    // public static void setId(ItemStack icon, long id) {
+    //     if (icon.getItemMeta() != null) {
+    //         ItemMeta meta = icon.getItemMeta();
+    //         meta.getPersistentDataContainer().set(ICON_ID_KEY, PersistentDataType.LONG, id);
+    //         icon.setItemMeta(meta);
+    //     }
+    // }
 
     public static ItemDTO parseItemStack(ItemStack itemStack) {
         ItemDTO itemDTO;

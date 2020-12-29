@@ -1,7 +1,6 @@
 package com.broscraft.cda.gui;
 
-import java.util.Objects;
-
+import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
@@ -17,7 +16,7 @@ import com.broscraft.cda.gui.screens.orders.PlayerOrdersScreen;
 import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.screens.search.SearchInputScreen;
-import com.broscraft.cda.gui.utils.OverviewIconsManager;
+import com.broscraft.cda.gui.utils.IconsManager;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.EcoUtils;
 import com.broscraft.cda.utils.InventoryUtils;
@@ -33,31 +32,31 @@ import net.md_5.bungee.api.ChatColor;
 
 public class MarketGui {
     private float MAX_PRICE = 1000000;
-    private OverviewIconsManager overviewIconsManager;
+    private IconsManager iconsManager;
     private OrderService orderService;
 
     public MarketGui(
-        OverviewIconsManager overviewIconsManager,
+        IconsManager iconsManager,
         OrderService orderService
     ) {
-        this.overviewIconsManager = overviewIconsManager;
+        this.iconsManager = iconsManager;
         this.orderService = orderService;
     }
 
     public void openAllItemsScreen(HumanEntity player) {
         AllItemsScreen allItemsScreen = new AllItemsScreen(
-            overviewIconsManager.getAllIcons(),
+            iconsManager.getAllOverviewIcons(),
             search -> openSearchInputScreen(search.getWhoClicked()),
             myOrders -> openMyOrdersScreen(myOrders.getWhoClicked()),
-            itemStack -> e -> openItemOrdersScreen(itemStack, player)
+            itemDTO -> e -> openItemOrdersScreen(itemDTO, player)
         );
 
-        overviewIconsManager.addIconUpdateObserver(allItemsScreen);
-        overviewIconsManager.addNewIconObserver(allItemsScreen);
+        iconsManager.addIconUpdateObserver(allItemsScreen);
+        iconsManager.addNewIconObserver(allItemsScreen);
         
         allItemsScreen.setOnClose(event -> {
-            overviewIconsManager.removeIconUpdateObserver(allItemsScreen);
-            overviewIconsManager.removeNewIconObserver(allItemsScreen);
+            iconsManager.removeIconUpdateObserver(allItemsScreen);
+            iconsManager.removeNewIconObserver(allItemsScreen);
         });
         allItemsScreen.open(player);
     }
@@ -77,18 +76,18 @@ public class MarketGui {
     }
 
     public void openSearchResultsScreen(String searchQuery, HumanEntity player) {
-        overviewIconsManager.searchIcons(searchQuery, searchResults -> {
+        iconsManager.searchIcons(searchQuery, searchResults -> {
             SearchResultsScreen searchResultsScreen = new SearchResultsScreen(
                 "Items matching '" + searchQuery + "'",
                 searchResults,
                 back -> openAllItemsScreen(player),
-                itemStack -> e -> openItemOrdersScreen(itemStack, player)
+                itemDTO -> e -> openItemOrdersScreen(itemDTO, player)
             );
     
-            overviewIconsManager.addIconUpdateObserver(searchResultsScreen);
+            iconsManager.addIconUpdateObserver(searchResultsScreen);
             
             searchResultsScreen.setOnClose(event -> {
-                overviewIconsManager.removeIconUpdateObserver(searchResultsScreen);
+                iconsManager.removeIconUpdateObserver(searchResultsScreen);
             });
             searchResultsScreen.open(player);
         });
@@ -96,11 +95,11 @@ public class MarketGui {
         
     }
 
-    public void openNewAskScreen(ItemStack itemStack, HumanEntity player) {
+    public void openNewAskScreen(ItemDTO itemDTO, HumanEntity player) {
         NewOrderDTO newOrderDTO = new NewOrderDTO();
         newOrderDTO.setType(OrderType.ASK);
         newOrderDTO.setPlayerUUID(player.getUniqueId());
-        newOrderDTO.setItem(ItemUtils.parseItemStack(itemStack));
+        newOrderDTO.setItem(itemDTO);
         orderService.getBestPrice(
             newOrderDTO.getItem(),
             newOrderDTO.getType(),
@@ -114,28 +113,28 @@ public class MarketGui {
                             float price = Float.parseFloat(priceTxt);
                             if (price > MAX_PRICE) {
                                 player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
-                                openNewAskScreen(itemStack, player); // TODO: is this safe?
+                                openNewAskScreen(itemDTO, player); // TODO: is this safe?
                             }
                             newOrderDTO.setPrice(price);
-                            openNewAskItemInputScreen(itemStack, newOrderDTO, player);
+                            openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
                         } catch (NumberFormatException ex) {
                             player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
-                            openNewAskScreen(itemStack, player); // TODO: is this safe?
+                            openNewAskScreen(itemDTO, player); // TODO: is this safe?
                         }
                     },
                     close -> {
-                        openItemOrdersScreen(itemStack, player);
+                        openItemOrdersScreenIfExists(itemDTO, player);
                     }
                 ).open(player);
             });
         
     }
 
-    public void openNewBidScreen(ItemStack itemStack, HumanEntity player) {
+    public void openNewBidScreen(ItemDTO itemDTO, HumanEntity player) {
         NewOrderDTO newOrderDTO = new NewOrderDTO();
         newOrderDTO.setType(OrderType.BID);
         newOrderDTO.setPlayerUUID(player.getUniqueId());
-        newOrderDTO.setItem(ItemUtils.parseItemStack(itemStack));
+        newOrderDTO.setItem(itemDTO);
 
         orderService.getBestPrice(
             newOrderDTO.getItem(),
@@ -150,31 +149,56 @@ public class MarketGui {
                             float price = Float.parseFloat(priceTxt);
                             if (price > MAX_PRICE) {
                                 player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
-                                openNewBidScreen(itemStack, player); // TODO: is this safe?
+                                openNewBidScreen(itemDTO, player); // TODO: is this safe?
                             }
                             newOrderDTO.setPrice(price);
-                            openNewBidQuantitiyInputScreen(itemStack, newOrderDTO, player);
+                            openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
                         } catch (NumberFormatException ex) {
                             player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
-                            openNewBidScreen(itemStack, player); // TODO: is this safe?
+                            openNewBidScreen(itemDTO, player); // TODO: is this safe?
                         }
                     },
-                    close -> openItemOrdersScreen(itemStack, player)
+                    close -> {
+                        openItemOrdersScreenIfExists(itemDTO, player);
+                    }
                 ).open(player);
             }
         );
 
     }
 
+    public void openItemOrdersScreen(ItemDTO itemDTO, HumanEntity player) {
+        ItemOrdersScreen itemOrdersScreen = new ItemOrdersScreen(
+            iconsManager.getItemIcon(itemDTO),
+            back -> openAllItemsScreen(player),
+            newBid -> openNewBidScreen(itemDTO, player),
+            newAsk -> openNewAskScreen(itemDTO, player)
+        );
+        orderService.getOrders(itemDTO, orders -> {
+            itemOrdersScreen.setOrders(
+                orders,
+                bid -> e -> openBidHitItemInputScreen(bid, itemDTO, 1, player),
+                ask -> e -> openAskLiftQuantityInputScreen(ask, itemDTO, 1, player)
+            );
+        });
 
-    private void openNewAskItemInputScreen(final ItemStack itemStack, NewOrderDTO newOrderDto, HumanEntity player) {
+        itemOrdersScreen.open(player);
+    }
+
+
+    public boolean itemHasOrders(ItemDTO itemDTO) {
+        return iconsManager.hasIcon(itemDTO);
+    }
+
+
+    private void openNewAskItemInputScreen(ItemDTO itemDTO, NewOrderDTO newOrderDto, HumanEntity player) {
         //ItemDTO itemDTO = ItemUtils.parseItemStack(itemStack);
         orderService.getBestPrice(
             newOrderDto.getItem(),
             newOrderDto.getType(),
             bestPrice -> {
                 NewAskItemInputScreen screen = new NewAskItemInputScreen(
-                    itemStack,
+                    iconsManager.getItemIcon(itemDTO),
                     bestPrice,
                     newOrderDto.getPrice()
                 );
@@ -193,20 +217,20 @@ public class MarketGui {
                         " for " + newOrderDto.getQuantity() +
                         "?",
                         confirm -> {
-                            orderService.submitOrder(player, newOrderDto, () -> {
+                            orderService.submitOrder(newOrderDto, () -> {
                                 player.sendMessage(
                                     ChatColor.GRAY.toString() + "Created " + ChatColor.AQUA +
                                     "Ask" + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
                                     ChatColor.AQUA + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
                                     ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice())
                                 );
-                                openItemOrdersScreen(itemStack, player);
+                                openItemOrdersScreenIfExists(itemDTO, player);
                             });
         
                         },
                         cancel -> {
                             InventoryUtils.dropPlayerItems(player, insertedItems);
-                            openItemOrdersScreen(itemStack, player);
+                            openItemOrdersScreenIfExists(itemDTO, player);
                         }
                     ).open(player);
                     
@@ -216,39 +240,49 @@ public class MarketGui {
         );
     }
 
-    private void openNewBidQuantitiyInputScreen(ItemStack itemStack, NewOrderDTO newOrderDto, HumanEntity player) {
+    private void openNewBidQuantitiyInputScreen(ItemDTO itemDTO, NewOrderDTO newOrderDto, HumanEntity player) {
         new NewBidQuantityInputScreen(
             (p, quantityTxt) -> {
                 try {
                     int quantity = Integer.parseInt(quantityTxt);
                     newOrderDto.setQuantity(quantity);
-                    new ConfirmScreen(
-                        "Bid " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
-                        " for " + newOrderDto.getQuantity() +
-                        "?",
-                        confirm -> {
-                            orderService.submitOrder(player, newOrderDto, () -> {
-                                //screen.close(player);
-                                player.sendMessage(
-                                    ChatColor.GRAY.toString() + "Created " + ChatColor.GOLD +
-                                    "Bid" + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
-                                    ChatColor.GOLD + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
-                                    ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice())
-                                );
-                                openItemOrdersScreen(itemStack, player);
-                            });
-                        },
-                        cancel -> openItemOrdersScreen(itemStack, player)
-                    ).open(player);
+                    float totalPrice = newOrderDto.getPrice() * quantity;
+                    if (EcoUtils.hasMoney(player, totalPrice)) {
+                        new ConfirmScreen(
+                            "Bid " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
+                            " for " + newOrderDto.getQuantity() +
+                            "?",
+                            confirm -> {
+                                orderService.submitOrder(newOrderDto, () -> {
+                                    //screen.close(player);
+                                    player.sendMessage(
+                                        ChatColor.GRAY.toString() + "Created " + ChatColor.GOLD +
+                                        "Bid" + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
+                                        ChatColor.GOLD + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
+                                        ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice())
+                                    );
+                                    EcoUtils.charge(player, totalPrice);
+                                    openItemOrdersScreen(itemDTO, player);
+                                });
+                            },
+                            cancel -> openItemOrdersScreenIfExists(itemDTO, player)
+                        ).open(player);
+                    } else {
+                        player.sendMessage(
+                            ChatColor.RED + "You do not have enough money! (Total cost " +
+                            EcoUtils.formatPriceCurrency(totalPrice) + ")"
+                        );
+                        openNewBidQuantitiyInputScreen(itemDTO, newOrderDto, player);
+                    }
+                    
                 } catch (NumberFormatException e) {
                     player.sendMessage(
                         ChatColor.RED + "Invalid quantity! Please try again."
                     );
-                    openNewBidQuantitiyInputScreen(itemStack, newOrderDto, player);
+                    openNewBidQuantitiyInputScreen(itemDTO, newOrderDto, player);
                 }
-                
             },
-            close -> openItemOrdersScreen(itemStack, player)
+            close -> openItemOrdersScreenIfExists(itemDTO, player)
         ).open(player);
     }
 
@@ -299,47 +333,54 @@ public class MarketGui {
         });
     }
 
-    private void openAskLiftQuantityInputScreen(GroupedOrderDTO groupedOrderDTO, final ItemStack item, int maxQuantity, HumanEntity player) {
+    private void openAskLiftQuantityInputScreen(GroupedOrderDTO groupedOrderDTO, ItemDTO itemDTO, int maxQuantity, HumanEntity player) {
         new AskLiftQuantityInputScreen(
             (e, quantityTxt) -> {
                 try {
-                    ItemStack itemsToGive = item.clone();
+                    ItemStack itemsToGive = iconsManager.getItemIcon(itemDTO).clone();
                     int quantityToBuy = Integer.parseInt(quantityTxt);
                     float price = groupedOrderDTO.getPrice();
                     float totalPrice = price * quantityToBuy;
-                    new ConfirmScreen(
-                        "Buy " + quantityToBuy + " for " + EcoUtils.formatPriceCurrency(totalPrice) + "?",
-                        confirm -> {
-                            orderService.fillOrder(quantityToBuy, price, quantityBought -> {
-                                float amountToCharge = price * quantityBought;
-                                String boughtPriceStr = EcoUtils.formatPriceCurrency(amountToCharge);
-                                player.sendMessage(
-                                    ChatColor.RED + "Bought " + quantityBought + " for " + boughtPriceStr
-                                );
-                                itemsToGive.setAmount(quantityBought);
-                                EcoUtils.charge(player, amountToCharge);
-                                InventoryUtils.dropPlayerItems(player, itemsToGive);
-                                openItemOrdersScreen(item, player);
-                            });
-                        },
-                        cancel -> openItemOrdersScreen(item, player)
-                        
-                    ).open(player);
-
+                    if (EcoUtils.hasMoney(player, totalPrice)) {
+                        new ConfirmScreen(
+                            "Buy " + quantityToBuy + " for " + EcoUtils.formatPriceCurrency(totalPrice) + "?",
+                            confirm -> {
+                                orderService.fillOrder(quantityToBuy, price, quantityBought -> {
+                                    float amountToCharge = price * quantityBought;
+                                    String boughtPriceStr = EcoUtils.formatPriceCurrency(amountToCharge);
+                                    player.sendMessage(
+                                        ChatColor.RED + "Bought " + quantityBought + " for " + boughtPriceStr
+                                    );
+                                    itemsToGive.setAmount(quantityBought);
+                                    EcoUtils.charge(player, amountToCharge);
+                                    InventoryUtils.dropPlayerItems(player, itemsToGive);
+                                    openItemOrdersScreen(itemDTO, player); //Item should exist now!! TODO: test
+                                });
+                            },
+                            cancel -> openItemOrdersScreenIfExists(itemDTO, player)
+                            
+                        ).open(player);
+                    } else {
+                        player.sendMessage(
+                            ChatColor.RED + "You do not have enough money! (Total cost " +
+                            EcoUtils.formatPriceCurrency(totalPrice) + ")"
+                        );
+                        openAskLiftQuantityInputScreen(groupedOrderDTO, itemDTO, maxQuantity, player);
+                    }
                 } catch (NumberFormatException ex) {
                     player.sendMessage(ChatColor.RED + "Invalid quantity, please try again!");
-                    openAskLiftQuantityInputScreen(groupedOrderDTO, item, maxQuantity, player); // TODO: is this safe?
+                    openAskLiftQuantityInputScreen(groupedOrderDTO, itemDTO, maxQuantity, player); // TODO: is this safe?
                 }
             },
-            onClose -> openItemOrdersScreen(item, player)
+            onClose -> openItemOrdersScreen(itemDTO, player)
         ).open(player);
     }
 
-    private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, final ItemStack item, int maxQuantity, HumanEntity player) {
+    private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, ItemDTO itemDTO, int maxQuantity, HumanEntity player) {
         BidHitItemInputScreen inputScreen = new BidHitItemInputScreen(
             groupedOrderDTO,
-            item,
-            back -> openItemOrdersScreen(item, player),
+            iconsManager.getItemIcon(itemDTO),
+            back -> openItemOrdersScreen(itemDTO, player),
             insertedItems -> {
                 if (insertedItems == null) {
                     player.sendMessage(
@@ -361,12 +402,12 @@ public class MarketGui {
                             );
                             
                             EcoUtils.pay(player, amountToPay);
-                            openItemOrdersScreen(item, player);
+                            openItemOrdersScreen(itemDTO, player); // Item should exist here TODO: test
                         }); // TODO: on fail return items!
                     },
                     cancel -> {
                         InventoryUtils.dropPlayerItems(player, insertedItems);
-                        openItemOrdersScreen(item, player);
+                        openItemOrdersScreen(itemDTO, player);
                     }
                 ).open(player);
                 
@@ -376,24 +417,9 @@ public class MarketGui {
         inputScreen.open(player);
     }
 
-    private void openItemOrdersScreen(ItemStack item, HumanEntity player) {
-        Long itemId = Objects.requireNonNull(ItemUtils.getId(item));
-        ItemOrdersScreen itemOrdersScreen = new ItemOrdersScreen(
-            item,
-            back -> openAllItemsScreen(player),
-            newBid -> openNewBidScreen(item, player),
-            newAsk -> openNewAskScreen(item, player)
-        );
-        orderService.getOrders(itemId, orders -> {
-            itemOrdersScreen.setOrders(
-                orders,
-                bid -> e -> openBidHitItemInputScreen(bid, item, 1, player),
-                ask -> e -> openAskLiftQuantityInputScreen(ask, item, 1, player)
-            );
-        });
 
-        itemOrdersScreen.open(player);
+    private void openItemOrdersScreenIfExists(ItemDTO itemDTO, HumanEntity player) {
+        if (iconsManager.hasIcon(itemDTO)) openItemOrdersScreen(itemDTO, player);
+        else player.closeInventory();
     }
-
-
 }

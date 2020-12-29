@@ -1,5 +1,6 @@
 package com.broscraft.cda.commands;
 
+import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.gui.MarketGui;
 import com.broscraft.cda.utils.ItemUtils;
@@ -33,7 +34,7 @@ public class NewOrderCommand implements CommandExecutor {
             String orderTypeStr = args[0];
             try {
                 OrderType orderType = OrderType.valueOf(orderTypeStr.toUpperCase());
-                ItemStack itemStack = player.getInventory().getItemInMainHand().clone();
+                ItemStack itemStack = player.getInventory().getItemInMainHand();
                 if (itemStack == null) {
                     sender.sendMessage(ChatColor.RED.toString() + "You must be holding an item to create an order for");
                     return false;
@@ -44,13 +45,13 @@ public class NewOrderCommand implements CommandExecutor {
                     sender.sendMessage(ChatColor.RED.toString() + "Cannot create ask orders for damaged items!");
                     return false; 
                 } else {
-                    itemStack.setAmount(0);
+                    ItemDTO itemDTO = ItemUtils.parseItemStack(itemStack);
                     switch (orderType) {
                         case BID:
-                            marketGui.openNewBidScreen(itemStack, player);
+                            marketGui.openNewBidScreen(itemDTO, player);
                             break;
                         case ASK:
-                            marketGui.openNewAskScreen(itemStack, player);
+                            marketGui.openNewAskScreen(itemDTO, player);
                             break;  
                     }
                     

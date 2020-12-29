@@ -32,11 +32,10 @@ public class ItemOrdersScreen extends ScrollableScreen {
         super("Item Orders", ScrollType.HORIZONTAL, 7, 3);
         this.createNavbar(item, onBackBtnClick);
         this.setGuiIcons();
-        this.setCreateOrderButtons(ItemUtils.getId(item), onNewBidClick, onNewAskClick);
+        this.setCreateOrderButtons(onNewBidClick, onNewAskClick);
     }
 
     private void setCreateOrderButtons(
-        Long itemId,
         GuiAction<InventoryClickEvent> onNewBidClick,
         GuiAction<InventoryClickEvent> onNewAskClick
     ) {

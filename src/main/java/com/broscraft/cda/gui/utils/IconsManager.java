@@ -6,12 +6,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.dtos.ItemOverviewDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.observers.IconUpdateObserver;
 import com.broscraft.cda.observers.NewIconObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
@@ -23,9 +23,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import net.md_5.bungee.api.ChatColor;
 
-public class OverviewIconsManager implements OverviewUpdateObserver {
-    private Map<Long, ItemStack> icons = new HashMap<>();
-    private Map<Long, String> iconNames = new HashMap<>();
+public class IconsManager implements OverviewUpdateObserver {
+    private Map<ItemDTO, ItemStack> overviewIcons = new HashMap<>();
+    private Map<ItemDTO, ItemStack> icons = new HashMap<>();
+    private Map<ItemDTO, String> iconSearchNames = new HashMap<>();
 
     private List<IconUpdateObserver> iconUpdateObservers = new ArrayList<>();
     private List<NewIconObserver> newIconObservers = new ArrayList<>();
@@ -48,27 +49,40 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
     }
 
 
-    private void notifyIconUpdateObservers(Long itemId, ItemStack icon) {
-        iconUpdateObservers.forEach(o ->  o.onIconUpdate(itemId, icon));
+    private void notifyIconUpdateObservers(ItemDTO itemDTO, ItemStack icon) {
+        iconUpdateObservers.forEach(o ->  o.onIconUpdate(itemDTO, icon));
     }
 
-    private void notifyNewIconObservers(ItemStack icon) {
-        newIconObservers.forEach(o ->  o.onNewIcon(icon));
+    private void notifyNewIconObservers(ItemDTO item, ItemStack icon) {
+        newIconObservers.forEach(o ->  o.onNewIcon(item, icon));
     }
 
 
-    public Collection<ItemStack> getAllIcons() {
-        return this.icons.values();
+    public Map<ItemDTO, ItemStack> getAllOverviewIcons() {
+        return this.overviewIcons;
     }
 
-    public void searchIcons(String searchQuery, Consumer<List<ItemStack>> onComplete) {
+    public ItemStack getItemIcon(ItemDTO itemDTO) {
+        return this.icons.get(itemDTO);
+    }
+
+    public ItemStack getOverviewIcon(ItemDTO itemDTO) {
+        return this.overviewIcons.get(itemDTO);
+    }
+
+    public boolean hasIcon(ItemDTO itemDTO) {
+        return this.overviewIcons.containsKey(itemDTO);
+    }
+
+    public void searchIcons(String searchQuery, Consumer<Map<ItemDTO, ItemStack>> onComplete) {
         CDAPlugin.newChain()
         .asyncFirst(
-            () -> icons.keySet().stream().filter(k -> {
-                String iconName = this.iconNames.get(k);
+            () -> icons.entrySet().stream().filter(entry -> {
+                ItemDTO itemDTO = entry.getKey();
+                String iconName = this.iconSearchNames.get(itemDTO);
                 return iconName.contains(searchQuery.toLowerCase());
-            }).map(k -> this.icons.get(k))
-            .collect(Collectors.toList())
+            })
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
         )
         .syncLast(result -> onComplete.accept(result))
         .execute();
@@ -83,22 +97,23 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
 
     // TODO: use itemBuilder to make
     private ItemStack createIcon(ItemOverviewDTO itemOverview) {
-        ItemStack icon = ItemUtils.buildItemStack(itemOverview.getItem());
+        ItemDTO itemDTO = itemOverview.getItem();
+        ItemStack icon = ItemUtils.buildItemStack(itemDTO);
+        icons.put(itemDTO, icon);
+
+        ItemStack overviewIcon = icon.clone();
         List<String> lore = this.getLore(itemOverview);
-        ItemMeta meta = icon.getItemMeta();
-
-        Long id = itemOverview.getItem().getId();
-
+        ItemMeta meta = overviewIcon.getItemMeta();
         meta.setLore(lore);
-        icon.setItemMeta(meta);
-        iconNames.put(id, ItemUtils.getSearchableName(itemOverview.getItem()));
-        icons.put(id, icon);
+        overviewIcon.setItemMeta(meta);
+
+        iconSearchNames.put(itemDTO, ItemUtils.getSearchableName(itemOverview.getItem()));
+        overviewIcons.put(itemDTO, overviewIcon);
         return icon;
     }
 
     private ItemStack updateIcon(ItemOverviewDTO itemOverviewDTO) {
-        Long itemId = Objects.requireNonNull(itemOverviewDTO.getItem().getId());
-        ItemStack icon = this.icons.get(itemId);
+        ItemStack icon = this.icons.get(itemOverviewDTO.getItem());
         List<String> lore = this.getLore(itemOverviewDTO);
         ItemMeta meta = icon.getItemMeta();
         meta.setLore(lore);
@@ -130,13 +145,13 @@ public class OverviewIconsManager implements OverviewUpdateObserver {
     @Override
     public void onOverviewUpdate(ItemOverviewDTO itemOverviewDTO) {
         // Update icon lore when data changes
-        Long itemId = Objects.requireNonNull(itemOverviewDTO.getItem().getId());
+        ItemDTO itemDTO = itemOverviewDTO.getItem();
 
-        if (icons.containsKey(itemId)) {
-            notifyIconUpdateObservers(itemId, updateIcon(itemOverviewDTO));
+        if (icons.containsKey(itemDTO)) {
+            notifyIconUpdateObservers(itemDTO, updateIcon(itemOverviewDTO));
         } else {
             ItemStack icon = createIcon(itemOverviewDTO);
-            notifyNewIconObservers(icon);
+            notifyNewIconObservers(itemDTO, icon);
         }
     }
 

@@ -3,7 +3,6 @@ package com.broscraft.cda.dtos.items.visitors;
 import com.broscraft.cda.dtos.items.EnchantedItemDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.items.PotionDTO;
-import com.broscraft.cda.utils.ItemUtils;
 import com.google.common.base.Preconditions;
 
 import org.bukkit.Material;
@@ -19,7 +18,6 @@ public class ItemStackBuilder extends ItemVisitor {
 
     private void initialiseItem(ItemDTO itemDto) {
         this.icon = new ItemStack(itemDto.getMaterial());
-        ItemUtils.setId(this.icon, itemDto.getId());
     }
 
     @Override

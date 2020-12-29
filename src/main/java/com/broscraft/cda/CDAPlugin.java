@@ -6,7 +6,7 @@ import com.broscraft.cda.commands.NewOrderCommand;
 import com.broscraft.cda.commands.OpenMenuCommand;
 import com.broscraft.cda.commands.SearchMarketCommand;
 import com.broscraft.cda.gui.MarketGui;
-import com.broscraft.cda.gui.utils.OverviewIconsManager;
+import com.broscraft.cda.gui.utils.IconsManager;
 import com.broscraft.cda.repositories.ItemRepository;
 import com.broscraft.cda.repositories.OrderRepository;
 import com.broscraft.cda.services.ItemOverviewService;
@@ -36,7 +36,7 @@ public class CDAPlugin extends JavaPlugin
     private ItemService itemService;
     private OrderService orderService;
     private ItemOverviewService itemOverviewService;
-    private OverviewIconsManager overviewIconsManager;
+    private IconsManager iconsManager;
 
     private MarketGui marketGui;
 
@@ -62,17 +62,17 @@ public class CDAPlugin extends JavaPlugin
 
         taskChainFactory = BukkitTaskChainFactory.create(this);
         
-        overviewIconsManager = new OverviewIconsManager();
+        iconsManager = new IconsManager();
 
         itemRepository = new ItemRepository();
         orderRepository = new OrderRepository();
 
         itemService = new ItemService(itemRepository);
-        itemOverviewService = new ItemOverviewService(itemService, overviewIconsManager);
+        itemOverviewService = new ItemOverviewService(itemService, iconsManager);
         orderService = new OrderService(orderRepository, itemService, itemOverviewService);
 
         marketGui = new MarketGui(
-            overviewIconsManager,
+            iconsManager,
             orderService
         );
 

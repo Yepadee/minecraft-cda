@@ -5,9 +5,9 @@ api-version: 1.16
 softdepend: [Vault, Essentials]
 commands:
   market:
-    description: Open the market GUI.
-    usage: /<command>
-    aliases: ['m']
+    description: Open the market GUI. Add argument 'this' to open orders page for item in hand.
+    usage: /<command> [this]
+    aliases: ['mkt']
   searchmarket:
     description: Searches the market for items matching a provided query.
     usage: /<command> 'item name'
