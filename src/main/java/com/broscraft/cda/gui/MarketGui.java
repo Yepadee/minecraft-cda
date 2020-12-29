@@ -191,7 +191,6 @@ public class MarketGui {
 
 
     private void openNewAskItemInputScreen(ItemDTO itemDTO, NewOrderDTO newOrderDto, HumanEntity player) {
-        //ItemDTO itemDTO = ItemUtils.parseItemStack(itemStack);
         orderService.getBestPrice(
             newOrderDto.getItem(),
             newOrderDto.getType(),
