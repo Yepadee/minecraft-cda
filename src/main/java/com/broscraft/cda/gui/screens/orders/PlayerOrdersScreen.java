@@ -36,6 +36,7 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
 
     private void createNavbar(GuiAction<InventoryClickEvent> onBackBtnClick) {
         this.gui.setItem(1, 1, ItemBuilder.from(Styles.BACK_ICON).asGuiItem(onBackBtnClick));
+        this.gui.setItem(1, 5, ItemBuilder.from(Styles.MY_ORDERS_ICON).asGuiItem());
     }
 
 

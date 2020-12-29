@@ -2,6 +2,7 @@ package com.broscraft.cda;
 
 import java.util.Objects;
 
+import com.broscraft.cda.commands.MyOrdersCommand;
 import com.broscraft.cda.commands.NewOrderCommand;
 import com.broscraft.cda.commands.OpenMenuCommand;
 import com.broscraft.cda.commands.SearchMarketCommand;
@@ -29,6 +30,7 @@ public class CDAPlugin extends JavaPlugin
     private OpenMenuCommand openMenuCommand;
     private SearchMarketCommand searchMarketCommand;
     private NewOrderCommand newOrderCommand;
+    private MyOrdersCommand myOrdersCommand;
 
     private ItemRepository itemRepository;
     private OrderRepository orderRepository;
@@ -79,6 +81,7 @@ public class CDAPlugin extends JavaPlugin
         openMenuCommand = new OpenMenuCommand(marketGui);
         searchMarketCommand = new SearchMarketCommand(marketGui);
         newOrderCommand = new NewOrderCommand(marketGui);
+        myOrdersCommand = new MyOrdersCommand(marketGui);
         
         getLogger().info("Enabled CDA!");
         this.setupCommands();
@@ -88,6 +91,7 @@ public class CDAPlugin extends JavaPlugin
         Objects.requireNonNull(this.getCommand("market")).setExecutor(openMenuCommand);
         Objects.requireNonNull(this.getCommand("searchmarket")).setExecutor(searchMarketCommand);
         Objects.requireNonNull(this.getCommand("neworder")).setExecutor(newOrderCommand);
+        Objects.requireNonNull(this.getCommand("myorders")).setExecutor(myOrdersCommand);
     }
 
 }
