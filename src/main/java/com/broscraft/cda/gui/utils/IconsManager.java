@@ -91,12 +91,12 @@ public class IconsManager implements OverviewUpdateObserver {
 
     public void createIcons(List<ItemOverviewDTO> itemOverviews) {
         itemOverviews.forEach(itemOverview -> {
-            createIcon(itemOverview);
+            createOverviewIcon(itemOverview);
         });
     }
 
     // TODO: use itemBuilder to make
-    private ItemStack createIcon(ItemOverviewDTO itemOverview) {
+    private ItemStack createOverviewIcon(ItemOverviewDTO itemOverview) {
         ItemDTO itemDTO = itemOverview.getItem();
         ItemStack icon = ItemUtils.buildItemStack(itemDTO);
         icons.put(itemDTO, icon);
@@ -150,7 +150,7 @@ public class IconsManager implements OverviewUpdateObserver {
         if (icons.containsKey(itemDTO)) {
             notifyIconUpdateObservers(itemDTO, updateIcon(itemOverviewDTO));
         } else {
-            ItemStack icon = createIcon(itemOverviewDTO);
+            ItemStack icon = createOverviewIcon(itemOverviewDTO);
             notifyNewIconObservers(itemDTO, icon);
         }
     }
@@ -158,7 +158,7 @@ public class IconsManager implements OverviewUpdateObserver {
     @Override
     public void onOverviewLoad(Collection<ItemOverviewDTO> itemOverviewDTOs) {
         itemOverviewDTOs.forEach(itemOverviewDTO -> {
-            createIcon(itemOverviewDTO);
+            createOverviewIcon(itemOverviewDTO);
         });
     }
 }
