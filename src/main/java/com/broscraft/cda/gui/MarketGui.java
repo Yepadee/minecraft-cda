@@ -2,8 +2,9 @@ package com.broscraft.cda.gui;
 
 import java.util.Objects;
 
-import com.broscraft.cda.dtos.orders.BestPriceDTO;
+import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
+import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.gui.screens.ConfirmScreen;
@@ -11,11 +12,13 @@ import com.broscraft.cda.gui.screens.fillOrders.AskLiftQuantityInputScreen;
 import com.broscraft.cda.gui.screens.fillOrders.BidHitItemInputScreen;
 import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
 import com.broscraft.cda.gui.screens.neworders.NewAskItemInputScreen;
+import com.broscraft.cda.gui.screens.neworders.NewOrderPriceInputScreen;
 import com.broscraft.cda.gui.screens.orders.PlayerOrdersScreen;
 import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.screens.search.SearchInputScreen;
 import com.broscraft.cda.gui.utils.OverviewIconsManager;
+import com.broscraft.cda.services.ItemService;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.EcoUtils;
 import com.broscraft.cda.utils.InventoryUtils;
@@ -23,7 +26,6 @@ import com.broscraft.cda.utils.ItemUtils;
 import com.google.common.base.Function;
 
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -33,13 +35,16 @@ import net.md_5.bungee.api.ChatColor;
 public class MarketGui {
     private OverviewIconsManager overviewIconsManager;
     private OrderService orderService;
+    private ItemService itemService;
 
     public MarketGui(
         OverviewIconsManager overviewIconsManager,
-        OrderService orderService
+        OrderService orderService,
+        ItemService itemService
     ) {
         this.overviewIconsManager = overviewIconsManager;
         this.orderService = orderService;
+        this.itemService = itemService;
     }
 
     public void openAllItemsScreen(HumanEntity player) {
@@ -98,46 +103,54 @@ public class MarketGui {
         player.sendMessage("New Bid Button Clicked!!!");
     }
 
-    public void openNewAskItemInputScreen(BestPriceDTO bestPrice, ItemStack itemStack, NewOrderDTO newOrderDto, Player player) {
-        NewAskItemInputScreen screen = new NewAskItemInputScreen(
-            itemStack,
-            bestPrice,
-            newOrderDto.getPrice()
-        );
-        screen.setBackBtn(e -> screen.close(player));
-        screen.setConfirmBtn(insertedItems -> {
-            if (insertedItems == null) {
-                player.sendMessage(
-                    ChatColor.RED + "No items selected!"
+    public void openNewAskItemInputScreen(ItemStack itemStack, NewOrderDTO newOrderDto, HumanEntity player) {
+        ItemDTO itemDTO = ItemUtils.parseItemStack(itemStack);
+        Long itemId = itemService.getItemId(itemDTO);
+        orderService.getBestPrice(
+            itemId,
+            newOrderDto.getType(),
+            bestPrice -> {
+                NewAskItemInputScreen screen = new NewAskItemInputScreen(
+                    itemStack,
+                    bestPrice,
+                    newOrderDto.getPrice()
                 );
-                return;
-            }
-            newOrderDto.setQuantity(insertedItems.getAmount());
-
-            new ConfirmScreen(
-                "Sell " + newOrderDto.getQuantity() +
-                " at " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
-                " each?",
-                confirm -> {
-                    orderService.submitOrder(player, newOrderDto, () -> {
-                        screen.close(player);
+                screen.setBackBtn(e -> screen.close(player));
+                screen.setConfirmBtn(insertedItems -> {
+                    if (insertedItems == null) {
                         player.sendMessage(
-                            ChatColor.GRAY.toString() + "Created " + ChatColor.AQUA +
-                            "Ask" + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
-                            ChatColor.AQUA + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
-                            ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice())
+                            ChatColor.RED + "No items selected!"
                         );
-                    });
-
-                },
-                cancel -> {
-                    InventoryUtils.dropPlayerItems(player, insertedItems);
-                    screen.close(player);
-                }
-            ).open(player);
-            
-        });
-        screen.open(player);
+                        return;
+                    }
+                    newOrderDto.setQuantity(insertedItems.getAmount());
+        
+                    new ConfirmScreen(
+                        "Sell " + newOrderDto.getQuantity() +
+                        " at " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
+                        " each?",
+                        confirm -> {
+                            orderService.submitOrder(player, newOrderDto, () -> {
+                                screen.close(player);
+                                player.sendMessage(
+                                    ChatColor.GRAY.toString() + "Created " + ChatColor.AQUA +
+                                    "Ask" + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
+                                    ChatColor.AQUA + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
+                                    ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice())
+                                );
+                            });
+        
+                        },
+                        cancel -> {
+                            InventoryUtils.dropPlayerItems(player, insertedItems);
+                            screen.close(player);
+                        }
+                    ).open(player);
+                    
+                });
+                screen.open(player);
+            }
+        );
     }
 
 
@@ -274,7 +287,7 @@ public class MarketGui {
                 newBid.getWhoClicked().sendMessage("New bid btn clicked for item " + itemId + "!");
             },
             newAsk -> {
-                newAsk.getWhoClicked().sendMessage("New ask btn clicked for item " + itemId + "!");
+                openNewAskScreen(item, player);
             }
         );
         orderService.getOrders(itemId, orders -> {
@@ -282,11 +295,33 @@ public class MarketGui {
                 orders,
                 bid -> e -> openBidHitItemInputScreen(bid, item, 1, player),
                 ask -> e -> openAskLiftQuantityInputScreen(ask, item, 1, player)
-                
             );
         });
 
         itemOrdersScreen.open(player);
+    }
+
+    private void openNewAskScreen(ItemStack itemStack, HumanEntity player) {
+        NewOrderDTO newOrderDTO = new NewOrderDTO();
+        newOrderDTO.setType(OrderType.ASK);
+        newOrderDTO.setPlayerUUID(player.getUniqueId());
+        newOrderDTO.setItem(ItemUtils.parseItemStack(itemStack));
+        
+        new NewOrderPriceInputScreen(
+            (p, priceTxt) -> {
+                try {
+                    float price = Integer.parseInt(priceTxt);
+                    newOrderDTO.setPrice(price);
+                    openNewAskItemInputScreen(itemStack, newOrderDTO, player);
+                } catch (NumberFormatException ex) {
+                    player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
+                    openNewAskScreen(itemStack, player); // TODO: is this safe?
+                }
+            },
+            close -> {
+                openItemOrdersScreen(itemStack, player);
+            }
+        ).open(player);
     }
 
 }

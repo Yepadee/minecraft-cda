@@ -75,7 +75,7 @@ public class OrderService {
     public void getBestPrice(Long itemId, OrderType orderType, Consumer<BestPriceDTO> onComplete) {
         CDAPlugin.newChain().asyncFirst(() -> {
             return orderRepository.getBestPrice(itemId, orderType);
-        }).abortIfNull() // TODO: handle error
+        })
         .syncLast(result -> onComplete.accept(result))
         .execute();
     }
@@ -98,7 +98,7 @@ public class OrderService {
         .execute();
     }
 
-    public void submitOrder(Player player, final NewOrderDTO newOrderDTO, Runnable onComplete) {
+    public void submitOrder(HumanEntity player, final NewOrderDTO newOrderDTO, Runnable onComplete) {
         float totalPrice = newOrderDTO.getPrice() * newOrderDTO.getQuantity();
         OrderType orderType = newOrderDTO.getType();
         if (orderType.equals(OrderType.BID) && !EcoUtils.hasMoney(player, totalPrice)) {

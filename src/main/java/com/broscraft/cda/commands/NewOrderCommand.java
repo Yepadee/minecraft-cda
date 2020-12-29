@@ -3,7 +3,6 @@ import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.gui.MarketGui;
-import com.broscraft.cda.services.ItemService;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.EcoUtils;
 import com.broscraft.cda.utils.ItemUtils;
@@ -20,14 +19,12 @@ import net.md_5.bungee.api.ChatColor;
 public class NewOrderCommand implements CommandExecutor {
 
     private OrderService orderService;
-    private ItemService itemService;
     private MarketGui marketGui;
 
     private float MAX_PRICE = 1000000;
 
-    public NewOrderCommand(OrderService orderService, ItemService itemService, MarketGui marketGui) {
+    public NewOrderCommand(OrderService orderService, MarketGui marketGui) {
         this.orderService = orderService;
-        this.itemService = itemService;
         this.marketGui = marketGui;
     }
 
@@ -105,12 +102,7 @@ public class NewOrderCommand implements CommandExecutor {
                     ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()));
                 });
             } else {
-                Long itemId = itemService.getItemId(itemDTO);
-                if (itemId != null) orderService.getBestPrice(
-                    itemId,
-                    newOrderDto.getType(),
-                    bestPrice -> marketGui.openNewAskItemInputScreen(bestPrice, itemStack, newOrderDto, player));
-                else marketGui.openNewAskItemInputScreen(null, itemStack, newOrderDto, player);
+                marketGui.openNewAskItemInputScreen(itemStack, newOrderDto, player);
             }
 
             return true;

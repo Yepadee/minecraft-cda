@@ -62,6 +62,7 @@ public class OrderRepository {
     }
 
     public BestPriceDTO getBestPrice(Long itemId, OrderType orderType) {
+        if (itemId == null) return null;
         BestPriceDTO bestPriceDTO = new BestPriceDTO();
         bestPriceDTO.setPrice(3.69f);
         bestPriceDTO.setQuantity(5);
