@@ -348,7 +348,10 @@ public class MarketGui {
                                     float amountToCharge = price * quantityBought;
                                     String boughtPriceStr = EcoUtils.formatPriceCurrency(amountToCharge);
                                     player.sendMessage(
-                                        ChatColor.RED + "Bought " + quantityBought + " for " + boughtPriceStr
+                                        ChatColor.AQUA + "Bought " +
+                                        ChatColor.GRAY + quantityBought +
+                                        ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" +
+                                        ChatColor.GRAY + " for " + ChatColor.GREEN + boughtPriceStr
                                     );
                                     itemsToGive.setAmount(quantityBought);
                                     EcoUtils.charge(player, amountToCharge);
@@ -397,7 +400,10 @@ public class MarketGui {
                             float amountToPay = price * quantitySold;
                             String soldPriceStr = EcoUtils.formatPriceCurrency(amountToPay);
                             player.sendMessage(
-                                ChatColor.GREEN + "Sold " + quantitySold + " for " + soldPriceStr
+                                ChatColor.GOLD + "Sold " +
+                                ChatColor.GRAY + quantitySold +
+                                ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" + 
+                                ChatColor.GRAY + " for " + ChatColor.GREEN + soldPriceStr
                             );
                             
                             EcoUtils.pay(player, amountToPay);
