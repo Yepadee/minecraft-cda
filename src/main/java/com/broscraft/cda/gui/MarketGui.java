@@ -196,7 +196,7 @@ public class MarketGui {
             newOrderDto.getType(),
             bestPrice -> {
                 NewAskItemInputScreen screen = new NewAskItemInputScreen(
-                    iconsManager.getItemIcon(itemDTO),
+                    itemDTO,
                     bestPrice,
                     newOrderDto.getPrice()
                 );
@@ -380,7 +380,7 @@ public class MarketGui {
     private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, ItemDTO itemDTO, int maxQuantity, HumanEntity player) {
         BidHitItemInputScreen inputScreen = new BidHitItemInputScreen(
             groupedOrderDTO,
-            iconsManager.getItemIcon(itemDTO),
+            itemDTO,
             back -> openItemOrdersScreen(itemDTO, player),
             insertedItems -> {
                 if (insertedItems == null) {

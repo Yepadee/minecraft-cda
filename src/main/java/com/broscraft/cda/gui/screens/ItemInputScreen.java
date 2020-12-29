@@ -23,16 +23,16 @@ public abstract class ItemInputScreen {
 
     private ItemDTO acceptedItem;
 
-    public ItemInputScreen(int height, String name, ItemStack acceptedItem) {
+    public ItemInputScreen(int height, String name, ItemDTO acceptedItem) {
         this.gui = new Gui(height, name);
         this.height = height;
         this.gui.setDefaultClickAction(e -> {
             if (isOnBorder(e.getRawSlot())) e.setCancelled(true);
             else onItemClick(e);
         });
+        this.acceptedItem = acceptedItem;
 
         setBorder();
-        setAcceptedItem(acceptedItem);
 
         this.gui.setCloseGuiAction(e -> {
             dropAllItems(e.getPlayer());
@@ -47,9 +47,6 @@ public abstract class ItemInputScreen {
         if (!clickedItem.equals(acceptedItem) || ItemUtils.isDamaged(item)) e.setCancelled(true);
     }
 
-    private void setAcceptedItem(ItemStack item) {
-        this.acceptedItem = ItemUtils.parseItemStack(item);
-    }
 
     public void setBackBtn(GuiAction<InventoryClickEvent> onBack) {
         this.gui.setItem(0, ItemBuilder.from(Styles.BACK_ICON).asGuiItem(onBack));

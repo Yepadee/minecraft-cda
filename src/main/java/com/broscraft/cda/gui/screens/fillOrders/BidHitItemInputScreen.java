@@ -2,9 +2,11 @@ package com.broscraft.cda.gui.screens.fillOrders;
 
 import java.util.function.Consumer;
 
+import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.gui.screens.ItemInputScreen;
 import com.broscraft.cda.utils.EcoUtils;
+import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -18,7 +20,7 @@ public class BidHitItemInputScreen extends ItemInputScreen {
 
     public BidHitItemInputScreen(
         GroupedOrderDTO groupedOrderDTO,
-        ItemStack acceptedItem,
+        ItemDTO acceptedItem,
         GuiAction<InventoryClickEvent> onBack,
         Consumer<ItemStack> onConfirm
     ) {
@@ -32,8 +34,8 @@ public class BidHitItemInputScreen extends ItemInputScreen {
         setConfirmBtn(onConfirm);
     }
 
-    private void setAcceptedItemIcon(GroupedOrderDTO groupedOrderDTO, ItemStack acceptedItem) {
-        GuiItem itemIcon = ItemBuilder.from(acceptedItem.clone())
+    private void setAcceptedItemIcon(GroupedOrderDTO groupedOrderDTO, ItemDTO acceptedItem) {
+        GuiItem itemIcon = ItemBuilder.from(ItemUtils.buildItemStack(acceptedItem))
         .setLore(
             ChatColor.GRAY + "Price per unit: " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(groupedOrderDTO.getPrice()),
             ChatColor.GRAY + "Available to sell: " + ChatColor.GOLD + groupedOrderDTO.getQuantity()

@@ -69,7 +69,7 @@ public class DB {
 
     public static ResultSet query(PreparedStatement stmt) {
         try {
-            return stmt.executeQuery(PASS);
+            return stmt.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
