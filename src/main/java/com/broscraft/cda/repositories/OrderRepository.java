@@ -73,7 +73,7 @@ public class OrderRepository {
         // TODO: submit delete request
     }
 
-    public TransactionSummaryDTO fillOrder(float price, int quantity) {
+    public TransactionSummaryDTO fillOrder(Long itemId, float price, int quantity) {
         TransactionSummaryDTO transactionSummary = new TransactionSummaryDTO();
         // TODO: send request to fill order and retrieve affected orders
         List<OrderDTO> affectedOrders = new ArrayList<>();

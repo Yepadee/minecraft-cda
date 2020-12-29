@@ -344,7 +344,7 @@ public class MarketGui {
                         new ConfirmScreen(
                             "Buy " + quantityToBuy + " for " + EcoUtils.formatPriceCurrency(totalPrice) + "?",
                             confirm -> {
-                                orderService.fillOrder(quantityToBuy, price, quantityBought -> {
+                                orderService.fillOrder(itemDTO, quantityToBuy, price, quantityBought -> {
                                     float amountToCharge = price * quantityBought;
                                     String boughtPriceStr = EcoUtils.formatPriceCurrency(amountToCharge);
                                     player.sendMessage(
@@ -396,7 +396,7 @@ public class MarketGui {
                 new ConfirmScreen(
                     "Sell " + insertedItems.getAmount() + " for " + totalPriceStr + "?",
                     confirm -> {
-                        orderService.fillOrder(quantityToSell, price, quantitySold -> {
+                        orderService.fillOrder(itemDTO, quantityToSell, price, quantitySold -> {
                             float amountToPay = price * quantitySold;
                             String soldPriceStr = EcoUtils.formatPriceCurrency(amountToPay);
                             player.sendMessage(
