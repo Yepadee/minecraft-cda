@@ -17,7 +17,7 @@ import com.broscraft.cda.dtos.transaction.TransactionSummaryDTO;
 import org.bukkit.Material;
 
 public class OrderRepository {
-    public GroupedOrdersDTO getOrders(Long itemId) {
+    public GroupedOrdersDTO getItemOrders(Long itemId) {
         // TODO: Actually load orders for the item
         System.out.println("Loading orders for item " + itemId + "!");
         List<GroupedBidDTO> bids = new ArrayList<>();

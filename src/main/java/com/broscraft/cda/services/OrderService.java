@@ -86,10 +86,10 @@ public class OrderService {
         .execute();
     }
 
-    public void getOrders(ItemDTO itemDTO, Consumer<GroupedOrdersDTO> onComplete) {
-        Long itemId = itemService.getItemId(itemDTO);
+    public void getItemOrders(ItemDTO itemDTO, Consumer<GroupedOrdersDTO> onComplete) {
+        Long itemId = Objects.requireNonNull(itemService.getItemId(itemDTO));
         CDAPlugin.newChain().asyncFirst(() -> {
-            return orderRepository.getOrders(itemId);
+            return orderRepository.getItemOrders(itemId);
         })
         .abortIfNull() // TODO: handle error
         .syncLast(result -> onComplete.accept(result))
