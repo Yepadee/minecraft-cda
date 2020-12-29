@@ -6,6 +6,7 @@ import com.broscraft.cda.commands.MyOrdersCommand;
 import com.broscraft.cda.commands.NewOrderCommand;
 import com.broscraft.cda.commands.OpenMenuCommand;
 import com.broscraft.cda.commands.SearchMarketCommand;
+import com.broscraft.cda.database.DB;
 import com.broscraft.cda.gui.MarketGui;
 import com.broscraft.cda.gui.utils.IconsManager;
 import com.broscraft.cda.repositories.ItemRepository;
@@ -60,6 +61,8 @@ public class CDAPlugin extends JavaPlugin
     
     @Override
     public void onEnable() {
+        setUpTables();
+
         instance = this;
 
         taskChainFactory = BukkitTaskChainFactory.create(this);
@@ -92,6 +95,37 @@ public class CDAPlugin extends JavaPlugin
         Objects.requireNonNull(this.getCommand("searchmarket")).setExecutor(searchMarketCommand);
         Objects.requireNonNull(this.getCommand("neworder")).setExecutor(newOrderCommand);
         Objects.requireNonNull(this.getCommand("myorders")).setExecutor(myOrdersCommand);
+    }
+
+    private void setUpTables() {
+        this.getDataFolder().mkdir();
+        DB.init(this.getDataFolder());
+
+        if (!DB.tableExists("Orders")) {
+
+        }
+
+        if (!DB.tableExists("Items")) {
+            
+        }
+
+        if (!DB.tableExists("Enchantments")) {
+            
+        }
+
+        if (!DB.tableExists("Transactions")) {
+            
+        }  
+
+
+        DB.update(
+            "CREATE TABLE TestTable " +
+            "(id INTEGER not NULL, " +
+            " first VARCHAR(255), " + 
+            " last VARCHAR(255), " + 
+            " age INTEGER, " + 
+            " PRIMARY KEY ( id ))"
+        );
     }
 
 }
