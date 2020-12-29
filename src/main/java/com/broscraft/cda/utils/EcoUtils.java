@@ -18,15 +18,7 @@ public class EcoUtils {
         priceFormat.setMinimumFractionDigits(2);
         priceFormat.setRoundingMode(RoundingMode.HALF_UP);
     }
-
-    public static float formatPrice(float price) {
-        return Float.parseFloat(priceFormat.format(price));
-    }
-
-    public static float formatPrice(String price) {
-        return Float.parseFloat(priceFormat.format(Float.parseFloat(price)));
-    }
-
+    
     public static String formatPriceCurrency(float price) {
         return Economy.format(BigDecimal.valueOf(price));
     }
