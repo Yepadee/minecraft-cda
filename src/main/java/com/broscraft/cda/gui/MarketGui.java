@@ -31,7 +31,7 @@ import me.mattstudios.mfgui.gui.components.GuiAction;
 import net.md_5.bungee.api.ChatColor;
 
 public class MarketGui {
-    private float MAX_PRICE = 1000000;
+    private static float MAX_PRICE = 1000000;
     private IconsManager iconsManager;
     private OrderService orderService;
 
@@ -184,7 +184,6 @@ public class MarketGui {
 
         itemOrdersScreen.open(player);
     }
-
 
     public boolean itemHasOrders(ItemDTO itemDTO) {
         return iconsManager.hasIcon(itemDTO);
@@ -416,7 +415,6 @@ public class MarketGui {
         
         inputScreen.open(player);
     }
-
 
     private void openItemOrdersScreenIfExists(ItemDTO itemDTO, HumanEntity player) {
         if (iconsManager.hasIcon(itemDTO)) openItemOrdersScreen(itemDTO, player);
