@@ -8,6 +8,10 @@ commands:
     description: Open the market GUI. Add argument 'this' to open orders page for item in hand.
     usage: /<command> [this]
     aliases: ['mkt']
+  myorders:
+    description: Open your orders screen.
+    usage: /<command>
+    aliases: ['mo']
   searchmarket:
     description: Searches the market for items matching a provided query.
     usage: /<command> 'item name'

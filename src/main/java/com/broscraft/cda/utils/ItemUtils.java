@@ -35,8 +35,6 @@ public class ItemUtils {
     private static final ItemStackBuilder itemStackBuilder = new ItemStackBuilder();
     private static final GroupedOrderIconBuilder groupedOrderIconBuilder = new GroupedOrderIconBuilder();
 
-    //private static final NamespacedKey ICON_ID_KEY = new NamespacedKey(JavaPlugin.getProvidingPlugin(ItemStackBuilder.class), "icon_id");
-
     private static final Set<String> NAME_CONTAINS_BLACKLIST = new HashSet<>(
         Arrays.asList("LEGACY",
                 "AIR",
