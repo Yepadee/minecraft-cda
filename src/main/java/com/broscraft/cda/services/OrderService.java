@@ -72,7 +72,8 @@ public class OrderService {
     }
 
 
-    public void getBestPrice(Long itemId, OrderType orderType, Consumer<BestPriceDTO> onComplete) {
+    public void getBestPrice(ItemDTO itemDTO, OrderType orderType, Consumer<BestPriceDTO> onComplete) {
+        Long itemId = itemService.getItemId(itemDTO);
         CDAPlugin.newChain().asyncFirst(() -> {
             return orderRepository.getBestPrice(itemId, orderType);
         })

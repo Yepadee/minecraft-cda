@@ -14,5 +14,5 @@ commands:
     aliases: ['sm']
   neworder:
     description: Create a new order.
-    usage: /<command> [bid | ask] <price> <quantity>
+    usage: /<command> [bid | ask]
     aliases: ['no']

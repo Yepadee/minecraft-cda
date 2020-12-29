@@ -14,14 +14,14 @@ import net.md_5.bungee.api.ChatColor;
 
 public class NewOrderPriceInputScreen extends TextInputScreen {
     private static ItemStack CONFIRM_ICON = ItemBuilder.from(Material.PAPER).setName("").build();
-    private static String PLACEHOLDER = ChatColor.GRAY + "_";
     public NewOrderPriceInputScreen(
+        String placeholder,
         BiConsumer<Player, String> onConfirmBtnClick,
         Consumer<Player> onClose
     ) {
         super(
-            "Enter a price:",
-            PLACEHOLDER,
+            ChatColor.DARK_GREEN + "Enter a price",
+            ChatColor.GRAY.toString() + placeholder,
             CONFIRM_ICON,
             onConfirmBtnClick,
             onClose

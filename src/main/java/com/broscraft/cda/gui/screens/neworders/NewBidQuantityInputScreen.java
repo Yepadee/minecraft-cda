@@ -14,9 +14,11 @@ import net.md_5.bungee.api.ChatColor;
 
 public class NewBidQuantityInputScreen extends TextInputScreen {
     private static ItemStack CONFIRM_ICON = ItemBuilder.from(Material.GOLD_INGOT).setName("").build();
-    private static String PLACEHOLDER = ChatColor.GRAY + "_";
+    private static String PLACEHOLDER = ChatColor.GRAY + "1_";
     public NewBidQuantityInputScreen(
-            BiConsumer<Player, String> onConfirmBtnClick, Consumer<Player> onClose) {
+        BiConsumer<Player, String> onConfirmBtnClick,
+        Consumer<Player> onClose
+    ) {
         super(
             "Enter a quantity:",
             PLACEHOLDER,
