@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import com.broscraft.cda.database.DB;
 import com.broscraft.cda.dtos.ItemOverviewDTO;
 import com.broscraft.cda.dtos.items.EnchantedItemDTO;
@@ -99,7 +97,6 @@ public class ItemRepository {
             }
             itemResults.close();
 
-            Set<Long> itemIds = itemOverviews.keySet();
             Map<Long, List<EnchantmentDTO>> itemEnchantments = new HashMap<>();
             while (enchantResults.next()) {
                 Long itemId = enchantResults.getLong(1);

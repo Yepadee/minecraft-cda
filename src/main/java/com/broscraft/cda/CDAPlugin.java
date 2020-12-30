@@ -117,6 +117,7 @@ public class CDAPlugin extends JavaPlugin
                 " quantity INTEGER NOT NULL, " +
                 " quantity_filled INTEGER DEFAULT 0, " +
                 " quantity_uncollected INTEGER DEFAULT 0, " +
+                " created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, " +
                 " FOREIGN KEY (item_id) REFERENCES Items(id) " +
                 ")"
             );

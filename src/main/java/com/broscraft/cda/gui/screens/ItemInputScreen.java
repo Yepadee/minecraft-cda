@@ -15,6 +15,7 @@ import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
 import me.mattstudios.mfgui.gui.guis.Gui;
 import me.mattstudios.mfgui.gui.guis.GuiItem;
+import net.md_5.bungee.api.ChatColor;
 
 public abstract class ItemInputScreen {
     private static int WIDTH = 9;
@@ -44,7 +45,11 @@ public abstract class ItemInputScreen {
         ItemStack item = e.getCurrentItem();
         if (item == null) return;
         ItemDTO clickedItem = ItemUtils.parseItemStack(item);
-        if (!clickedItem.equals(acceptedItem) || ItemUtils.isDamaged(item)) e.setCancelled(true);
+        if (!clickedItem.equals(acceptedItem)) e.setCancelled(true);
+        if (ItemUtils.isDamaged(item)) {
+            e.setCancelled(true);
+            e.getWhoClicked().sendMessage(ChatColor.RED + "You cannot insert damaged items!");
+        }
     }
 
 
