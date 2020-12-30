@@ -195,6 +195,7 @@ public class OrderRepository {
             ResultSet results = stmt.executeQuery();
             if (results.next()) {
                 nextBestPrice = results.getFloat(1);
+                nextBestPrice = nextBestPrice == 0 ? null : nextBestPrice;
             }
  
         } catch (SQLException e) {
@@ -270,12 +271,23 @@ public class OrderRepository {
                 decrementOrderQtyStmt.setLong(3, toDecrementOrderId);
                 decrementOrderQtyStmt.executeUpdate();
             }
-            
-            transactionSummary.setAffectedOrders(affectedOrders);
-            transactionSummary.setNumFilled(totalFilled);
             DB.commit();
+
+            transactionSummary.setAffectedOrders(affectedOrders);
+            transactionSummary.setItemId(itemId);
+            transactionSummary.setOrderType(orderType);
+            transactionSummary.setNumFilled(totalFilled);
+
+            PreparedStatement getBestPriceStmt;
+            if (orderType.equals(OrderType.BID)) getBestPriceStmt = getBestBidStmt;
+            else getBestPriceStmt = getBestAskStmt;
+
+            getBestPriceStmt.setLong(1, itemId);
+            ResultSet bestPriceResults = getBestPriceStmt.executeQuery();
+            if (bestPriceResults.next()) {
+                transactionSummary.setNewBestPrice(bestPriceResults.getFloat(1));
+            }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

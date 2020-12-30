@@ -51,30 +51,7 @@ public class OrderService {
         orderUpdateObservers.remove(playerUUID);
     }
 
-    private void notifyOrderUpdateObserver(UUID playerUUID, OrderDTO orderDTO) {
-        OrderUpdateObserver o = orderUpdateObservers.get(playerUUID);
-        if (o != null) {
-            o.onOrderUpdate(orderDTO);
-        }
-    }
-
-    private void notifyNewOrderObserver(NewOrderDTO newOrderDTO) {
-        orderObserver.onNewOrder(newOrderDTO);
-    }
-
-    private void notifyNewOrderNewItemObserver(NewOrderDTO newOrderDTO) {
-        orderObserver.onNewOrder(newOrderDTO);
-    }
-
-    private void notifyRemoveOrderObserver(OrderDTO orderDTO, Float nextBestPrice) {
-        orderObserver.onRemoveOrder(orderDTO, nextBestPrice);
-    }
-
-    private String getOrderOperationThreadName(ItemDTO itemDTO) {
-        Long itemId = itemService.getItemId(itemDTO);
-        return "order " + itemId;
-    }
-
+    // Queries:
     public void getItemOrders(ItemDTO itemDTO, Consumer<GroupedOrdersDTO> onComplete) {
         Long itemId = Objects.requireNonNull(itemService.getItemId(itemDTO));
         CDAPlugin.newChain().asyncFirst(() -> {
@@ -99,6 +76,7 @@ public class OrderService {
         .execute();
     }
 
+    // Mutations:
     public void submitOrder(NewOrderDTO newOrderDTO, Runnable onComplete) {  
         CDAPlugin.newSharedChain(getOrderOperationThreadName(newOrderDTO.getItem())).async(() -> {
             ItemDTO itemDTO = newOrderDTO.getItem();
@@ -164,6 +142,7 @@ public class OrderService {
         .execute();
     }
 
+    // This operation doesnt affect supply/demand so its chill to be run whenever :)
     public void collectOrder(HumanEntity player, OrderDTO orderDTO) {
         int availableToCollect = orderDTO.getToCollect();
         if (availableToCollect == 0) {
@@ -233,6 +212,7 @@ public class OrderService {
             return transactionSummary;
         })
         .async(transactionSummary -> {
+            notifyFillOrderObserver(transactionSummary);
             transactionSummary.getAffectedOrders().forEach(order -> {
                 UUID playerUUID = Objects.requireNonNull(order.getPlayerUUID());
                 notifyOrderUpdateObserver(playerUUID, order);
@@ -256,5 +236,36 @@ public class OrderService {
 
 
     }
+
+
+    private void notifyOrderUpdateObserver(UUID playerUUID, OrderDTO orderDTO) {
+        OrderUpdateObserver o = orderUpdateObservers.get(playerUUID);
+        if (o != null) {
+            o.onOrderUpdate(orderDTO);
+        }
+    }
+
+    private void notifyFillOrderObserver(TransactionSummaryDTO transactionSummaryDTO) {
+        orderObserver.onFillOrder(transactionSummaryDTO);
+    }
+
+    private void notifyNewOrderObserver(NewOrderDTO newOrderDTO) {
+        orderObserver.onNewOrder(newOrderDTO);
+    }
+
+    private void notifyNewOrderNewItemObserver(NewOrderDTO newOrderDTO) {
+        orderObserver.onNewOrder(newOrderDTO);
+    }
+
+    private void notifyRemoveOrderObserver(OrderDTO orderDTO, Float nextBestPrice) {
+        orderObserver.onRemoveOrder(orderDTO, nextBestPrice);
+    }
+
+    // Name makes sure only one mutation operation can be carried out at a time per item
+    private String getOrderOperationThreadName(ItemDTO itemDTO) {
+        Long itemId = itemService.getItemId(itemDTO);
+        return "order " + itemId;
+    }
+
 }
 
