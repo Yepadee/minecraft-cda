@@ -19,8 +19,6 @@ import com.broscraft.cda.dtos.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.dtos.transaction.TransactionSummaryDTO;
 
-import org.bukkit.Material;
-
 public class OrderRepository {
 
     private static float EPSILON = 0.001f;
@@ -32,7 +30,11 @@ public class OrderRepository {
     private PreparedStatement getOrdersToFillStmt;
     private String emptyOrderQtyStmt;
     private PreparedStatement decrementOrderQtyStmt;
+
     private PreparedStatement getPlayerOrdersStmt;
+
+    private PreparedStatement collectOrderStmt;
+    private PreparedStatement deleteOrderStmt;
 
     public OrderRepository() {
         getOrdersToFillStmt = DB.prepareStatement(
@@ -77,6 +79,13 @@ public class OrderRepository {
             "FROM Orders " +
             "WHERE player_uuid=?"
         );
+
+        collectOrderStmt = DB.prepareStatement(
+            "UPDATE Orders " +
+            "SET quantity_uncollected = quantity_uncollected - ? " +
+            "WHERE id=?"
+        );
+        
     }
 
     public GroupedOrdersDTO getItemOrders(Long itemId) {
@@ -85,7 +94,7 @@ public class OrderRepository {
 
         try {
             getItemBidsStmt.setLong(1, itemId);
-            ResultSet bidResults = DB.query(getItemBidsStmt);
+            ResultSet bidResults = getItemBidsStmt.executeQuery();
             while (bidResults.next()) {
                 float price = bidResults.getFloat(1);
                 int quantity = bidResults.getInt(2);
@@ -96,7 +105,7 @@ public class OrderRepository {
             bidResults.close();
 
             getItemAsksStmt.setLong(1, itemId);
-            ResultSet askResults = DB.query(getItemAsksStmt);
+            ResultSet askResults = getItemAsksStmt.executeQuery();
             while (askResults.next()) {
                 float price = askResults.getFloat(1);
                 int quantity = askResults.getInt(2);
@@ -117,7 +126,7 @@ public class OrderRepository {
         
         try {
             getPlayerOrdersStmt.setString(1, playerUUID.toString());
-            ResultSet results = DB.query(getPlayerOrdersStmt);
+            ResultSet results = getPlayerOrdersStmt.executeQuery();
         
             while (results.next()) {
                 OrderDTO orderDTO = new OrderDTO();
@@ -148,11 +157,11 @@ public class OrderRepository {
             createOrderStmt.setLong(3, newOrderDTO.getItem().getId());
             createOrderStmt.setFloat(4, newOrderDTO.getPrice());
             createOrderStmt.setInt(5, newOrderDTO.getQuantity());
+            createOrderStmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         
-        DB.update(createOrderStmt);
         DB.commit();
     }
 
@@ -161,6 +170,7 @@ public class OrderRepository {
         // TODO: return next best price
         return 0.0f;
     }
+    
     // TODO: cache prepared statements
     public TransactionSummaryDTO fillOrder(OrderType orderType, ItemDTO itemDTO, float price, int quantity) {
         TransactionSummaryDTO transactionSummary = new TransactionSummaryDTO();
@@ -174,7 +184,7 @@ public class OrderRepository {
             getOrdersToFillStmt.setLong(2, itemId);
             getOrdersToFillStmt.setFloat(3, minPrice);
             getOrdersToFillStmt.setFloat(4, maxPrice);
-            ResultSet orderResults = DB.query(getOrdersToFillStmt);
+            ResultSet orderResults = getOrdersToFillStmt.executeQuery();
 
             int totalAvailable = 0;
             List<Long> toEmptyOrderIds = new ArrayList<>();
@@ -220,7 +230,6 @@ public class OrderRepository {
             if (toEmptyOrderIds.size() > 0) {
                 String idList = toEmptyOrderIds.stream().map(id -> "" + id).collect(Collectors.joining(", "));
                 String stmt = emptyOrderQtyStmt.replace("?", idList);
-                System.out.println(stmt);
                 DB.update(stmt);
             }
 
@@ -228,7 +237,7 @@ public class OrderRepository {
                 decrementOrderQtyStmt.setInt(1, toDecrementQuantity);
                 decrementOrderQtyStmt.setInt(2, toDecrementQuantity);
                 decrementOrderQtyStmt.setLong(3, toDecrementOrderId);
-                DB.update(decrementOrderQtyStmt);
+                decrementOrderQtyStmt.executeUpdate();
             }
             
             transactionSummary.setAffectedOrders(affectedOrders);
@@ -243,6 +252,14 @@ public class OrderRepository {
     }
 
     public void collectOrder(Long orderId, int quantity) {
-
+        try {
+            collectOrderStmt.setInt(1, quantity);
+            collectOrderStmt.setLong(2, orderId);
+            collectOrderStmt.executeUpdate();
+            DB.commit();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

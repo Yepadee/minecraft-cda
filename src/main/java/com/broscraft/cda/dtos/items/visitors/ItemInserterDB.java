@@ -10,6 +10,21 @@ import com.broscraft.cda.dtos.items.PotionDTO;
 
 public class ItemInserterDB extends ItemVisitor {
     private Long createdKey;
+    PreparedStatement itemStmt;
+    PreparedStatement potionStmt;
+    PreparedStatement enchantmentStmt;
+
+    public ItemInserterDB() {
+        itemStmt = DB.prepareStatement("INSERT INTO Items (material) " + "VALUES (?)");
+        potionStmt = DB.prepareStatement(
+            "INSERT INTO Items (material, potion_type, is_upgraded, is_extended) " +
+            "VALUES (?, ?, ?, ?)"
+        );
+        enchantmentStmt = DB.prepareStatement(
+            "INSERT INTO Enchantments (item_id, enchantment, level) " +
+            "VALUES (?, ?, ?)"
+        );
+    }
 
     public Long getCreatedKey() {
         return this.createdKey;
@@ -17,7 +32,6 @@ public class ItemInserterDB extends ItemVisitor {
 
     @Override
     public void visit(ItemDTO itemDto) {
-        PreparedStatement itemStmt = DB.prepareStatement("INSERT INTO Items (material) " + "VALUES (?)");
         try {
             itemStmt.setString(1, itemDto.getMaterial().toString());
         } catch (SQLException e) {
@@ -31,28 +45,21 @@ public class ItemInserterDB extends ItemVisitor {
     public void visit(EnchantedItemDTO enchantedItemDto) {
         visit((ItemDTO) enchantedItemDto);
         enchantedItemDto.getEnchantments().forEach(enchantmentDTO -> {
-            PreparedStatement enchantmentStmt = DB.prepareStatement(
-                "INSERT INTO Enchantments (item_id, enchantment, level) " +
-                "VALUES (?, ?, ?)"
-            );
             try {
                 enchantmentStmt.setLong(1, enchantedItemDto.getId());
                 enchantmentStmt.setString(2, enchantmentDTO.getEnchantment());
                 enchantmentStmt.setInt(3, enchantmentDTO.getLevel());
+                enchantmentStmt.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            DB.create(enchantmentStmt);
+            
         });
 
     }
 
     @Override
     public void visit(PotionDTO potionDto) {
-        PreparedStatement potionStmt = DB.prepareStatement(
-            "INSERT INTO Items (material, potion_type, is_upgraded, is_extended) " +
-            "VALUES (?, ?, ?, ?)"
-        );
         try {
             potionStmt.setString(1, potionDto.getMaterial().toString());
             potionStmt.setString(2, potionDto.getType().toString());

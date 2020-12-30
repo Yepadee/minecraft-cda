@@ -62,12 +62,10 @@ public class ItemRepository {
 
     public Map<Long, ItemOverviewDTO> getItemOverviews() {
         Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
-
-        ResultSet itemResults = DB.query(getItemOverviewsStmt);
-
-        ResultSet enchantResults = DB.query(getItemEnchantsStmt);
-
         try {
+            ResultSet itemResults = getItemOverviewsStmt.executeQuery();
+            ResultSet enchantResults = getItemEnchantsStmt.executeQuery();
+
 			while (itemResults.next()) {
                 int demand = itemResults.getInt(1);
                 Float bestBid = itemResults.getFloat(2);
