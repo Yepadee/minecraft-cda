@@ -1,5 +1,6 @@
 package com.broscraft.cda.repositories;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,11 +20,10 @@ import org.bukkit.potion.PotionType;
 
 public class ItemRepository {
     private ItemInserterDB itemInserter = new ItemInserterDB();
-
-    public Map<Long, ItemOverviewDTO> getItemOverviews() {
-        Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
-
-        ResultSet itemResults = DB.query(
+    private PreparedStatement getItemOverviewsStmt;
+    private PreparedStatement getItemEnchantsStmt;
+    public ItemRepository() {
+        getItemOverviewsStmt = DB.prepareStatement(
             "SELECT d.demand, bb.best_bid, " +
             "s.supply, ab.best_ask, " +
             "i.id item_id, i.material, i.potion_type, i.is_upgraded, i.is_extended " +
@@ -54,10 +54,18 @@ public class ItemRepository {
             ") s ON i.id = s.item_id "
         );
 
-        ResultSet enchantResults = DB.query(
-          "SELECT item_id, enchantment, level " +
-          "FROM Enchantments"  
+        getItemEnchantsStmt = DB.prepareStatement(
+            "SELECT item_id, enchantment, level " +
+            "FROM Enchantments"  
         );
+    }
+
+    public Map<Long, ItemOverviewDTO> getItemOverviews() {
+        Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
+
+        ResultSet itemResults = DB.query(getItemOverviewsStmt);
+
+        ResultSet enchantResults = DB.query(getItemEnchantsStmt);
 
         try {
 			while (itemResults.next()) {

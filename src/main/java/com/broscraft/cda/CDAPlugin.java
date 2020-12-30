@@ -14,6 +14,7 @@ import com.broscraft.cda.repositories.OrderRepository;
 import com.broscraft.cda.services.ItemOverviewService;
 import com.broscraft.cda.services.ItemService;
 import com.broscraft.cda.services.OrderService;
+import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -62,6 +63,7 @@ public class CDAPlugin extends JavaPlugin
     @Override
     public void onEnable() {
         setUpTables();
+        
 
         instance = this;
 
@@ -73,8 +75,11 @@ public class CDAPlugin extends JavaPlugin
         orderRepository = new OrderRepository();
 
         itemService = new ItemService(itemRepository);
+        ItemUtils.init(itemService);
         itemOverviewService = new ItemOverviewService(itemService, iconsManager);
         orderService = new OrderService(orderRepository, itemService, itemOverviewService);
+
+        
 
         marketGui = new MarketGui(
             iconsManager,

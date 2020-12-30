@@ -373,6 +373,12 @@ public class MarketGui {
                                         itemsToGive.setAmount(quantityBought);
                                         EcoUtils.charge(player, amountToCharge);
                                         InventoryUtils.dropPlayerItems(player, itemsToGive);
+                                        int numUnsuccessful = quantityToBuy - quantityBought;
+                                        if (numUnsuccessful > 0) {
+                                            player.sendMessage(
+                                                ChatColor.RED + "Unable to complete transaction for " + numUnsuccessful + " units!"
+                                            );
+                                        }
                                         openItemOrdersScreen(itemDTO, player); //Item should exist now!! TODO: test
                                     });
                                 },
@@ -423,8 +429,14 @@ public class MarketGui {
                                 ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" + 
                                 ChatColor.GRAY + " for " + ChatColor.GREEN + soldPriceStr
                             );
-                            
                             EcoUtils.pay(player, amountToPay);
+
+                            int numUnsuccessful = quantityToSell - quantitySold;
+                            if (numUnsuccessful > 0) {
+                                player.sendMessage(
+                                    ChatColor.RED + "Unable to complete transaction for " + numUnsuccessful + " units"
+                                );
+                            }
                             openItemOrdersScreen(itemDTO, player); // Item should exist here TODO: test
                         }); // TODO: on fail return items!
                     },

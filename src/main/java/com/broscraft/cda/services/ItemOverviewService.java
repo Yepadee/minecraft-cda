@@ -26,7 +26,7 @@ public class ItemOverviewService implements OrderObserver {
     public void onNewOrder(NewOrderDTO newOrderDTO) {
         ItemDTO itemDTO = newOrderDTO.getItem();
 
-        Long itemId = itemDTO.getId();
+        Long itemId = itemService.getItemId(itemDTO);
         ItemOverviewDTO itemOverview = itemService.getItemOverview(itemId);
 
         switch (newOrderDTO.getType()) {
@@ -55,7 +55,7 @@ public class ItemOverviewService implements OrderObserver {
 
     @Override
     public void onRemoveOrder(OrderDTO orderDTO, Float nextBestPrice) {
-        Long itemId = Objects.requireNonNull(orderDTO.getItem().getId());
+        Long itemId = Objects.requireNonNull(itemService.getItemId(orderDTO.getItem()));
         ItemOverviewDTO itemOverview = Objects.requireNonNull(itemService.getItemOverview(itemId));
         int orderQuantityRemaining = orderDTO.getQuantity() - orderDTO.getQuantityFilled();
         switch (orderDTO.getType()) {

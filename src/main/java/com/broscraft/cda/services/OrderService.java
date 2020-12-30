@@ -212,7 +212,7 @@ public class OrderService {
         .asyncFirst(() -> {
             TransactionSummaryDTO transactionSummary = orderRepository.fillOrder(
                 orderType,    
-                itemService.getItemId(itemDTO),
+                itemDTO,
                 price,
                 quantity
             );
