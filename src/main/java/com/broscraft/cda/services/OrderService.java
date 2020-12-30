@@ -70,9 +70,9 @@ public class OrderService {
         orderObserver.onRemoveOrder(orderDTO, nextBestPrice);
     }
 
-    private String getOrderOperationThreadName(ItemDTO itemDTO, float price) {
+    private String getOrderOperationThreadName(ItemDTO itemDTO) {
         Long itemId = itemService.getItemId(itemDTO);
-        return "order " + itemId + " " + price;
+        return "order " + itemId;
     }
 
     public void getItemOrders(ItemDTO itemDTO, Consumer<GroupedOrdersDTO> onComplete) {
@@ -95,7 +95,7 @@ public class OrderService {
     }
 
     public void submitOrder(NewOrderDTO newOrderDTO, Runnable onComplete) {  
-        CDAPlugin.newSharedChain("submitOrder").async(() -> {
+        CDAPlugin.newSharedChain(getOrderOperationThreadName(newOrderDTO.getItem())).async(() -> {
             ItemDTO itemDTO = newOrderDTO.getItem();
             if (itemService.exists(itemDTO)) {
                 Long itemId = itemService.getItemId(itemDTO);
@@ -117,7 +117,7 @@ public class OrderService {
 
     public void cancelOrder(OrderDTO orderDTO, Runnable onComplete) {
         HumanEntity player = Bukkit.getPlayer(orderDTO.getPlayerUUID());
-        CDAPlugin.newSharedChain(getOrderOperationThreadName(orderDTO.getItem(), orderDTO.getPrice())).asyncFirst(() -> {
+        CDAPlugin.newSharedChain(getOrderOperationThreadName(orderDTO.getItem())).asyncFirst(() -> {
             Float nextBestPrice = orderRepository.delete(orderDTO.getId());
             notifyRemoveOrderObserver(
                 orderDTO,
@@ -208,7 +208,7 @@ public class OrderService {
     }
 
     public void fillOrder(ItemDTO itemDTO, int quantity, float price, Consumer<Integer> onComplete) {
-        CDAPlugin.newSharedChain(getOrderOperationThreadName(itemDTO, price))
+        CDAPlugin.newSharedChain(getOrderOperationThreadName(itemDTO))
         .asyncFirst(() -> {
             TransactionSummaryDTO transactionSummary = orderRepository.fillOrder(
                 itemService.getItemId(itemDTO),
