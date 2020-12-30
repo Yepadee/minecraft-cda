@@ -128,7 +128,7 @@ public class MarketGui {
                     if (itemOverviewDto != null) {
                         if (itemOverviewDto.getBestBid() != null) {
                             if (price <= itemOverviewDto.getBestBid()) {
-                                player.sendMessage(ChatColor.RED + "Ask price must be higher than best bid!");
+                                player.sendMessage(ChatColor.RED + "Bid price must be lower than best ask!");
                                 openNewAskScreen(itemDTO, player);
                             }
                         }
@@ -175,7 +175,7 @@ public class MarketGui {
                         if (itemOverviewDto.getBestAsk() != null) {
                             if (price >= itemOverviewDto.getBestAsk()) {
                                 player.sendMessage(ChatColor.RED + "Ask price must be lower than best ask!");
-                                openNewAskScreen(itemDTO, player);
+                                openNewBidScreen(itemDTO, player);
                             }
                         }
                     }
