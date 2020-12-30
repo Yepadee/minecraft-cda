@@ -34,4 +34,7 @@ public class Styles {
 
     public static ItemStack CONFIRM_ICON = ItemBuilder.from(Material.LIME_STAINED_GLASS_PANE).setName(ChatColor.GREEN + "Confirm").build();
     public static ItemStack CANCEL_ICON = ItemBuilder.from(Material.RED_STAINED_GLASS_PANE).setName(ChatColor.RED + "Cancel").build();
+
+    public static GuiItem NO_ITEM_ORDER_BTN = ItemBuilder.from(Material.BARRIER).setName(ChatColor.RED + "N/A").asGuiItem();
+    public static GuiItem END_OF_ORDERS = ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).setName(ChatColor.BLACK + "_").asGuiItem();
 }

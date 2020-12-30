@@ -12,7 +12,6 @@ import com.broscraft.cda.gui.screens.ScrollableScreen;
 import com.broscraft.cda.gui.utils.Styles;
 import com.broscraft.cda.utils.ItemUtils;
 
-import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -91,12 +90,12 @@ public class ItemOrdersScreen extends ScrollableScreen {
                     GroupedBidDTO groupedBid = groupedBids.get(0);
                     icons.add(Styles.BEST_ORDER_ICON);
                     icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem(onBidClick.apply(groupedBid)));
-                    icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                    icons.add(Styles.NO_ITEM_ORDER_BTN);
                     
                 } else if (numBids == 0) {
                     GroupedAskDTO groupedAsk = groupedAsks.get(0);
                     icons.add(Styles.BEST_ORDER_ICON);
-                    icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                    icons.add(Styles.NO_ITEM_ORDER_BTN);
                     icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(true).asGuiItem(onAskClick.apply(groupedAsk)));
                 }
             }
@@ -114,7 +113,7 @@ public class ItemOrdersScreen extends ScrollableScreen {
                 for (int i = smallest; i < numAsks; ++i) {
                     GroupedAskDTO groupedAsk = groupedAsks.get(i);
                     icons.add(Styles.OTHER_ORDER_ICON);
-                    icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                    icons.add(Styles.NO_ITEM_ORDER_BTN);
                     icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(i % 2 == 0).asGuiItem(onAskClick.apply(groupedAsk)));
                 }
             } else {
@@ -123,11 +122,11 @@ public class ItemOrdersScreen extends ScrollableScreen {
                     GroupedBidDTO groupedBid = groupedBids.get(i);
                     icons.add(Styles.OTHER_ORDER_ICON);
                     icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem(onBidClick.apply(groupedBid)));
-                    icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                    icons.add(Styles.NO_ITEM_ORDER_BTN);
                 }
             }
             for (int i = 0; i < 3; ++i) {
-                icons.add(ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).asGuiItem());
+                icons.add(Styles.END_OF_ORDERS);
             }
     
             this.setItems(icons);
