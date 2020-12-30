@@ -32,6 +32,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class MarketGui {
     private static float MAX_PRICE = 1000000;
+    private static int MAX_ITEM_STACKS = 8;
     private IconsManager iconsManager;
     private OrderService orderService;
 
@@ -181,8 +182,8 @@ public class MarketGui {
         orderService.getItemOrders(itemDTO, orders -> {
             itemOrdersScreen.setOrders(
                 orders,
-                bid -> e -> openBidHitItemInputScreen(bid, itemDTO, 1, player),
-                ask -> e -> openAskLiftQuantityInputScreen(ask, itemDTO, 1, player)
+                bid -> e -> openBidHitItemInputScreen(bid, itemDTO, player),
+                ask -> e -> openAskLiftQuantityInputScreen(ask, itemDTO, player)
             );
         });
 
@@ -335,53 +336,62 @@ public class MarketGui {
         });
     }
 
-    private void openAskLiftQuantityInputScreen(GroupedOrderDTO groupedOrderDTO, ItemDTO itemDTO, int maxQuantity, HumanEntity player) {
+    private void openAskLiftQuantityInputScreen(GroupedOrderDTO groupedOrderDTO, ItemDTO itemDTO, HumanEntity player) {
         new AskLiftQuantityInputScreen(
             (e, quantityTxt) -> {
                 try {
                     ItemStack itemsToGive = iconsManager.getItemIcon(itemDTO).clone();
+
                     int quantityToBuy = Integer.parseInt(quantityTxt);
-                    float price = groupedOrderDTO.getPrice();
-                    float totalPrice = price * quantityToBuy;
-                    if (EcoUtils.hasMoney(player, totalPrice)) {
-                        new ConfirmScreen(
-                            "Buy " + quantityToBuy + " for " + EcoUtils.formatPriceCurrency(totalPrice) + "?",
-                            confirm -> {
-                                orderService.fillOrder(itemDTO, quantityToBuy, price, quantityBought -> {
-                                    float amountToCharge = price * quantityBought;
-                                    String boughtPriceStr = EcoUtils.formatPriceCurrency(amountToCharge);
-                                    player.sendMessage(
-                                        ChatColor.AQUA + "Bought " +
-                                        ChatColor.GRAY + quantityBought +
-                                        ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" +
-                                        ChatColor.GRAY + " for " + ChatColor.GREEN + boughtPriceStr
-                                    );
-                                    itemsToGive.setAmount(quantityBought);
-                                    EcoUtils.charge(player, amountToCharge);
-                                    InventoryUtils.dropPlayerItems(player, itemsToGive);
-                                    openItemOrdersScreen(itemDTO, player); //Item should exist now!! TODO: test
-                                });
-                            },
-                            cancel -> openItemOrdersScreenIfExists(itemDTO, player)
-                            
-                        ).open(player);
-                    } else {
+                    int maxQuantity = MAX_ITEM_STACKS * itemsToGive.getMaxStackSize();
+                    if (quantityToBuy > maxQuantity) {
                         player.sendMessage(
-                            ChatColor.RED + "You do not have enough money! (Total cost " +
-                            EcoUtils.formatPriceCurrency(totalPrice) + ")"
+                            ChatColor.RED + "Quantity too large! (MAX: " + maxQuantity + ")"
                         );
-                        openAskLiftQuantityInputScreen(groupedOrderDTO, itemDTO, maxQuantity, player);
+                        openAskLiftQuantityInputScreen(groupedOrderDTO, itemDTO, player);
+                    } else {
+                        float price = groupedOrderDTO.getPrice();
+                        float totalPrice = price * quantityToBuy;
+                        if (EcoUtils.hasMoney(player, totalPrice)) {
+                            new ConfirmScreen(
+                                "Buy " + quantityToBuy + " for " + EcoUtils.formatPriceCurrency(totalPrice) + "?",
+                                confirm -> {
+                                    orderService.fillOrder(itemDTO, quantityToBuy, price, quantityBought -> {
+                                        float amountToCharge = price * quantityBought;
+                                        String boughtPriceStr = EcoUtils.formatPriceCurrency(amountToCharge);
+                                        player.sendMessage(
+                                            ChatColor.AQUA + "Bought " +
+                                            ChatColor.GRAY + quantityBought +
+                                            ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" +
+                                            ChatColor.GRAY + " for " + ChatColor.GREEN + boughtPriceStr
+                                        );
+                                        itemsToGive.setAmount(quantityBought);
+                                        EcoUtils.charge(player, amountToCharge);
+                                        InventoryUtils.dropPlayerItems(player, itemsToGive);
+                                        openItemOrdersScreen(itemDTO, player); //Item should exist now!! TODO: test
+                                    });
+                                },
+                                cancel -> openItemOrdersScreenIfExists(itemDTO, player)
+                                
+                            ).open(player);
+                        } else {
+                            player.sendMessage(
+                                ChatColor.RED + "You do not have enough money! (Total cost " +
+                                EcoUtils.formatPriceCurrency(totalPrice) + ")"
+                            );
+                            openAskLiftQuantityInputScreen(groupedOrderDTO, itemDTO, player);
+                        }
                     }
                 } catch (NumberFormatException ex) {
                     player.sendMessage(ChatColor.RED + "Invalid quantity, please try again!");
-                    openAskLiftQuantityInputScreen(groupedOrderDTO, itemDTO, maxQuantity, player); // TODO: is this safe?
+                    openAskLiftQuantityInputScreen(groupedOrderDTO, itemDTO, player); // TODO: is this safe?
                 }
             },
             onClose -> openItemOrdersScreen(itemDTO, player)
         ).open(player);
     }
 
-    private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, ItemDTO itemDTO, int maxQuantity, HumanEntity player) {
+    private void openBidHitItemInputScreen(GroupedOrderDTO groupedOrderDTO, ItemDTO itemDTO, HumanEntity player) {
         BidHitItemInputScreen inputScreen = new BidHitItemInputScreen(
             groupedOrderDTO,
             itemDTO,
