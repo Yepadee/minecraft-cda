@@ -78,7 +78,8 @@ public class CDAPlugin extends JavaPlugin
 
         marketGui = new MarketGui(
             iconsManager,
-            orderService
+            orderService,
+            itemService
         );
 
         openMenuCommand = new OpenMenuCommand(marketGui);

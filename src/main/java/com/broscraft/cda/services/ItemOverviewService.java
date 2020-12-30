@@ -19,7 +19,6 @@ public class ItemOverviewService implements OrderObserver {
     ) {
         this.itemService = itemService;
         this.overviewUpdateObserver = overviewUpdateObserver;
-        
         overviewUpdateObserver.onOverviewLoad(itemService.getItemOverviews());
     }
 

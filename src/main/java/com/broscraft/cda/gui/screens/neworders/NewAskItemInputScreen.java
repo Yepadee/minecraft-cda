@@ -1,7 +1,6 @@
 package com.broscraft.cda.gui.screens.neworders;
 
 import com.broscraft.cda.dtos.items.ItemDTO;
-import com.broscraft.cda.dtos.orders.BestPriceDTO;
 import com.broscraft.cda.gui.screens.ItemInputScreen;
 import com.broscraft.cda.utils.EcoUtils;
 import com.broscraft.cda.utils.ItemUtils;
@@ -13,7 +12,8 @@ public class NewAskItemInputScreen extends ItemInputScreen {
 
     public NewAskItemInputScreen(
         ItemDTO acceptedItem,
-        BestPriceDTO bestPrice,
+        Float bestPrice,
+        int supply,
         float selectedPrice
     ) {
         super(
@@ -21,15 +21,13 @@ public class NewAskItemInputScreen extends ItemInputScreen {
             ChatColor.DARK_AQUA + "Insert items " + ChatColor.DARK_GREEN + "(Price: " + EcoUtils.formatPriceCurrency(selectedPrice) + ") ",
             acceptedItem
         );
-        setAcceptedItemIcon(acceptedItem, bestPrice);
+        setAcceptedItemIcon(acceptedItem, bestPrice, supply);
     }
 
-    private void setAcceptedItemIcon(ItemDTO acceptedItem, BestPriceDTO bestPrice) {
-        int supply = 0;
+    private void setAcceptedItemIcon(ItemDTO acceptedItem, Float bestPrice, int supply) {
         String bestPriceStr = ChatColor.RED + "N/A";
         if (bestPrice != null) {
-            bestPriceStr = ChatColor.GREEN + EcoUtils.formatPriceCurrency(bestPrice.getPrice());
-            supply = bestPrice.getQuantity();
+            bestPriceStr = ChatColor.GREEN + EcoUtils.formatPriceCurrency(bestPrice);
         }
         GuiItem itemIcon = ItemBuilder.from(ItemUtils.buildItemStack(acceptedItem))
         .setLore(

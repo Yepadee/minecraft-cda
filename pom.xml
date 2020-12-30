@@ -22,6 +22,7 @@
     <anvilgui.version>1.4.0-SNAPSHOT</anvilgui.version>
     <vault.version>1.7</vault.version>
     <essentials.version>2.18.2</essentials.version>
+    <taskchain.version>3.7.2</taskchain.version>
   </properties>
   
   <repositories>
@@ -75,12 +76,12 @@
     <dependency>
       <groupId>co.aikar</groupId>
       <artifactId>taskchain-bukkit</artifactId>
-      <version>3.7.2</version> <!-- Replace this with the version from TaskChain -->
+      <version>${taskchain.version}</version>
     </dependency>
     <dependency>
       <groupId>me.mattstudios.utils</groupId>
       <artifactId>matt-framework-gui</artifactId>
-      <version>${matt-framework-gui.version}</version> <!-- replace version here -->
+      <version>${matt-framework-gui.version}</version>
     </dependency>
     <dependency>
       <groupId>net.wesjd</groupId>

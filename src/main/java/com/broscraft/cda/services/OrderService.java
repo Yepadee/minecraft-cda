@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 
 import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.dtos.items.ItemDTO;
-import com.broscraft.cda.dtos.orders.BestPriceDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrdersDTO;
@@ -76,16 +75,6 @@ public class OrderService {
         return "order " + itemId + " " + price;
     }
 
-
-    public void getBestPrice(ItemDTO itemDTO, OrderType orderType, Consumer<BestPriceDTO> onComplete) {
-        Long itemId = itemService.getItemId(itemDTO);
-        CDAPlugin.newChain().asyncFirst(() -> {
-            return orderRepository.getBestPrice(itemId, orderType);
-        })
-        .syncLast(result -> onComplete.accept(result))
-        .execute();
-    }
-
     public void getItemOrders(ItemDTO itemDTO, Consumer<GroupedOrdersDTO> onComplete) {
         Long itemId = Objects.requireNonNull(itemService.getItemId(itemDTO));
         CDAPlugin.newChain().asyncFirst(() -> {
@@ -129,10 +118,10 @@ public class OrderService {
     public void cancelOrder(OrderDTO orderDTO, Runnable onComplete) {
         HumanEntity player = Bukkit.getPlayer(orderDTO.getPlayerUUID());
         CDAPlugin.newSharedChain(getOrderOperationThreadName(orderDTO.getItem(), orderDTO.getPrice())).asyncFirst(() -> {
-            orderRepository.delete(orderDTO.getId());
+            Float nextBestPrice = orderRepository.delete(orderDTO.getId());
             notifyRemoveOrderObserver(
                 orderDTO,
-                orderRepository.getBestPrice(orderDTO.getItem().getId(), orderDTO.getType()).getPrice()
+                nextBestPrice
             );
             return true;
         })

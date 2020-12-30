@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import com.broscraft.cda.database.DB;
 import com.broscraft.cda.dtos.items.ItemDTO;
-import com.broscraft.cda.dtos.orders.BestPriceDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.grouped.GroupedAskDTO;
@@ -105,46 +104,10 @@ public class OrderRepository {
         DB.commit();
     }
 
-    public BestPriceDTO getBestPrice(Long itemId, OrderType orderType) {
-        if (itemId == null) return null;
-        String minMax = "MIN";
-        if (orderType.equals(OrderType.BID)) minMax = "MAX";
-
-        PreparedStatement stmt = DB.prepareStatement(
-            "SELECT " + minMax +"(b.price) price, b.quantity " +
-            "FROM Orders a " +
-            "INNER JOIN (" +
-               "SELECT id, price, SUM(quantity - quantity_filled) quantity " +
-                "FROM Orders  " +
-                "WHERE item_id=? AND type=?  " +
-                "GROUP BY price " +
-            ") b ON a.id = b.id"
-        );
-
-        try {
-            stmt.setLong(1, itemId);
-            stmt.setString(2, orderType.toString());
-
-            ResultSet results = DB.query(stmt);
-            
-            if (results.next()) {
-                BestPriceDTO bestPriceDTO = new BestPriceDTO();
-                bestPriceDTO.setPrice(results.getFloat(1));
-                bestPriceDTO.setQuantity(results.getInt(2));
-                results.close();
-                return bestPriceDTO;
-            } else {
-                results.close();
-                return null;
-            }  
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public void delete(Long orderId) {
+    public Float delete(Long orderId) {
         // TODO: submit delete request
+        // TODO: return next best price
+        return 0.0f;
     }
 
     public TransactionSummaryDTO fillOrder(Long itemId, float price, int quantity) {

@@ -27,6 +27,10 @@ public class ItemService {
         return this.itemOverviews.values();
     }
 
+    public ItemOverviewDTO getItemOverview(ItemDTO itemDTO) {
+        return itemOverviews.get(itemIds.get(itemDTO));
+    }
+
     public ItemOverviewDTO getItemOverview(Long itemId) {
         return this.itemOverviews.get(itemId);
     }

@@ -1,5 +1,6 @@
 package com.broscraft.cda.gui;
 
+import com.broscraft.cda.dtos.ItemOverviewDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
@@ -17,6 +18,7 @@ import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.screens.search.SearchInputScreen;
 import com.broscraft.cda.gui.utils.IconsManager;
+import com.broscraft.cda.services.ItemService;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.EcoUtils;
 import com.broscraft.cda.utils.InventoryUtils;
@@ -35,13 +37,16 @@ public class MarketGui {
     private static int MAX_ITEM_STACKS = 8;
     private IconsManager iconsManager;
     private OrderService orderService;
+    private ItemService itemService;
 
     public MarketGui(
         IconsManager iconsManager,
-        OrderService orderService
+        OrderService orderService,
+        ItemService itemService
     ) {
         this.iconsManager = iconsManager;
         this.orderService = orderService;
+        this.itemService = itemService;
     }
 
     public void openAllItemsScreen(HumanEntity player) {
@@ -101,36 +106,35 @@ public class MarketGui {
         newOrderDTO.setType(OrderType.ASK);
         newOrderDTO.setPlayerUUID(player.getUniqueId());
         newOrderDTO.setItem(itemDTO);
-        orderService.getBestPrice(
-            newOrderDTO.getItem(),
-            newOrderDTO.getType(),
-            bestPrice -> {
-                String placeholder = "_";
-                if (bestPrice != null) {
-                    if (bestPrice.getPrice() != 0.0f) placeholder = bestPrice.getPrice() + "_";
-                }
-                new NewOrderPriceInputScreen(
-                    placeholder,
-                    (p, priceTxt) -> {
-                        try {
-                            float price = Float.parseFloat(priceTxt);
-                            if (price > MAX_PRICE) {
-                                player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
-                                openNewAskScreen(itemDTO, player); // TODO: is this safe?
-                            }
-                            newOrderDTO.setPrice(price);
-                            openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
-                        } catch (NumberFormatException ex) {
-                            player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
-                            openNewAskScreen(itemDTO, player); // TODO: is this safe?
-                        }
-                    },
-                    close -> {
-                        openItemOrdersScreenIfExists(itemDTO, player);
-                    }
-                ).open(player);
-            });
+
+        ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
+        Float bestAsk = itemOverviewDto.getBestAsk();
         
+        String placeholder = "_";
+        if (bestAsk != null) {
+            placeholder = bestAsk + "_";
+        }
+
+        new NewOrderPriceInputScreen(
+            placeholder,
+            (p, priceTxt) -> {
+                try {
+                    float price = Float.parseFloat(priceTxt);
+                    if (price > MAX_PRICE) {
+                        player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
+                        openNewAskScreen(itemDTO, player); // TODO: is this safe?
+                    }
+                    newOrderDTO.setPrice(price);
+                    openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
+                } catch (NumberFormatException ex) {
+                    player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
+                    openNewAskScreen(itemDTO, player); // TODO: is this safe?
+                }
+            },
+            close -> {
+                openItemOrdersScreenIfExists(itemDTO, player);
+            }
+        ).open(player);
     }
 
     public void openNewBidScreen(ItemDTO itemDTO, HumanEntity player) {
@@ -139,36 +143,34 @@ public class MarketGui {
         newOrderDTO.setPlayerUUID(player.getUniqueId());
         newOrderDTO.setItem(itemDTO);
 
-        orderService.getBestPrice(
-            newOrderDTO.getItem(),
-            newOrderDTO.getType(),
-            bestPrice -> {
-                String placeholder = "_";
-                if (bestPrice != null) {
-                    if (bestPrice.getPrice() != 0.0f) placeholder = bestPrice.getPrice() + "_";
-                }
-                new NewOrderPriceInputScreen(
-                    placeholder,
-                    (p, priceTxt) -> {
-                        try {
-                            float price = Float.parseFloat(priceTxt);
-                            if (price > MAX_PRICE) {
-                                player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
-                                openNewBidScreen(itemDTO, player); // TODO: is this safe?
-                            }
-                            newOrderDTO.setPrice(price);
-                            openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
-                        } catch (NumberFormatException ex) {
-                            player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
-                            openNewBidScreen(itemDTO, player); // TODO: is this safe?
-                        }
-                    },
-                    close -> {
-                        openItemOrdersScreenIfExists(itemDTO, player);
+        ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
+        Float bestBid = itemOverviewDto.getBestBid();
+        String placeholder = "_";
+        if (bestBid != null) {
+            placeholder = bestBid + "_";
+        }
+        new NewOrderPriceInputScreen(
+            placeholder,
+            (p, priceTxt) -> {
+                try {
+                    float price = Float.parseFloat(priceTxt);
+                    if (price > MAX_PRICE) {
+                        player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
+                        openNewBidScreen(itemDTO, player); // TODO: is this safe?
                     }
-                ).open(player);
+                    newOrderDTO.setPrice(price);
+                    openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
+                } catch (NumberFormatException ex) {
+                    player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
+                    openNewBidScreen(itemDTO, player); // TODO: is this safe?
+                }
+            },
+            close -> {
+                openItemOrdersScreenIfExists(itemDTO, player);
             }
-        );
+        ).open(player);
+        
+        
 
     }
 
@@ -196,51 +198,48 @@ public class MarketGui {
 
 
     private void openNewAskItemInputScreen(ItemDTO itemDTO, NewOrderDTO newOrderDto, HumanEntity player) {
-        orderService.getBestPrice(
-            newOrderDto.getItem(),
-            newOrderDto.getType(),
-            bestPrice -> {
-                NewAskItemInputScreen screen = new NewAskItemInputScreen(
-                    itemDTO,
-                    bestPrice,
-                    newOrderDto.getPrice()
-                );
-                screen.setBackBtn(e -> screen.close(player));
-                screen.setConfirmBtn(insertedItems -> {
-                    if (insertedItems == null) {
-                        player.sendMessage(
-                            ChatColor.RED + "No items selected!"
-                        );
-                        return;
-                    }
-                    newOrderDto.setQuantity(insertedItems.getAmount());
-        
-                    new ConfirmScreen(
-                        "Ask  " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
-                        " for " + newOrderDto.getQuantity() +
-                        "?",
-                        confirm -> {
-                            orderService.submitOrder(newOrderDto, () -> {
-                                player.sendMessage(
-                                    ChatColor.GRAY.toString() + "Created " + ChatColor.AQUA +
-                                    "Ask" + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
-                                    ChatColor.AQUA + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
-                                    ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice())
-                                );
-                                openItemOrdersScreenIfExists(itemDTO, player);
-                            });
-        
-                        },
-                        cancel -> {
-                            InventoryUtils.dropPlayerItems(player, insertedItems);
-                            openItemOrdersScreenIfExists(itemDTO, player);
-                        }
-                    ).open(player);
-                    
-                });
-                screen.open(player);
-            }
+        ItemOverviewDTO itemOverview = itemService.getItemOverview(itemDTO);
+
+        NewAskItemInputScreen screen = new NewAskItemInputScreen(
+            itemDTO,
+            itemOverview.getBestAsk(),
+            itemOverview.getSupply(),
+            newOrderDto.getPrice()
         );
+        screen.setBackBtn(e -> screen.close(player));
+        screen.setConfirmBtn(insertedItems -> {
+            if (insertedItems == null) {
+                player.sendMessage(
+                    ChatColor.RED + "No items selected!"
+                );
+                return;
+            }
+            newOrderDto.setQuantity(insertedItems.getAmount());
+    
+            new ConfirmScreen(
+                "Ask  " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
+                " for " + newOrderDto.getQuantity() +
+                "?",
+                confirm -> {
+                    orderService.submitOrder(newOrderDto, () -> {
+                        player.sendMessage(
+                            ChatColor.GRAY.toString() + "Created " + ChatColor.AQUA +
+                            "Ask" + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
+                            ChatColor.AQUA + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
+                            ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice())
+                        );
+                        openItemOrdersScreenIfExists(itemDTO, player);
+                    });
+    
+                },
+                cancel -> {
+                    InventoryUtils.dropPlayerItems(player, insertedItems);
+                    openItemOrdersScreenIfExists(itemDTO, player);
+                }
+            ).open(player);
+            
+        });
+        screen.open(player);
     }
 
     private void openNewBidQuantitiyInputScreen(ItemDTO itemDTO, NewOrderDTO newOrderDto, HumanEntity player) {
