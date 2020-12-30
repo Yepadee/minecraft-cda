@@ -20,6 +20,9 @@ import com.broscraft.cda.dtos.transaction.TransactionSummaryDTO;
 import org.bukkit.Material;
 
 public class OrderRepository {
+
+    private static float EPSILON = 0.001f;
+
     public GroupedOrdersDTO getItemOrders(Long itemId) {
         PreparedStatement bidStmt = DB.prepareStatement(
             "SELECT price, SUM(quantity) total_quantity " +
@@ -102,6 +105,12 @@ public class OrderRepository {
         
         DB.update(stmt);
         DB.commit();
+        try {
+            stmt.close();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public Float delete(Long orderId) {
@@ -110,10 +119,46 @@ public class OrderRepository {
         return 0.0f;
     }
 
-    public TransactionSummaryDTO fillOrder(Long itemId, float price, int quantity) {
+    public TransactionSummaryDTO fillOrder(OrderType orderType, Long itemId, float price, int quantity) {
         TransactionSummaryDTO transactionSummary = new TransactionSummaryDTO();
         // TODO: send request to fill order and retrieve affected orders
         List<OrderDTO> affectedOrders = new ArrayList<>();
+        
+
+        PreparedStatement getStmt = DB.prepareStatement(
+            "SELECT id, price, quantity, quantity_filled, quantity_uncollected, quanitity - quanitity_filled " +
+            "FROM Orders " +
+            "WHERE type=? AND item_id=? " + 
+            "AND ? <= price AND price <= ? " +
+            "ORDER BY created_at ASC"
+        );
+        float minPrice = price - EPSILON;
+        float maxPrice = price + EPSILON;
+        try {
+            getStmt.setString(1, orderType.toString());
+            getStmt.setLong(2, itemId);
+            getStmt.setFloat(3, minPrice);
+            getStmt.setFloat(4, maxPrice);
+            ResultSet orderResults = DB.query(getStmt);
+            int totalAvailable = 0;
+            while (orderResults.next() && totalAvailable < quantity) {
+                OrderDTO affectedOrder = new OrderDTO();
+                affectedOrder.setId(orderResults.getLong(1));
+                affectedOrder.setPrice(orderResults.getFloat(2));
+                affectedOrder.setQuantity(orderResults.getInt(3));
+                affectedOrder.setQuantityFilled(orderResults.getInt(4));
+                affectedOrder.setToCollect(orderResults.getInt(5));
+
+                affectedOrders.add(affectedOrder);
+                totalAvailable += orderResults.getInt(6);
+            }
+
+            
+
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         transactionSummary.setAffectedOrders(affectedOrders);
         transactionSummary.setNumFilled(quantity);

@@ -107,12 +107,14 @@ public class MarketGui {
         newOrderDTO.setPlayerUUID(player.getUniqueId());
         newOrderDTO.setItem(itemDTO);
 
-        ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
-        Float bestAsk = itemOverviewDto.getBestAsk();
-        
         String placeholder = "_";
-        if (bestAsk != null) {
-            placeholder = bestAsk + "_";
+        ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
+        if (itemOverviewDto != null) {
+            Float bestAsk = itemOverviewDto.getBestAsk();
+            
+            if (bestAsk != null) {
+                placeholder = bestAsk + "_";
+            }
         }
 
         new NewOrderPriceInputScreen(
@@ -143,12 +145,16 @@ public class MarketGui {
         newOrderDTO.setPlayerUUID(player.getUniqueId());
         newOrderDTO.setItem(itemDTO);
 
-        ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
-        Float bestBid = itemOverviewDto.getBestBid();
         String placeholder = "_";
-        if (bestBid != null) {
-            placeholder = bestBid + "_";
+        ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
+        if (itemOverviewDto != null) {
+            Float bestBid = itemOverviewDto.getBestBid();
+            
+            if (bestBid != null) {
+                placeholder = bestBid + "_";
+            }
         }
+
         new NewOrderPriceInputScreen(
             placeholder,
             (p, priceTxt) -> {
@@ -355,7 +361,7 @@ public class MarketGui {
                             new ConfirmScreen(
                                 "Buy " + quantityToBuy + " for " + EcoUtils.formatPriceCurrency(totalPrice) + "?",
                                 confirm -> {
-                                    orderService.fillOrder(itemDTO, quantityToBuy, price, quantityBought -> {
+                                    orderService.fillOrder(OrderType.ASK, itemDTO, quantityToBuy, price, quantityBought -> {
                                         float amountToCharge = price * quantityBought;
                                         String boughtPriceStr = EcoUtils.formatPriceCurrency(amountToCharge);
                                         player.sendMessage(
@@ -408,7 +414,7 @@ public class MarketGui {
                 new ConfirmScreen(
                     "Sell " + insertedItems.getAmount() + " for " + totalPriceStr + "?",
                     confirm -> {
-                        orderService.fillOrder(itemDTO, quantityToSell, price, quantitySold -> {
+                        orderService.fillOrder(OrderType.BID, itemDTO, quantityToSell, price, quantitySold -> {
                             float amountToPay = price * quantitySold;
                             String soldPriceStr = EcoUtils.formatPriceCurrency(amountToPay);
                             player.sendMessage(

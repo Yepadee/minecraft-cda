@@ -207,10 +207,11 @@ public class OrderService {
         chain.execute();
     }
 
-    public void fillOrder(ItemDTO itemDTO, int quantity, float price, Consumer<Integer> onComplete) {
+    public void fillOrder(OrderType orderType, ItemDTO itemDTO, int quantity, float price, Consumer<Integer> onComplete) {
         CDAPlugin.newSharedChain(getOrderOperationThreadName(itemDTO))
         .asyncFirst(() -> {
             TransactionSummaryDTO transactionSummary = orderRepository.fillOrder(
+                orderType,    
                 itemService.getItemId(itemDTO),
                 price,
                 quantity
