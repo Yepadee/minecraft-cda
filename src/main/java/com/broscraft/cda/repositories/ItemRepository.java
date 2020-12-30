@@ -2,12 +2,16 @@ package com.broscraft.cda.repositories;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.broscraft.cda.database.DB;
 import com.broscraft.cda.dtos.ItemOverviewDTO;
+import com.broscraft.cda.dtos.items.EnchantedItemDTO;
+import com.broscraft.cda.dtos.items.EnchantmentDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.items.PotionDTO;
 import com.broscraft.cda.dtos.items.visitors.ItemInserterDB;
@@ -21,7 +25,7 @@ public class ItemRepository {
     public Map<Long, ItemOverviewDTO> getItemOverviews() {
         Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
 
-        ResultSet results = DB.query(
+        ResultSet itemResults = DB.query(
             "SELECT d.demand, bb.best_bid, " +
             "s.supply, ab.best_ask, " +
             "i.id item_id, i.material, i.potion_type, i.is_upgraded, i.is_extended " +
@@ -52,18 +56,23 @@ public class ItemRepository {
             ") s ON i.id = s.item_id "
         );
 
-        try {
-			while (results.next()) {
-                int demand = results.getInt(1);
-                Float bestBid = results.getFloat(2);
-                int supply = results.getInt(3);
-                Float bestAsk = results.getFloat(4);
+        ResultSet enchantResults = DB.query(
+          "SELECT item_id, enchantment, level " +
+          "FROM Enchantments"  
+        );
 
-                long itemId = results.getLong(5);
-                Material material = Material.valueOf(results.getString(6));
-                String potionType = results.getString(7);
-                Boolean upgraded = results.getBoolean(8);
-                Boolean extended = results.getBoolean(9);
+        try {
+			while (itemResults.next()) {
+                int demand = itemResults.getInt(1);
+                Float bestBid = itemResults.getFloat(2);
+                int supply = itemResults.getInt(3);
+                Float bestAsk = itemResults.getFloat(4);
+
+                long itemId = itemResults.getLong(5);
+                Material material = Material.valueOf(itemResults.getString(6));
+                String potionType = itemResults.getString(7);
+                Boolean upgraded = itemResults.getBoolean(8);
+                Boolean extended = itemResults.getBoolean(9);
                 ItemDTO itemDTO;
                 if (potionType == null) {
                     itemDTO = new ItemDTO();
@@ -88,12 +97,34 @@ public class ItemRepository {
                 itemOverviews.put(itemId, itemOverviewDTO);
 
             }
-            results.close();
+            itemResults.close();
 
             Set<Long> itemIds = itemOverviews.keySet();
-            System.out.println(itemIds);
-            // TODO: load enchantments with itemId.
+            Map<Long, List<EnchantmentDTO>> itemEnchantments = new HashMap<>();
+            while (enchantResults.next()) {
+                Long itemId = enchantResults.getLong(1);
+                String enchantment = enchantResults.getString(2);
+                Integer level = enchantResults.getInt(3);
+                EnchantmentDTO enchantmentDTO = new EnchantmentDTO()
+                .enchantment(enchantment)
+                .level(level);
 
+                if (!itemEnchantments.containsKey(itemId))
+                    itemEnchantments.put(itemId, new ArrayList<>());
+
+                itemEnchantments.get(itemId).add(enchantmentDTO);
+            }
+            itemEnchantments.entrySet().forEach(e -> {
+                Long itemId = e.getKey();
+                List<EnchantmentDTO> enchantments = e.getValue();
+                ItemDTO itemDTO = itemOverviews.get(itemId).getItem();
+                EnchantedItemDTO enchantedItemDTO = new EnchantedItemDTO();
+                enchantedItemDTO.setId(itemDTO.getId());
+                enchantedItemDTO.setMaterial(itemDTO.getMaterial());
+                enchantedItemDTO.setEnchantments(enchantments);
+                itemOverviews.get(itemId).setItem(enchantedItemDTO);
+
+            });
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

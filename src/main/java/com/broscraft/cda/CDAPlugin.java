@@ -139,8 +139,8 @@ public class CDAPlugin extends JavaPlugin
                 "CREATE TABLE Enchantments " +
                 "(id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 " item_id INTEGER NOT NULL, " +
-                " enchantment VARCHAR(64), " + 
-                " level TINYINT, " + 
+                " enchantment VARCHAR(64) NOT NULL, " + 
+                " level TINYINT NOT NULL, " + 
 
                 " FOREIGN KEY (item_id) REFERENCES Items(id) " +
                 ")"

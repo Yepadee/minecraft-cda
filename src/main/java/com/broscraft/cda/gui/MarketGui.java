@@ -104,10 +104,12 @@ public class MarketGui {
             newOrderDTO.getItem(),
             newOrderDTO.getType(),
             bestPrice -> {
-                String placeHolder = "_";
-                if (bestPrice != null) placeHolder = bestPrice.getPrice() + "_";
+                String placeholder = "_";
+                if (bestPrice != null) {
+                    if (bestPrice.getPrice() != 0.0f) placeholder = bestPrice.getPrice() + "_";
+                }
                 new NewOrderPriceInputScreen(
-                    placeHolder,
+                    placeholder,
                     (p, priceTxt) -> {
                         try {
                             float price = Float.parseFloat(priceTxt);
@@ -141,7 +143,9 @@ public class MarketGui {
             newOrderDTO.getType(),
             bestPrice -> {
                 String placeholder = "_";
-                if (bestPrice != null) placeholder = bestPrice.getPrice() + "_";
+                if (bestPrice != null) {
+                    if (bestPrice.getPrice() != 0.0f) placeholder = bestPrice.getPrice() + "_";
+                }
                 new NewOrderPriceInputScreen(
                     placeholder,
                     (p, priceTxt) -> {

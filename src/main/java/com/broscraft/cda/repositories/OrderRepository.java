@@ -109,7 +109,7 @@ public class OrderRepository {
         if (itemId == null) return null;
         String minMax = "MIN";
         if (orderType.equals(OrderType.BID)) minMax = "MAX";
-        System.out.println(minMax);
+
         PreparedStatement stmt = DB.prepareStatement(
             "SELECT " + minMax +"(b.price) price, b.quantity " +
             "FROM Orders a " +
