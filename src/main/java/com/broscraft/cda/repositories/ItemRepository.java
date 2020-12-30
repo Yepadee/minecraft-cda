@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.broscraft.cda.database.DB;
 import com.broscraft.cda.dtos.ItemOverviewDTO;
@@ -88,6 +89,11 @@ public class ItemRepository {
 
             }
             results.close();
+
+            Set<Long> itemIds = itemOverviews.keySet();
+            System.out.println(itemIds);
+            // TODO: load enchantments with itemId.
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
