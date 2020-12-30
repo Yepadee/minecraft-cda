@@ -22,9 +22,6 @@ import org.bukkit.Material;
 
 public class OrderRepository {
     public GroupedOrdersDTO getItemOrders(Long itemId) {
-        System.out.println("Loading orders for item " + itemId + "!");
-
-        
         PreparedStatement bidStmt = DB.prepareStatement(
             "SELECT price, SUM(quantity) total_quantity " +
             "FROM Orders " + 
@@ -70,8 +67,6 @@ public class OrderRepository {
             e.printStackTrace();
         }
 
-        System.out.println(groupedBids);
-        System.out.println(groupedAsks);
         return new GroupedOrdersDTO().groupedBids(groupedBids).groupedAsks(groupedAsks);
     }
 
@@ -118,8 +113,8 @@ public class OrderRepository {
         PreparedStatement stmt = DB.prepareStatement(
             "SELECT " + minMax +"(b.price) price, b.quantity " +
             "FROM Orders a " +
-            "INNER JOIN ( " +
-               "SELECT id,  price, SUM(quantity) quantity " +
+            "INNER JOIN (" +
+               "SELECT id, price, SUM(quantity - quantity_filled) quantity " +
                 "FROM Orders  " +
                 "WHERE item_id=? AND type=?  " +
                 "GROUP BY price " +

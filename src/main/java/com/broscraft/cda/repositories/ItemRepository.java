@@ -1,14 +1,18 @@
 package com.broscraft.cda.repositories;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.broscraft.cda.database.DB;
 import com.broscraft.cda.dtos.ItemOverviewDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
+import com.broscraft.cda.dtos.items.PotionDTO;
 import com.broscraft.cda.dtos.items.visitors.ItemInserterDB;
 
 import org.bukkit.Material;
+import org.bukkit.potion.PotionType;
 
 public class ItemRepository {
     private ItemInserterDB itemInserter = new ItemInserterDB();
@@ -16,31 +20,77 @@ public class ItemRepository {
     public Map<Long, ItemOverviewDTO> getItemOverviews() {
         Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
 
-        // TODO
-        ItemDTO item1 = new ItemDTO();
-        item1.setId(1L);
-        item1.setMaterial(Material.STONE);
+        ResultSet results = DB.query(
+            "SELECT d.demand, bb.best_bid, " +
+            "s.supply, ab.best_ask, " +
+            "i.id item_id, i.material, i.potion_type, i.is_upgraded, i.is_extended " +
+            "FROM Items i " +
+            "LEFT JOIN (" +
+                "SELECT item_id, MAX(price) best_bid " +
+                "FROM Orders " +
+                "WHERE type='BID' " +
+                "GROUP BY item_id " +
+            ") bb ON i.id = bb.item_id " +
+            "LEFT JOIN (" +
+                "SELECT item_id, SUM(quantity - quantity_filled) demand " +
+                "FROM Orders " +
+                "WHERE type='BID' " +
+                "GROUP BY item_id " +
+            ") d ON i.id = d.item_id " +
+            "LEFT JOIN (" +
+                "SELECT item_id, MIN(price) best_ask " +
+                "FROM Orders " +
+                "WHERE type='ASK' " +
+                "GROUP BY item_id " +
+            ") ab ON i.id = ab.item_id " +
+            "LEFT JOIN (" +
+                "SELECT item_id, SUM(quantity - quantity_filled) supply " +
+                "FROM Orders " +
+                "WHERE type='ASK' " +
+                "GROUP BY item_id " +
+            ") s ON i.id = s.item_id "
+        );
 
-        ItemOverviewDTO overview1 = new ItemOverviewDTO();
-        overview1.setDemand(100);
-        overview1.setBestBid(10.0f);
-        overview1.setSupply(200);
-        overview1.setBestAsk(20.0f);
-        overview1.setItem(item1);
+        try {
+			while (results.next()) {
+                int demand = results.getInt(1);
+                Float bestBid = results.getFloat(2);
+                int supply = results.getInt(3);
+                Float bestAsk = results.getFloat(4);
 
-        ItemDTO item2 = new ItemDTO();
-        item2.setId(2L);
-        item2.setMaterial(Material.DIAMOND_BLOCK);
+                long itemId = results.getLong(5);
+                Material material = Material.valueOf(results.getString(6));
+                String potionType = results.getString(7);
+                Boolean upgraded = results.getBoolean(8);
+                Boolean extended = results.getBoolean(9);
+                ItemDTO itemDTO;
+                if (potionType == null) {
+                    itemDTO = new ItemDTO();
+                } else {
+                    PotionDTO potionDTO = new PotionDTO();
+                    potionDTO.setType(PotionType.valueOf(potionType));
+                    potionDTO.upgraded(upgraded)
+                    .extended(extended);
+                    itemDTO = potionDTO;
+                }
+                 
+                itemDTO.id(itemId);
+                itemDTO.material(material);
 
-        ItemOverviewDTO overview2 = new ItemOverviewDTO();
-        overview2.setDemand(100);
-        overview2.setBestBid(10.0f);
-        overview2.setSupply(200);
-        overview2.setBestAsk(20.0f);
-        overview2.setItem(item2);
+                ItemOverviewDTO itemOverviewDTO = new ItemOverviewDTO()
+                .demand(demand)
+                .bestBid(bestBid == 0 ? null : bestBid)
+                .supply(supply)
+                .bestAsk(bestAsk == 0 ? null : bestAsk)
+                .item(itemDTO);
 
-        itemOverviews.put(item1.getId(), overview1);
-        itemOverviews.put(item2.getId(), overview2);
+                itemOverviews.put(itemId, itemOverviewDTO);
+
+            }
+            results.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
         return itemOverviews;
     }
