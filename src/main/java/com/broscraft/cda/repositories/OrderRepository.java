@@ -36,6 +36,9 @@ public class OrderRepository {
     private PreparedStatement collectOrderStmt;
     private PreparedStatement deleteOrderStmt;
 
+    private PreparedStatement getBestBidStmt;
+    private PreparedStatement getBestAskStmt;
+
     public OrderRepository() {
         getOrdersToFillStmt = DB.prepareStatement(
             "SELECT id, player_uuid, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
@@ -79,13 +82,24 @@ public class OrderRepository {
             "FROM Orders " +
             "WHERE player_uuid=?"
         );
-
         collectOrderStmt = DB.prepareStatement(
             "UPDATE Orders " +
             "SET quantity_uncollected = quantity_uncollected - ? " +
             "WHERE id=?"
         );
-        
+        deleteOrderStmt = DB.prepareStatement(
+            "DELETE FROM Orders WHERE id=?"
+        );
+        getBestBidStmt = DB.prepareStatement(
+            "SELECT MAX(price) " +
+            "FROM Orders " +
+            "WHERE item_id=? AND type='BID'"
+        );
+        getBestAskStmt = DB.prepareStatement(
+            "SELECT MIN(price) " +
+            "FROM Orders " +
+            "WHERE item_id=? AND type='ASK'"
+        );
     }
 
     public GroupedOrdersDTO getItemOrders(Long itemId) {
@@ -149,8 +163,6 @@ public class OrderRepository {
     }
 
     public void createOrder(NewOrderDTO newOrderDTO) {
-        System.out.println("Created new order:" + newOrderDTO);
-        
         try {
             createOrderStmt.setString(1, newOrderDTO.getType().toString());
             createOrderStmt.setString(2, newOrderDTO.getPlayerUUID().toString());
@@ -165,13 +177,32 @@ public class OrderRepository {
         DB.commit();
     }
 
-    public Float delete(Long orderId) {
-        // TODO: submit delete request
-        // TODO: return next best price
-        return 0.0f;
+    public Float delete(OrderDTO orderDTO) {
+        Float nextBestPrice = null;
+        try {
+            deleteOrderStmt.setLong(1, orderDTO.getId());
+            deleteOrderStmt.executeUpdate();
+            DB.commit();
+            
+            PreparedStatement stmt;
+            if (orderDTO.getType().equals(OrderType.BID)) {
+                stmt = getBestBidStmt;
+            } else {
+                stmt = getBestAskStmt;
+            }
+
+            stmt.setLong(1, orderDTO.getItem().getId());
+            ResultSet results = stmt.executeQuery();
+            if (results.next()) {
+                nextBestPrice = results.getFloat(1);
+            }
+ 
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return nextBestPrice;
     }
     
-    // TODO: cache prepared statements
     public TransactionSummaryDTO fillOrder(OrderType orderType, ItemDTO itemDTO, float price, int quantity) {
         TransactionSummaryDTO transactionSummary = new TransactionSummaryDTO();
         List<OrderDTO> affectedOrders = new ArrayList<>();
@@ -258,7 +289,6 @@ public class OrderRepository {
             collectOrderStmt.executeUpdate();
             DB.commit();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

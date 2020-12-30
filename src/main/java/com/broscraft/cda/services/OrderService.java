@@ -123,7 +123,7 @@ public class OrderService {
     public void cancelOrder(OrderDTO orderDTO, Runnable onComplete) {
         HumanEntity player = Bukkit.getPlayer(orderDTO.getPlayerUUID());
         CDAPlugin.newSharedChain(getOrderOperationThreadName(orderDTO.getItem())).asyncFirst(() -> {
-            Float nextBestPrice = orderRepository.delete(orderDTO.getId());
+            Float nextBestPrice = orderRepository.delete(orderDTO);
             notifyRemoveOrderObserver(
                 orderDTO,
                 nextBestPrice
