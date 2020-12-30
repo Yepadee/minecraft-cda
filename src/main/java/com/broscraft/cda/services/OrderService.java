@@ -227,6 +227,18 @@ public class OrderService {
             transactionSummary.getAffectedOrders().forEach(order -> {
                 UUID playerUUID = Objects.requireNonNull(order.getPlayerUUID());
                 notifyOrderUpdateObserver(playerUUID, order);
+                Player player = Bukkit.getPlayer(playerUUID);
+                String subject;
+                // TODO: make update messages more detailed.
+                if (order.getType().equals(OrderType.BID)) {
+                    subject = "new items";
+                } else {
+                    subject = "money";
+                }
+                player.sendMessage(
+                    ChatColor.LIGHT_PURPLE + "You have " + subject + " to collect!"
+                );
+
             });
             return transactionSummary.getNumFilled();
         })
