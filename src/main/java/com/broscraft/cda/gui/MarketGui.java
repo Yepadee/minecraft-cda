@@ -111,7 +111,6 @@ public class MarketGui {
         ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
         if (itemOverviewDto != null) {
             Float bestAsk = itemOverviewDto.getBestAsk();
-            
             if (bestAsk != null) {
                 placeholder = bestAsk + "_";
             }
@@ -124,13 +123,22 @@ public class MarketGui {
                     float price = Float.parseFloat(priceTxt);
                     if (price > MAX_PRICE) {
                         player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
-                        openNewAskScreen(itemDTO, player); // TODO: is this safe?
+                        openNewAskScreen(itemDTO, player);
                     }
+                    if (itemOverviewDto != null) {
+                        if (itemOverviewDto.getBestBid() != null) {
+                            if (price <= itemOverviewDto.getBestBid()) {
+                                player.sendMessage(ChatColor.RED + "Ask price must be higher than best bid!");
+                                openNewAskScreen(itemDTO, player);
+                            }
+                        }
+                    }
+
                     newOrderDTO.setPrice(price);
                     openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
                 } catch (NumberFormatException ex) {
                     player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
-                    openNewAskScreen(itemDTO, player); // TODO: is this safe?
+                    openNewAskScreen(itemDTO, player);
                 }
             },
             close -> {
@@ -149,7 +157,6 @@ public class MarketGui {
         ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
         if (itemOverviewDto != null) {
             Float bestBid = itemOverviewDto.getBestBid();
-            
             if (bestBid != null) {
                 placeholder = bestBid + "_";
             }
@@ -162,13 +169,22 @@ public class MarketGui {
                     float price = Float.parseFloat(priceTxt);
                     if (price > MAX_PRICE) {
                         player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
-                        openNewBidScreen(itemDTO, player); // TODO: is this safe?
+                        openNewBidScreen(itemDTO, player);
                     }
+                    if (itemOverviewDto != null) {
+                        if (itemOverviewDto.getBestAsk() != null) {
+                            if (price >= itemOverviewDto.getBestAsk()) {
+                                player.sendMessage(ChatColor.RED + "Ask price must be lower than best ask!");
+                                openNewAskScreen(itemDTO, player);
+                            }
+                        }
+                    }
+
                     newOrderDTO.setPrice(price);
                     openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
                 } catch (NumberFormatException ex) {
                     player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
-                    openNewBidScreen(itemDTO, player); // TODO: is this safe?
+                    openNewBidScreen(itemDTO, player);
                 }
             },
             close -> {

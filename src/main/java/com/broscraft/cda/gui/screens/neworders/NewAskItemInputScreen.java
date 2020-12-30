@@ -28,7 +28,9 @@ public class NewAskItemInputScreen extends ItemInputScreen {
         String bestPriceStr = ChatColor.RED + "N/A";
         int supply = 0;
         if (itemOverviewDTO != null) {
-            bestPriceStr = ChatColor.GREEN + EcoUtils.formatPriceCurrency(itemOverviewDTO.getBestAsk());
+            if (itemOverviewDTO.getBestAsk() != null) {
+                bestPriceStr = ChatColor.GREEN + EcoUtils.formatPriceCurrency(itemOverviewDTO.getBestAsk());
+            }
             supply = itemOverviewDTO.getSupply();
         }
         GuiItem itemIcon = ItemBuilder.from(ItemUtils.buildItemStack(acceptedItem))

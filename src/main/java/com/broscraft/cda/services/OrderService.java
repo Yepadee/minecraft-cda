@@ -166,7 +166,16 @@ public class OrderService {
 
     public void collectOrder(HumanEntity player, OrderDTO orderDTO) {
         int availableToCollect = orderDTO.getToCollect();
-        if (availableToCollect == 0) return;
+        if (availableToCollect == 0) {
+            String subject;
+            if (orderDTO.getType().equals(OrderType.BID)) {
+                subject = "items";
+            } else {
+                subject = "money";
+            }
+            player.sendMessage(ChatColor.RED + "No more " + subject + " to collect");
+            return;
+        };
 
         Long orderId = orderDTO.getId();
 
