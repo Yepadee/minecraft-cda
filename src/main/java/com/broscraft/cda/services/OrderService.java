@@ -143,7 +143,7 @@ public class OrderService {
     }
 
     // This operation doesnt affect supply/demand so its chill to be run whenever :)
-    public void collectOrder(HumanEntity player, OrderDTO orderDTO) {
+    public void collectOrder(HumanEntity player, OrderDTO orderDTO, Runnable onOrderRemoved) {
         int availableToCollect = orderDTO.getToCollect();
         if (availableToCollect == 0) {
             String subject;
@@ -196,8 +196,14 @@ public class OrderService {
                 notifyOrderUpdateObserver(player.getUniqueId(), orderDTO);
             });
         }
-
         chain.execute();
+
+        if (orderDTO.getQuantityUnfilled() == 0) {
+            cancelOrder(orderDTO, () -> {
+                player.sendMessage(ChatColor.RED + "Removed completed order.");
+                onOrderRemoved.run();
+            });
+        }
     }
 
     public void fillOrder(OrderType orderType, ItemDTO itemDTO, int quantity, float price, Consumer<Integer> onComplete) {

@@ -347,7 +347,11 @@ public class MarketGui {
     private Function<OrderDTO, GuiAction<InventoryClickEvent>> onOrderClick(HumanEntity player) {
         return order -> e -> {
             if (e.getClick().isLeftClick()) {
-                orderService.collectOrder(player, order);
+                orderService.collectOrder(
+                    player,
+                    order,
+                    () -> openMyOrdersScreen(player)
+                );
             }
             if (e.getClick().isRightClick()) {
                 confirmCancelOrder(order, player);
