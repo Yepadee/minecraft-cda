@@ -113,7 +113,8 @@ public class IconsManager implements OverviewUpdateObserver {
     }
 
     private ItemStack updateIcon(ItemOverviewDTO itemOverviewDTO) {
-        ItemStack icon = this.icons.get(itemOverviewDTO.getItem());
+        ItemDTO itemDTO = itemOverviewDTO.getItem();
+        ItemStack icon = this.overviewIcons.get(itemDTO);
         List<String> lore = this.getLore(itemOverviewDTO);
         ItemMeta meta = icon.getItemMeta();
         meta.setLore(lore);
@@ -146,13 +147,17 @@ public class IconsManager implements OverviewUpdateObserver {
     public void onOverviewUpdate(ItemOverviewDTO itemOverviewDTO) {
         // Update icon lore when data changes
         ItemDTO itemDTO = itemOverviewDTO.getItem();
-
+        ItemStack newIcon; 
         if (icons.containsKey(itemDTO)) {
-            notifyIconUpdateObservers(itemDTO, updateIcon(itemOverviewDTO));
+            newIcon = updateIcon(itemOverviewDTO);
+            notifyIconUpdateObservers(itemDTO, newIcon);
         } else {
-            ItemStack icon = createOverviewIcon(itemOverviewDTO);
-            notifyNewIconObservers(itemDTO, icon);
+            newIcon = createOverviewIcon(itemOverviewDTO);
+            notifyNewIconObservers(itemDTO, newIcon);
         }
+        System.out.println("UPDATED ICONS: ");
+        System.out.println(this.overviewIcons);
+        
     }
 
     @Override

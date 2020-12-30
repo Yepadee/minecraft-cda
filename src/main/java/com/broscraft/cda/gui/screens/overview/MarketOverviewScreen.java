@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.gui.screens.ScrollableScreen;
 import com.broscraft.cda.observers.IconUpdateObserver;
@@ -46,7 +45,7 @@ public abstract class MarketOverviewScreen extends ScrollableScreen implements I
     @Override
     public void onIconUpdate(ItemDTO itemDTO, ItemStack itemStack) {
         guiItems.get(itemDTO).setItemStack(itemStack);
-        CDAPlugin.newChain().async(this::update).execute();
+        update();
     }
     
 }

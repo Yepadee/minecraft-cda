@@ -55,6 +55,7 @@ public class ItemOverviewService implements OrderObserver {
 
     @Override
     public void onRemoveOrder(OrderDTO orderDTO, Float nextBestPrice) {
+
         Long itemId = Objects.requireNonNull(itemService.getItemId(orderDTO.getItem()));
         ItemOverviewDTO itemOverview = Objects.requireNonNull(itemService.getItemOverview(itemId));
         int orderQuantityRemaining = orderDTO.getQuantity() - orderDTO.getQuantityFilled();

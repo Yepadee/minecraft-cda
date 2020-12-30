@@ -124,18 +124,21 @@ public class MarketGui {
                     if (price > MAX_PRICE) {
                         player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
                         openNewAskScreen(itemDTO, player);
-                    } else if (itemOverviewDto != null) {
+                        return;
+                    } 
+
+                    if (itemOverviewDto != null) {
                         if (itemOverviewDto.getBestBid() != null) {
                             if (price <= itemOverviewDto.getBestBid()) {
                                 player.sendMessage(ChatColor.RED + "Ask price must be higher than best bid!");
                                 openNewAskScreen(itemDTO, player);
+                                return;
                             }
                         }
-                    } else {
-                        newOrderDTO.setPrice(price);
-                        openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
                     }
 
+                    newOrderDTO.setPrice(price);
+                    openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
 
                 } catch (NumberFormatException ex) {
                     player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
@@ -171,17 +174,22 @@ public class MarketGui {
                     if (price > MAX_PRICE) {
                         player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
                         openNewBidScreen(itemDTO, player);
-                    } else if (itemOverviewDto != null) {
+                        return;
+                    }
+
+                    if (itemOverviewDto != null) {
                         if (itemOverviewDto.getBestAsk() != null) {
                             if (price >= itemOverviewDto.getBestAsk()) {
                                 player.sendMessage(ChatColor.RED + "Bid price must be lower than best ask!");
                                 openNewBidScreen(itemDTO, player);
+                                return;
                             }
                         }
-                    } else {
-                        newOrderDTO.setPrice(price);
-                        openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
                     }
+
+                    newOrderDTO.setPrice(price);
+                    openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
+                    
                 } catch (NumberFormatException ex) {
                     player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
                     openNewBidScreen(itemDTO, player);
@@ -444,9 +452,10 @@ public class MarketGui {
                                 ChatColor.WHITE + " '" + ItemUtils.getItemName(itemDTO) + "'" + 
                                 ChatColor.GRAY + " for " + ChatColor.GREEN + soldPriceStr
                             );
-                            EcoUtils.pay(player, amountToPay);
-
                             int numUnsuccessful = quantityToSell - quantitySold;
+                            EcoUtils.pay(player, amountToPay);
+                            insertedItems.setAmount(numUnsuccessful);
+                            InventoryUtils.dropPlayerItems(player, insertedItems);
                             if (numUnsuccessful > 0) {
                                 player.sendMessage(
                                     ChatColor.RED + "Unable to complete transaction for " + numUnsuccessful + " units"
