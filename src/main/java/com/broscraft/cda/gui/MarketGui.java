@@ -124,18 +124,19 @@ public class MarketGui {
                     if (price > MAX_PRICE) {
                         player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
                         openNewAskScreen(itemDTO, player);
-                    }
-                    if (itemOverviewDto != null) {
+                    } else if (itemOverviewDto != null) {
                         if (itemOverviewDto.getBestBid() != null) {
                             if (price <= itemOverviewDto.getBestBid()) {
-                                player.sendMessage(ChatColor.RED + "Bid price must be lower than best ask!");
+                                player.sendMessage(ChatColor.RED + "Ask price must be higher than best bid!");
                                 openNewAskScreen(itemDTO, player);
                             }
                         }
+                    } else {
+                        newOrderDTO.setPrice(price);
+                        openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
                     }
 
-                    newOrderDTO.setPrice(price);
-                    openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
+
                 } catch (NumberFormatException ex) {
                     player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
                     openNewAskScreen(itemDTO, player);
@@ -170,18 +171,17 @@ public class MarketGui {
                     if (price > MAX_PRICE) {
                         player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
                         openNewBidScreen(itemDTO, player);
-                    }
-                    if (itemOverviewDto != null) {
+                    } else if (itemOverviewDto != null) {
                         if (itemOverviewDto.getBestAsk() != null) {
                             if (price >= itemOverviewDto.getBestAsk()) {
-                                player.sendMessage(ChatColor.RED + "Ask price must be lower than best ask!");
+                                player.sendMessage(ChatColor.RED + "Bid price must be lower than best ask!");
                                 openNewBidScreen(itemDTO, player);
                             }
                         }
+                    } else {
+                        newOrderDTO.setPrice(price);
+                        openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
                     }
-
-                    newOrderDTO.setPrice(price);
-                    openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
                 } catch (NumberFormatException ex) {
                     player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
                     openNewBidScreen(itemDTO, player);
@@ -204,7 +204,6 @@ public class MarketGui {
             newAsk -> openNewAskScreen(itemDTO, player)
         );
         orderService.getItemOrders(itemDTO, orders -> {
-            System.out.println(orders);
             itemOrdersScreen.setOrders(
                 orders,
                 bid -> e -> openBidHitItemInputScreen(bid, itemDTO, player),
