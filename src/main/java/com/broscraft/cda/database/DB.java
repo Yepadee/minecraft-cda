@@ -1,6 +1,7 @@
 package com.broscraft.cda.database;
 
 import java.io.File;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -117,6 +118,15 @@ public class DB {
         } catch (SQLException e) {
             e.printStackTrace();
             return 0;
+        }
+    }
+
+    public static Array createArrayOf(String typeName, Object[] elements) {
+        try {
+            return con.createArrayOf(typeName, elements);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

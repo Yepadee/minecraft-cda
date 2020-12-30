@@ -188,6 +188,7 @@ public class MarketGui {
             newAsk -> openNewAskScreen(itemDTO, player)
         );
         orderService.getItemOrders(itemDTO, orders -> {
+            System.out.println(orders);
             itemOrdersScreen.setOrders(
                 orders,
                 bid -> e -> openBidHitItemInputScreen(bid, itemDTO, player),

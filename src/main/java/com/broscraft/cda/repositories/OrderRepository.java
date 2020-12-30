@@ -1,5 +1,6 @@
 package com.broscraft.cda.repositories;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.broscraft.cda.database.DB;
 import com.broscraft.cda.dtos.items.ItemDTO;
@@ -27,7 +29,10 @@ public class OrderRepository {
     private PreparedStatement getItemBidsStmt;
     private PreparedStatement getItemAsksStmt;
     private PreparedStatement createOrderStmt;
+
     private PreparedStatement getOrdersToFillStmt;
+    private String emptyOrderQtyStmt;
+    private PreparedStatement decrementOrderQtyStmt;
 
     public OrderRepository() {
         getOrdersToFillStmt = DB.prepareStatement(
@@ -38,22 +43,34 @@ public class OrderRepository {
             "ORDER BY created_at ASC"
         );
         getItemBidsStmt = DB.prepareStatement(
-            "SELECT price, SUM(quantity) total_quantity " +
+            "SELECT price, SUM(quantity - quantity_filled) total_quantity " +
             "FROM Orders " + 
             "WHERE item_id=? AND type='BID' " +
             "GROUP BY price " +
+            "HAVING total_quantity > 0 " +
             "ORDER BY price DESC"
         );
         getItemAsksStmt = DB.prepareStatement(
-            "SELECT price, SUM(quantity) total_quantity " +
+            "SELECT price, SUM(quantity - quantity_filled) total_quantity " +
             "FROM Orders " + 
             "WHERE item_id=? AND type='ASK' " +
             "GROUP BY price " +
+            "HAVING total_quantity > 0 " +
             "ORDER BY price ASC"
         );
         createOrderStmt = DB.prepareStatement(
             "INSERT INTO Orders (type, player_uuid, item_id, price, quantity) " +
             "VALUES (?, ?, ?, ?, ?)"
+        );
+        emptyOrderQtyStmt = 
+            "UPDATE Orders " +
+            "SET quantity_filled = quantity, quantity_uncollected = quantity_uncollected + (quantity - quantity_filled) " +
+            "WHERE id IN (?)"
+        ;
+        decrementOrderQtyStmt = DB.prepareStatement(
+            "UPDATE Orders " +
+            "SET quantity_filled = quantity_filled + ?, quantity_uncollected = quantity_uncollected + ? " +
+            "WHERE id=?"
         );
     }
 
@@ -134,10 +151,6 @@ public class OrderRepository {
  
         float minPrice = price - EPSILON;
         float maxPrice = price + EPSILON;
-
-        System.out.println(minPrice);
-        System.out.println(price);
-        System.out.println(maxPrice);
         try {
             Long itemId = Objects.requireNonNull(itemDTO.getId());
             getOrdersToFillStmt.setString(1, orderType.toString());
@@ -149,8 +162,8 @@ public class OrderRepository {
             int totalAvailable = 0;
             List<Long> toEmptyOrderIds = new ArrayList<>();
             Long toDecrementOrderId = null;
+            Integer toDecrementQuantity = null;
             int totalFilled = 0;
-            System.out.println("q: " + quantity);
             while (orderResults.next() && totalAvailable < quantity) {
                 OrderDTO affectedOrder = new OrderDTO();
                 affectedOrder.setType(orderType);
@@ -162,7 +175,6 @@ public class OrderRepository {
                 affectedOrder.setToCollect(orderResults.getInt(6));
                 affectedOrder.setQuantityUnfilled(orderResults.getInt(7));
                 affectedOrder.setItem(itemDTO);
-                
                 
                 totalAvailable += affectedOrder.getQuantityUnfilled();
                 int overflow = totalAvailable - quantity;
@@ -176,25 +188,35 @@ public class OrderRepository {
                     
                     toEmptyOrderIds.add(affectedOrder.getId());
                 } else {
-                    int remainder = quantity - totalFilled;
-                    System.out.println("r: " + remainder);
-                    affectedOrder.setToCollect(affectedOrder.getToCollect() + remainder);
-                    affectedOrder.setQuantityFilled(affectedOrder.getQuantityFilled() + remainder);
-                    affectedOrder.setQuantityUnfilled(affectedOrder.getQuantityUnfilled() - remainder);
+                    toDecrementQuantity = quantity - totalFilled;
+                    affectedOrder.setToCollect(affectedOrder.getToCollect() + toDecrementQuantity);
+                    affectedOrder.setQuantityFilled(affectedOrder.getQuantityFilled() + toDecrementQuantity);
+                    affectedOrder.setQuantityUnfilled(affectedOrder.getQuantityUnfilled() - toDecrementQuantity);
                     toDecrementOrderId = affectedOrder.getId();
-                    totalFilled += remainder;
+                    totalFilled += toDecrementQuantity;
+                    break; // Should exit loop here anyway
                 }
 
                 affectedOrders.add(affectedOrder);
             }
 
-            toEmptyOrderIds.forEach(order -> {
-                int newQuantity;
-            });
+            if (toEmptyOrderIds.size() > 0) {
+                String idList = toEmptyOrderIds.stream().map(id -> "" + id).collect(Collectors.joining(", "));
+                String stmt = emptyOrderQtyStmt.replace("?", idList);
+                System.out.println(stmt);
+                DB.update(stmt);
+            }
+
+            if (toDecrementOrderId != null) {
+                decrementOrderQtyStmt.setInt(1, toDecrementQuantity);
+                decrementOrderQtyStmt.setInt(2, toDecrementQuantity);
+                decrementOrderQtyStmt.setLong(3, toDecrementOrderId);
+                DB.update(decrementOrderQtyStmt);
+            }
             
             transactionSummary.setAffectedOrders(affectedOrders);
             transactionSummary.setNumFilled(totalFilled);
-            System.out.println(transactionSummary);
+            DB.commit();
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

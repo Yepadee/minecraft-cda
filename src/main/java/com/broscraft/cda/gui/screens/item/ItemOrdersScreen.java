@@ -75,62 +75,65 @@ public class ItemOrdersScreen extends ScrollableScreen {
         List<GroupedAskDTO> groupedAsks = groupedOrders.getGroupedAsks();
         int numBids = groupedBids.size();
         int numAsks = groupedAsks.size();
-        int smallest = numBids < numAsks ? numBids : numAsks;
+        if (numBids > 0 || numAsks > 0) {
+            int smallest = numBids < numAsks ? numBids : numAsks;
 
-        List<GuiItem> icons = new ArrayList<>();
-
-        if (smallest > 0) {
-            icons.add(Styles.BEST_ORDER_ICON);
-            GroupedBidDTO groupedBid = groupedBids.get(0);
-            GroupedAskDTO groupedAsk = groupedAsks.get(0);
-            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem(onBidClick.apply(groupedBid)));
-            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(true).asGuiItem(onAskClick.apply(groupedAsk)));
-        } else {
-            if (numAsks == 0) {
+            List<GuiItem> icons = new ArrayList<>();
+    
+            if (smallest > 0) {
+                icons.add(Styles.BEST_ORDER_ICON);
                 GroupedBidDTO groupedBid = groupedBids.get(0);
-                icons.add(Styles.BEST_ORDER_ICON);
-                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem(onBidClick.apply(groupedBid)));
-                icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
-                
-            } else if (numBids == 0) {
                 GroupedAskDTO groupedAsk = groupedAsks.get(0);
-                icons.add(Styles.BEST_ORDER_ICON);
-                icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem(onBidClick.apply(groupedBid)));
                 icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(true).asGuiItem(onAskClick.apply(groupedAsk)));
+            } else {
+                if (numAsks == 0) {
+                    GroupedBidDTO groupedBid = groupedBids.get(0);
+                    icons.add(Styles.BEST_ORDER_ICON);
+                    icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(true).asGuiItem(onBidClick.apply(groupedBid)));
+                    icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                    
+                } else if (numBids == 0) {
+                    GroupedAskDTO groupedAsk = groupedAsks.get(0);
+                    icons.add(Styles.BEST_ORDER_ICON);
+                    icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                    icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(true).asGuiItem(onAskClick.apply(groupedAsk)));
+                }
             }
-        }
-
-
-        for (int i = 1; i < smallest; ++i) {
-            GroupedBidDTO groupedBid = groupedBids.get(i);
-            GroupedAskDTO groupedAsk = groupedAsks.get(i);
-            icons.add(Styles.OTHER_ORDER_ICON);
-            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem(onBidClick.apply(groupedBid)));
-            icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(i % 2 == 0).asGuiItem(onAskClick.apply(groupedAsk)));
-        }
-        if (smallest == numBids) {
-            if (smallest == 0) smallest ++;
-            for (int i = smallest; i < numAsks; ++i) {
+    
+    
+            for (int i = 1; i < smallest; ++i) {
+                GroupedBidDTO groupedBid = groupedBids.get(i);
                 GroupedAskDTO groupedAsk = groupedAsks.get(i);
                 icons.add(Styles.OTHER_ORDER_ICON);
-                icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem(onBidClick.apply(groupedBid)));
                 icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(i % 2 == 0).asGuiItem(onAskClick.apply(groupedAsk)));
             }
-        } else {
-            if (smallest == 0) smallest ++;
-            for (int i = smallest; i < numBids; ++i) {
-                GroupedBidDTO groupedBid = groupedBids.get(i);
-                icons.add(Styles.OTHER_ORDER_ICON);
-                icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem(onBidClick.apply(groupedBid)));
-                icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+            if (smallest == numBids) {
+                if (smallest == 0) smallest ++;
+                for (int i = smallest; i < numAsks; ++i) {
+                    GroupedAskDTO groupedAsk = groupedAsks.get(i);
+                    icons.add(Styles.OTHER_ORDER_ICON);
+                    icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                    icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedAsk)).glow(i % 2 == 0).asGuiItem(onAskClick.apply(groupedAsk)));
+                }
+            } else {
+                if (smallest == 0) smallest ++;
+                for (int i = smallest; i < numBids; ++i) {
+                    GroupedBidDTO groupedBid = groupedBids.get(i);
+                    icons.add(Styles.OTHER_ORDER_ICON);
+                    icons.add(ItemBuilder.from(ItemUtils.createGroupedOrderIcon(groupedBid)).glow(i % 2 == 0).asGuiItem(onBidClick.apply(groupedBid)));
+                    icons.add(ItemBuilder.from(Material.BARRIER).asGuiItem());
+                }
             }
+            for (int i = 0; i < 3; ++i) {
+                icons.add(ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).asGuiItem());
+            }
+    
+            this.setItems(icons);
+    
+            update();
         }
-        for (int i = 0; i < 3; ++i) {
-            icons.add(ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).asGuiItem());
-        }
-
-        this.setItems(icons);
-
-        update();
+        
     }
 }
