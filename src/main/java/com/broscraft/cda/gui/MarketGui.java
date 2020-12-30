@@ -209,8 +209,7 @@ public class MarketGui {
 
         NewAskItemInputScreen screen = new NewAskItemInputScreen(
             itemDTO,
-            itemOverview.getBestAsk(),
-            itemOverview.getSupply(),
+            itemOverview,
             newOrderDto.getPrice()
         );
         screen.setBackBtn(e -> screen.close(player));
