@@ -33,10 +33,10 @@ public class OpenMenuCommand implements CommandExecutor {
                 if (args[0].equals("this")) {
                     ItemStack itemStack = player.getInventory().getItemInMainHand();
                     if (itemStack == null) {
-                        sender.sendMessage(ChatColor.RED + "You must be holding an item to create an order for");
+                        sender.sendMessage(ChatColor.RED + "You must be holding the item you want to create an order for");
                         return false;
                     } else if (itemStack.getType() == Material.AIR) {
-                        sender.sendMessage(ChatColor.RED + "You must be holding an item to create an order for");
+                        sender.sendMessage(ChatColor.RED + "You must be holding the item you want to create an order for");
                         return false;
                     } else {
                         ItemDTO itemDTO = ItemUtils.parseItemStack(itemStack);

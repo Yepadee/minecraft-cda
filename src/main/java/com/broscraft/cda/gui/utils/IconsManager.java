@@ -155,8 +155,6 @@ public class IconsManager implements OverviewUpdateObserver {
             newIcon = createOverviewIcon(itemOverviewDTO);
             notifyNewIconObservers(itemDTO, newIcon);
         }
-        System.out.println("UPDATED ICONS: ");
-        System.out.println(this.overviewIcons);
         
     }
 

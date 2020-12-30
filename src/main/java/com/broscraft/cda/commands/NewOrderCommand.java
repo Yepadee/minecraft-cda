@@ -36,10 +36,10 @@ public class NewOrderCommand implements CommandExecutor {
                 OrderType orderType = OrderType.valueOf(orderTypeStr.toUpperCase());
                 ItemStack itemStack = player.getInventory().getItemInMainHand();
                 if (itemStack == null) {
-                    sender.sendMessage(ChatColor.RED.toString() + "You must be holding an item to create an order for");
+                    sender.sendMessage(ChatColor.RED.toString() + "You must be holding the item you want to create the order for");
                     return false;
                 } else if (itemStack.getType() == Material.AIR) {
-                    sender.sendMessage(ChatColor.RED.toString() + "You must be holding an item to create an order for");
+                    sender.sendMessage(ChatColor.RED.toString() + "You must be holding the item you want to create the order for");
                     return false;
                 } else if (ItemUtils.isDamaged(itemStack) && orderType.equals(OrderType.ASK)) {
                     sender.sendMessage(ChatColor.RED.toString() + "Cannot create ask orders for damaged items!");
