@@ -140,6 +140,8 @@ public class ItemRepository {
     public Long create(ItemDTO itemDTO) {
         itemDTO.accept(itemInserter);
         DB.commit();
-        return itemInserter.getCreatedKey();
+        Long itemId = itemInserter.getCreatedKey();
+        itemDTO.setId(itemId);
+        return itemId;
     }
 }

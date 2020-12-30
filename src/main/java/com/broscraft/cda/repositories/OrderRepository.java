@@ -1,6 +1,5 @@
 package com.broscraft.cda.repositories;
 
-import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,10 +32,11 @@ public class OrderRepository {
     private PreparedStatement getOrdersToFillStmt;
     private String emptyOrderQtyStmt;
     private PreparedStatement decrementOrderQtyStmt;
+    private PreparedStatement getPlayerOrdersStmt;
 
     public OrderRepository() {
         getOrdersToFillStmt = DB.prepareStatement(
-            "SELECT id, player_uuid, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled " +
+            "SELECT id, player_uuid, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
             "FROM Orders " +
             "WHERE type=? AND item_id=? " + 
             "AND ? <= price AND price <= ? " +
@@ -71,6 +71,11 @@ public class OrderRepository {
             "UPDATE Orders " +
             "SET quantity_filled = quantity_filled + ?, quantity_uncollected = quantity_uncollected + ? " +
             "WHERE id=?"
+        );
+        getPlayerOrdersStmt = DB.prepareStatement(
+            "SELECT id, type, item_id, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
+            "FROM Orders " +
+            "WHERE player_uuid=?"
         );
     }
 
@@ -108,18 +113,30 @@ public class OrderRepository {
     }
 
     public List<OrderDTO> getPlayerOrders(UUID playerUUID) {
-        // TODO: Actually load orders
-        System.out.println("Loading orders for player " + playerUUID + "!");
-        List<OrderDTO> orderDTOs = new ArrayList<>();
-        orderDTOs.add(new OrderDTO().id(1L).type(OrderType.ASK).price(10.3f).quantity(3).quantityFilled(1)
-                .playerUUID(UUID.fromString("ff5b7624-5859-455e-b708-e7cb227e114d")).toCollect(2)
-                .item(new ItemDTO().id(1L).material(Material.STONE)));
+        List<OrderDTO> playerOrders = new ArrayList<>();
+        
+        try {
+            getPlayerOrdersStmt.setString(1, playerUUID.toString());
+            ResultSet results = DB.query(getPlayerOrdersStmt);
+        
+            while (results.next()) {
+                OrderDTO orderDTO = new OrderDTO();
+                orderDTO.id(results.getLong(1))
+                .type(OrderType.valueOf(results.getString(2)))
+                .playerUUID(playerUUID)
+                .item(new ItemDTO().id(results.getLong(3)))
+                .price(results.getFloat(4))
+                .quantity(results.getInt(5))
+                .quantityFilled(results.getInt(6))
+                .toCollect(results.getInt(7))
+                .quantityUnfilled(results.getInt(8));
+                playerOrders.add(orderDTO);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-        orderDTOs.add(new OrderDTO().id(2L).type(OrderType.BID).price(5.5f).quantity(3).quantityFilled(2)
-                .playerUUID(UUID.fromString("ff5b7624-5859-455e-b708-e7cb227e114d")).toCollect(1)
-                .item(new ItemDTO().id(2L).material(Material.DIAMOND_BLOCK)));
-
-        return orderDTOs;
+        return playerOrders;
     }
 
     public void createOrder(NewOrderDTO newOrderDTO) {

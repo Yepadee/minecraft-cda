@@ -87,7 +87,12 @@ public class OrderService {
 
     public void getPlayerOrders(UUID playerUUID, Consumer<List<OrderDTO>> onComplete) {
         CDAPlugin.newChain().asyncFirst(() -> {
-            return orderRepository.getPlayerOrders(playerUUID);
+            List<OrderDTO> playerOrders = orderRepository.getPlayerOrders(playerUUID);
+            playerOrders.forEach(order -> {
+                Long itemId = order.getItem().getId();
+                order.setItem(itemService.getItem(itemId));
+            });
+            return playerOrders;
         })
         .abortIfNull()
         .syncLast(result -> onComplete.accept(result))

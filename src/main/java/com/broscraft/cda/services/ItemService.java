@@ -12,14 +12,17 @@ public class ItemService {
     private ItemRepository itemRepository;
 
     private Map<ItemDTO, Long> itemIds;
+    private Map<Long, ItemDTO> items;
     private Map<Long, ItemOverviewDTO> itemOverviews;
 
     public ItemService(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
         itemOverviews = itemRepository.getItemOverviews();
         itemIds = new HashMap<>();
+        items = new HashMap<>();
         itemOverviews.forEach((itemId, itemOverview) -> {
             itemIds.put(itemOverview.getItem(), itemId);
+            items.put(itemId, itemOverview.getItem());
         });
     }
 
@@ -40,13 +43,19 @@ public class ItemService {
         return itemId;
     }
 
+    public ItemDTO getItem(Long itemId) {
+        return items.get(itemId);
+    }
+
     public boolean exists(ItemDTO itemDTO) {
         return itemIds.containsKey(itemDTO);
     }
 
     public Long createItem(ItemDTO itemDTO) {
         Long itemId = itemRepository.create(itemDTO);
+
         itemIds.put(itemDTO, itemId);
+        items.put(itemId, itemDTO);
 
         ItemOverviewDTO itemOverview = new ItemOverviewDTO();
         itemOverview.setItem(itemDTO);
