@@ -334,10 +334,16 @@ public class MarketGui {
                 PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen(
                    back -> openAllItemsScreen(player)
                 );
+                orderService.addOrderUpdateObserver(player.getUniqueId(), playerOrdersScreen);
+                playerOrdersScreen.setOnClose(
+                    close -> {
+                        orderService.removeOrderUpdateObserver(player.getUniqueId());
+                    }
+                );
+                playerOrdersScreen.open(player);
                 orderService.cancelOrder(player, orderDTO, () -> {
                     loadPlayerOrders(playerOrdersScreen, player);
                 });
-                playerOrdersScreen.open(player);
             },
             cancel -> {
                 openMyOrdersScreen(player);
@@ -351,7 +357,7 @@ public class MarketGui {
                 orderService.collectOrder(
                     player,
                     order,
-                    () -> openMyOrdersScreen(player)
+                    () -> {}//openMyOrdersScreen(player);
                 );
             }
             if (e.getClick().isRightClick()) {

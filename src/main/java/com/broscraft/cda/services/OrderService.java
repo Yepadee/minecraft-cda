@@ -243,6 +243,7 @@ public class OrderService {
 
     private void notifyOrderUpdateObserver(UUID playerUUID, OrderDTO orderDTO) {
         OrderUpdateObserver o = orderUpdateObservers.get(playerUUID);
+        System.out.println(playerUUID + " " + o + ": " + orderUpdateObservers.size());
         if (o != null) {
             o.onOrderUpdate(orderDTO);
         }
