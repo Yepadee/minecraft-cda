@@ -264,7 +264,8 @@ public class MarketGui {
                 cancel -> {
                     InventoryUtils.dropPlayerItems(player, insertedItems);
                     openItemOrdersScreenIfExists(itemDTO, player);
-                }
+                },
+                close -> InventoryUtils.dropPlayerItems(player, insertedItems)
             ).open(player);
             
         });
@@ -476,7 +477,8 @@ public class MarketGui {
                     cancel -> {
                         InventoryUtils.dropPlayerItems(player, insertedItems);
                         openItemOrdersScreen(itemDTO, player);
-                    }
+                    },
+                    close -> InventoryUtils.dropPlayerItems(player, insertedItems)
                 ).open(player);
                 
             }

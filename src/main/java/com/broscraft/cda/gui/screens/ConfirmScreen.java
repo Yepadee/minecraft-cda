@@ -4,6 +4,7 @@ import com.broscraft.cda.gui.utils.Styles;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import me.mattstudios.mfgui.gui.components.GuiAction;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
@@ -13,6 +14,11 @@ import net.md_5.bungee.api.ChatColor;
 public class ConfirmScreen {
     protected Gui gui;
 
+    public ConfirmScreen(String name, GuiAction<InventoryClickEvent> onConfirm, GuiAction<InventoryClickEvent> onCancel, GuiAction<InventoryCloseEvent> onClose) {
+        this(name, onConfirm, onCancel);
+        gui.setCloseGuiAction(onClose);
+    }
+
     public ConfirmScreen(String name, GuiAction<InventoryClickEvent> onConfirm, GuiAction<InventoryClickEvent> onCancel) {
         this.gui = new Gui(1, ChatColor.DARK_RED.toString() + name);
         gui.setDefaultClickAction(event -> {
@@ -21,6 +27,7 @@ public class ConfirmScreen {
         gui.setDragAction(event -> {
             event.setCancelled(true);
         });
+        
         setIcons(onConfirm, onCancel);
     }
 
