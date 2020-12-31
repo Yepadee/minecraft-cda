@@ -1,5 +1,6 @@
 package com.broscraft.cda.repositories;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,49 +21,47 @@ import org.bukkit.potion.PotionType;
 
 public class ItemRepository {
     private ItemInserterDB itemInserter = new ItemInserterDB();
-    private PreparedStatement getItemOverviewsStmt;
-    private PreparedStatement getItemEnchantsStmt;
-    public ItemRepository() {
-        getItemOverviewsStmt = DB.prepareStatement(
-            "SELECT d.demand, bb.best_bid, " +
-            "s.supply, ab.best_ask, " +
-            "i.id item_id, i.material, i.potion_type, i.is_upgraded, i.is_extended " +
-            "FROM Items i " +
-            "LEFT JOIN (" +
-                "SELECT item_id, MAX(price) best_bid " +
-                "FROM Orders " +
-                "WHERE type='BID' " +
-                "GROUP BY item_id " +
-            ") bb ON i.id = bb.item_id " +
-            "LEFT JOIN (" +
-                "SELECT item_id, SUM(quantity - quantity_filled) demand " +
-                "FROM Orders " +
-                "WHERE type='BID' " +
-                "GROUP BY item_id " +
-            ") d ON i.id = d.item_id " +
-            "LEFT JOIN (" +
-                "SELECT item_id, MIN(price) best_ask " +
-                "FROM Orders " +
-                "WHERE type='ASK' " +
-                "GROUP BY item_id " +
-            ") ab ON i.id = ab.item_id " +
-            "LEFT JOIN (" +
-                "SELECT item_id, SUM(quantity - quantity_filled) supply " +
-                "FROM Orders " +
-                "WHERE type='ASK' " +
-                "GROUP BY item_id " +
-            ") s ON i.id = s.item_id "
-        );
-
-        getItemEnchantsStmt = DB.prepareStatement(
-            "SELECT item_id, enchantment, level " +
-            "FROM Enchantments"  
-        );
-    }
 
     public Map<Long, ItemOverviewDTO> getItemOverviews() {
         Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
         try {
+            Connection con = DB.getConnection();
+            PreparedStatement getItemOverviewsStmt = con.prepareStatement(
+                "SELECT d.demand, bb.best_bid, " +
+                "s.supply, ab.best_ask, " +
+                "i.id item_id, i.material, i.potion_type, i.is_upgraded, i.is_extended " +
+                "FROM Items i " +
+                "LEFT JOIN (" +
+                    "SELECT item_id, MAX(price) best_bid " +
+                    "FROM Orders " +
+                    "WHERE type='BID' " +
+                    "GROUP BY item_id " +
+                ") bb ON i.id = bb.item_id " +
+                "LEFT JOIN (" +
+                    "SELECT item_id, SUM(quantity - quantity_filled) demand " +
+                    "FROM Orders " +
+                    "WHERE type='BID' " +
+                    "GROUP BY item_id " +
+                ") d ON i.id = d.item_id " +
+                "LEFT JOIN (" +
+                    "SELECT item_id, MIN(price) best_ask " +
+                    "FROM Orders " +
+                    "WHERE type='ASK' " +
+                    "GROUP BY item_id " +
+                ") ab ON i.id = ab.item_id " +
+                "LEFT JOIN (" +
+                    "SELECT item_id, SUM(quantity - quantity_filled) supply " +
+                    "FROM Orders " +
+                    "WHERE type='ASK' " +
+                    "GROUP BY item_id " +
+                ") s ON i.id = s.item_id "
+            );
+    
+            PreparedStatement getItemEnchantsStmt = con.prepareStatement(
+                "SELECT item_id, enchantment, level " +
+                "FROM Enchantments"  
+            );
+
             ResultSet itemResults = getItemOverviewsStmt.executeQuery();
             ResultSet enchantResults = getItemEnchantsStmt.executeQuery();
 
@@ -128,6 +127,9 @@ public class ItemRepository {
                 itemOverviews.get(itemId).setItem(enchantedItemDTO);
 
             });
+            getItemOverviewsStmt.close();
+            getItemEnchantsStmt.close();
+            con.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -136,10 +138,19 @@ public class ItemRepository {
     }
 
     public Long create(ItemDTO itemDTO) {
-        itemDTO.accept(itemInserter);
-        DB.commit();
-        Long itemId = itemInserter.getCreatedKey();
-        itemDTO.setId(itemId);
-        return itemId;
+        try {
+            Connection con = DB.getConnection();
+            itemInserter.setConnection(con);
+            itemDTO.accept(itemInserter);
+            con.commit();
+            con.close();
+            Long itemId = itemInserter.getCreatedKey();
+            itemDTO.setId(itemId);
+            return itemId;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

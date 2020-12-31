@@ -98,9 +98,9 @@ public class OrderService {
         .execute();   
     }
 
-    public void cancelOrder(OrderDTO orderDTO, Runnable onComplete) {
-        HumanEntity player = Bukkit.getPlayer(orderDTO.getPlayerUUID());
+    public void cancelOrder(HumanEntity player, OrderDTO orderDTO, Runnable onComplete) {
         CDAPlugin.newSharedChain(getOrderOperationThreadName(orderDTO.getItem())).asyncFirst(() -> {
+            orderRepository.collectOrder(orderDTO.getId(), orderDTO.getToCollect());
             Float nextBestPrice = orderRepository.delete(orderDTO);
             notifyRemoveOrderObserver(
                 orderDTO,
@@ -198,12 +198,12 @@ public class OrderService {
         }
         chain.execute();
 
-        if (orderDTO.getQuantityUnfilled() == 0) {
-            cancelOrder(orderDTO, () -> {
-                player.sendMessage(ChatColor.RED + "Removed completed order.");
-                onOrderRemoved.run();
-            });
-        }
+        // if (orderDTO.getQuantityUnfilled() == 0) {
+        //     cancelOrder(orderDTO, () -> {
+        //         player.sendMessage(ChatColor.RED + "Removed completed order.");
+        //         onOrderRemoved.run();
+        //     });
+        // }
     }
 
     public void fillOrder(OrderType orderType, ItemDTO itemDTO, int quantity, float price, Consumer<Integer> onComplete) {

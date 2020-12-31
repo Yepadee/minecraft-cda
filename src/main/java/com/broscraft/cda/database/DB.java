@@ -1,50 +1,56 @@
 package com.broscraft.cda.database;
 
 import java.io.File;
-import java.sql.Array;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import java.sql.Statement;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 public class DB {
-    private static String DB_NAME = "minecraft-cda.db";
-    private static String DIALECT = "jdbc:sqlite:";
-    private static String USER = "";
+    // private static String DB_NAME = "MinecraftCDA";
+    // private static String DIALECT = "jdbc:mariadb:";
+    static final String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+    private static String USER = "root";
     private static String PASS = "";
-
-    private static Connection con;
+    private static String URL = "jdbc:mariadb://localhost:3306/MinecraftCDA?user=root&password=";
+    private static HikariConfig config = new HikariConfig();
+    private static HikariDataSource ds;
 
     public static void init(File dbFolder) {
+        //String url = DIALECT + dbFolder.getAbsolutePath() + File.separator + DB_NAME;
         try {
-            String url = DIALECT + dbFolder.getAbsolutePath() + File.separator + DB_NAME;
-            con = DriverManager.getConnection(url, USER, PASS);
-            con.setAutoCommit(false);
-        } catch (SQLException e) {
+            Class.forName(JDBC_DRIVER);
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
+        config.setJdbcUrl(URL);
+        config.setUsername(USER);
+        config.setPassword(PASS);
+        config.addDataSourceProperty("cachePrepStmts" , "true");
+        config.addDataSourceProperty("prepStmtCacheSize" , "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit" , "2048");
+        ds = new HikariDataSource(config);
+        ds.setMaxLifetime(60000);
+        ds.setMinimumIdle(0);
+        ds.setMaximumPoolSize(1);
+        ds.setIdleTimeout(5000);
+        ds.setAutoCommit(false);
     }
 
-    public static void commit() {
-        try {
-            con.commit();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public static Connection getConnection() throws SQLException {
+        Connection con = ds.getConnection();
+        con.setAutoCommit(false);
+        return con;
     }
 
     public static void close() {
-        try {
-            con.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        ds.close();
     }
 
-    public static boolean tableExists(String tableName) {
+    public static boolean tableExists(Connection con, String tableName) {
         ResultSet tables;
         try {
             tables = con.getMetaData().getTables(null, null, tableName, null);
@@ -59,74 +65,18 @@ public class DB {
         }
     }
 
-    public static PreparedStatement prepareStatement(String query) {
-        try {
-            return con.prepareStatement(query);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static ResultSet query(PreparedStatement stmt) {
-        try {
-            return stmt.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static ResultSet query(String query) {
-        try {
-            Statement stmt = con.createStatement();
-            return stmt.executeQuery(query);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static int update(PreparedStatement stmt) {
-        try {
-            return stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    public static Long create(PreparedStatement stmt) {
-        try {
-            stmt.executeUpdate();
-            ResultSet rs = stmt.getGeneratedKeys();
-            Long createdKey = null;
-            if (rs.next()){
-                createdKey=rs.getLong(1);
-            }
-            return createdKey;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static int update(String udpate) {
-        try {
-            Statement stmt = con.createStatement();
-            return stmt.executeUpdate(udpate);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    public static Array createArrayOf(String typeName, Object[] elements) {
-        try {
-            return con.createArrayOf(typeName, elements);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+    // public static Long create(PreparedStatement stmt) {
+    //     try {
+    //         stmt.executeUpdate();
+    //         ResultSet rs = stmt.getGeneratedKeys();
+    //         Long createdKey = null;
+    //         if (rs.next()){
+    //             createdKey=rs.getLong(1);
+    //         }
+    //         return createdKey;
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //         return null;
+    //     }
+    // }
 }

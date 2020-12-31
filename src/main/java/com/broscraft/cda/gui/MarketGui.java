@@ -127,15 +127,15 @@ public class MarketGui {
                         return;
                     } 
 
-                    if (itemOverviewDto != null) {
-                        if (itemOverviewDto.getBestBid() != null) {
-                            if (price <= itemOverviewDto.getBestBid()) {
-                                player.sendMessage(ChatColor.RED + "Ask price must be higher than best bid!");
-                                openNewAskScreen(itemDTO, player);
-                                return;
-                            }
-                        }
-                    }
+                    // if (itemOverviewDto != null) {
+                    //     if (itemOverviewDto.getBestBid() != null) {
+                    //         if (price <= itemOverviewDto.getBestBid()) {
+                    //             player.sendMessage(ChatColor.RED + "Ask price must be higher than best bid!");
+                    //             openNewAskScreen(itemDTO, player);
+                    //             return;
+                    //         }
+                    //     }
+                    // }
 
                     newOrderDTO.setPrice(price);
                     openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
@@ -177,15 +177,15 @@ public class MarketGui {
                         return;
                     }
 
-                    if (itemOverviewDto != null) {
-                        if (itemOverviewDto.getBestAsk() != null) {
-                            if (price >= itemOverviewDto.getBestAsk()) {
-                                player.sendMessage(ChatColor.RED + "Bid price must be lower than best ask!");
-                                openNewBidScreen(itemDTO, player);
-                                return;
-                            }
-                        }
-                    }
+                    // if (itemOverviewDto != null) {
+                    //     if (itemOverviewDto.getBestAsk() != null) {
+                    //         if (price >= itemOverviewDto.getBestAsk()) {
+                    //             player.sendMessage(ChatColor.RED + "Bid price must be lower than best ask!");
+                    //             openNewBidScreen(itemDTO, player);
+                    //             return;
+                    //         }
+                    //     }
+                    // }
 
                     newOrderDTO.setPrice(price);
                     openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
@@ -333,7 +333,7 @@ public class MarketGui {
                 PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen(
                    back -> openAllItemsScreen(player)
                 );
-                orderService.cancelOrder(orderDTO, () -> {
+                orderService.cancelOrder(player, orderDTO, () -> {
                     loadPlayerOrders(playerOrdersScreen, player);
                 });
                 playerOrdersScreen.open(player);
@@ -354,7 +354,12 @@ public class MarketGui {
                 );
             }
             if (e.getClick().isRightClick()) {
-                confirmCancelOrder(order, player);
+                if (order.getToCollect() > 0) {
+                    player.sendMessage(ChatColor.RED + "Please collect your order before deleting it");
+                } else {
+                    confirmCancelOrder(order, player);
+                }
+                
             }
         };
     }

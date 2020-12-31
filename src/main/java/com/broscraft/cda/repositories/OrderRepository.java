@@ -1,5 +1,6 @@
 package com.broscraft.cda.repositories;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,84 +23,30 @@ import com.broscraft.cda.dtos.transaction.TransactionSummaryDTO;
 public class OrderRepository {
 
     private static float EPSILON = 0.001f;
-    
-    private PreparedStatement getItemBidsStmt;
-    private PreparedStatement getItemAsksStmt;
-    private PreparedStatement createOrderStmt;
 
-    private PreparedStatement getOrdersToFillStmt;
     private String emptyOrderQtyStmt;
-    private PreparedStatement decrementOrderQtyStmt;
-
-    private PreparedStatement getPlayerOrdersStmt;
-
-    private PreparedStatement collectOrderStmt;
-    private PreparedStatement deleteOrderStmt;
-
-    private PreparedStatement getBestBidStmt;
-    private PreparedStatement getBestAskStmt;
+    private String bestBidStmt;
+    private String bestAskStmt;
 
     public OrderRepository() {
-        getOrdersToFillStmt = DB.prepareStatement(
-            "SELECT id, player_uuid, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
-            "FROM Orders " +
-            "WHERE type=? AND item_id=? " + 
-            "AND ? <= price AND price <= ? " +
-            "ORDER BY created_at ASC"
-        );
-        getItemBidsStmt = DB.prepareStatement(
-            "SELECT price, SUM(quantity - quantity_filled) total_quantity " +
-            "FROM Orders " + 
-            "WHERE item_id=? AND type='BID' " +
-            "GROUP BY price " +
-            "HAVING total_quantity > 0 " +
-            "ORDER BY price DESC"
-        );
-        getItemAsksStmt = DB.prepareStatement(
-            "SELECT price, SUM(quantity - quantity_filled) total_quantity " +
-            "FROM Orders " + 
-            "WHERE item_id=? AND type='ASK' " +
-            "GROUP BY price " +
-            "HAVING total_quantity > 0 " +
-            "ORDER BY price ASC"
-        );
-        createOrderStmt = DB.prepareStatement(
-            "INSERT INTO Orders (type, player_uuid, item_id, price, quantity) " +
-            "VALUES (?, ?, ?, ?, ?)"
-        );
-        emptyOrderQtyStmt = 
+        emptyOrderQtyStmt = (
             "UPDATE Orders " +
             "SET quantity_filled = quantity, quantity_uncollected = quantity_uncollected + (quantity - quantity_filled) " +
             "WHERE id IN (?)"
-        ;
-        decrementOrderQtyStmt = DB.prepareStatement(
-            "UPDATE Orders " +
-            "SET quantity_filled = quantity_filled + ?, quantity_uncollected = quantity_uncollected + ? " +
-            "WHERE id=?"
         );
-        getPlayerOrdersStmt = DB.prepareStatement(
-            "SELECT id, type, item_id, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
-            "FROM Orders " +
-            "WHERE player_uuid=?"
-        );
-        collectOrderStmt = DB.prepareStatement(
-            "UPDATE Orders " +
-            "SET quantity_uncollected = quantity_uncollected - ? " +
-            "WHERE id=?"
-        );
-        deleteOrderStmt = DB.prepareStatement(
-            "DELETE FROM Orders WHERE id=?"
-        );
-        getBestBidStmt = DB.prepareStatement(
+
+        bestBidStmt = (
             "SELECT MAX(price) " +
             "FROM Orders " +
             "WHERE item_id=? AND type='BID'"
         );
-        getBestAskStmt = DB.prepareStatement(
+
+        bestAskStmt = (
             "SELECT MIN(price) " +
             "FROM Orders " +
             "WHERE item_id=? AND type='ASK'"
         );
+
     }
 
     public GroupedOrdersDTO getItemOrders(Long itemId) {
@@ -107,6 +54,25 @@ public class OrderRepository {
         List<GroupedAskDTO> groupedAsks = new ArrayList<>();
 
         try {
+            Connection con = DB.getConnection();
+            System.out.println("GOT CONNECTION");
+            PreparedStatement getItemBidsStmt = con.prepareStatement(
+                "SELECT price, SUM(quantity - quantity_filled) total_quantity " +
+                "FROM Orders " + 
+                "WHERE item_id=? AND type='BID' " +
+                "GROUP BY price " +
+                "HAVING total_quantity > 0 " +
+                "ORDER BY price DESC"
+            );
+            PreparedStatement getItemAsksStmt = con.prepareStatement(
+                "SELECT price, SUM(quantity - quantity_filled) total_quantity " +
+                "FROM Orders " + 
+                "WHERE item_id=? AND type='ASK' " +
+                "GROUP BY price " +
+                "HAVING total_quantity > 0 " +
+                "ORDER BY price ASC"
+            );
+
             getItemBidsStmt.setLong(1, itemId);
             ResultSet bidResults = getItemBidsStmt.executeQuery();
             while (bidResults.next()) {
@@ -128,6 +94,9 @@ public class OrderRepository {
                 groupedAsks.add(groupedAsk);   
             }
             askResults.close();
+            getItemBidsStmt.close();
+            getItemAsksStmt.close();
+            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -139,6 +108,13 @@ public class OrderRepository {
         List<OrderDTO> playerOrders = new ArrayList<>();
         
         try {
+            Connection con = DB.getConnection();
+            PreparedStatement getPlayerOrdersStmt = con.prepareStatement(
+                "SELECT id, type, item_id, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
+                "FROM Orders " +
+                "WHERE player_uuid=?"
+            );
+
             getPlayerOrdersStmt.setString(1, playerUUID.toString());
             ResultSet results = getPlayerOrdersStmt.executeQuery();
         
@@ -155,6 +131,8 @@ public class OrderRepository {
                 .quantityUnfilled(results.getInt(8));
                 playerOrders.add(orderDTO);
             }
+            results.close();
+            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -164,31 +142,42 @@ public class OrderRepository {
 
     public void createOrder(NewOrderDTO newOrderDTO) {
         try {
+            Connection con =  DB.getConnection();
+            PreparedStatement createOrderStmt = con.prepareStatement(
+                "INSERT INTO Orders (type, player_uuid, item_id, price, quantity) " +
+                "VALUES (?, ?, ?, ?, ?)"
+            );
             createOrderStmt.setString(1, newOrderDTO.getType().toString());
             createOrderStmt.setString(2, newOrderDTO.getPlayerUUID().toString());
             createOrderStmt.setLong(3, newOrderDTO.getItem().getId());
             createOrderStmt.setFloat(4, newOrderDTO.getPrice());
             createOrderStmt.setInt(5, newOrderDTO.getQuantity());
             createOrderStmt.executeUpdate();
+            createOrderStmt.close();
+            con.commit();
+            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        DB.commit();
     }
 
     public Float delete(OrderDTO orderDTO) {
         Float nextBestPrice = null;
         try {
+            Connection con = DB.getConnection();
+            PreparedStatement deleteOrderStmt = con.prepareStatement(
+                "DELETE FROM Orders WHERE id=?"
+            );
             deleteOrderStmt.setLong(1, orderDTO.getId());
             deleteOrderStmt.executeUpdate();
-            DB.commit();
+            deleteOrderStmt.close();
+            con.commit();
             
             PreparedStatement stmt;
             if (orderDTO.getType().equals(OrderType.BID)) {
-                stmt = getBestBidStmt;
+                stmt = con.prepareStatement(bestBidStmt);
             } else {
-                stmt = getBestAskStmt;
+                stmt = con.prepareStatement(bestAskStmt);
             }
 
             stmt.setLong(1, orderDTO.getItem().getId());
@@ -197,7 +186,9 @@ public class OrderRepository {
                 nextBestPrice = results.getFloat(1);
                 nextBestPrice = nextBestPrice == 0 ? null : nextBestPrice;
             }
- 
+            results.close();
+            stmt.close();
+            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -211,18 +202,29 @@ public class OrderRepository {
         float minPrice = price - EPSILON;
         float maxPrice = price + EPSILON;
         try {
+            Connection con = DB.getConnection();
+            PreparedStatement getOrdersToFillStmt = con.prepareStatement(
+                "SELECT id, player_uuid, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
+                "FROM Orders " +
+                "WHERE type=? AND item_id=? " + 
+                "AND ? <= price AND price <= ? " +
+                "ORDER BY created_at ASC"
+            );
+    
             Long itemId = Objects.requireNonNull(itemDTO.getId());
             getOrdersToFillStmt.setString(1, orderType.toString());
             getOrdersToFillStmt.setLong(2, itemId);
             getOrdersToFillStmt.setFloat(3, minPrice);
             getOrdersToFillStmt.setFloat(4, maxPrice);
-            ResultSet orderResults = getOrdersToFillStmt.executeQuery();
+            
 
             int totalAvailable = 0;
             List<Long> toEmptyOrderIds = new ArrayList<>();
-            Long toDecrementOrderId = null;
+            OrderDTO toDecrementOrder = null;
             Integer toDecrementQuantity = null;
             int totalFilled = 0;
+
+            ResultSet orderResults = getOrdersToFillStmt.executeQuery();
             while (orderResults.next() && totalAvailable < quantity) {
                 OrderDTO affectedOrder = new OrderDTO();
                 affectedOrder.setType(orderType);
@@ -237,7 +239,6 @@ public class OrderRepository {
                 
                 totalAvailable += affectedOrder.getQuantityUnfilled();
                 int overflow = totalAvailable - quantity;
-                
                 if (overflow <= 0)  {
                     totalFilled += affectedOrder.getQuantityUnfilled();
                     
@@ -246,32 +247,43 @@ public class OrderRepository {
                     affectedOrder.setQuantityUnfilled(0);
                     
                     toEmptyOrderIds.add(affectedOrder.getId());
+                    affectedOrders.add(affectedOrder);
                 } else {
                     toDecrementQuantity = quantity - totalFilled;
                     affectedOrder.setToCollect(affectedOrder.getToCollect() + toDecrementQuantity);
                     affectedOrder.setQuantityFilled(affectedOrder.getQuantityFilled() + toDecrementQuantity);
                     affectedOrder.setQuantityUnfilled(affectedOrder.getQuantityUnfilled() - toDecrementQuantity);
-                    toDecrementOrderId = affectedOrder.getId();
+                    toDecrementOrder = affectedOrder;
                     totalFilled += toDecrementQuantity;
                     break; // Should exit loop here anyway
                 }
-
-                affectedOrders.add(affectedOrder);
             }
+            getOrdersToFillStmt.close();
+            orderResults.close();
+            
 
             if (toEmptyOrderIds.size() > 0) {
                 String idList = toEmptyOrderIds.stream().map(id -> "" + id).collect(Collectors.joining(", "));
-                String stmt = emptyOrderQtyStmt.replace("?", idList);
-                DB.update(stmt);
+                PreparedStatement stmt = con.prepareStatement(emptyOrderQtyStmt.replace("?", idList));
+                stmt.executeUpdate();
+                stmt.close();
             }
 
-            if (toDecrementOrderId != null) {
+            if (toDecrementOrder != null) {
+                PreparedStatement decrementOrderQtyStmt = con.prepareStatement(
+                    "UPDATE Orders " +
+                    "SET quantity_filled = quantity_filled + ?, quantity_uncollected = quantity_uncollected + ? " +
+                    "WHERE id=?"
+                );
+                affectedOrders.add(toDecrementOrder);
                 decrementOrderQtyStmt.setInt(1, toDecrementQuantity);
                 decrementOrderQtyStmt.setInt(2, toDecrementQuantity);
-                decrementOrderQtyStmt.setLong(3, toDecrementOrderId);
+                decrementOrderQtyStmt.setLong(3, toDecrementOrder.getId());
                 decrementOrderQtyStmt.executeUpdate();
+                decrementOrderQtyStmt.close();
             }
-            DB.commit();
+
+            con.commit();
 
             transactionSummary.setAffectedOrders(affectedOrders);
             transactionSummary.setItemId(itemId);
@@ -279,27 +291,41 @@ public class OrderRepository {
             transactionSummary.setNumFilled(totalFilled);
 
             PreparedStatement getBestPriceStmt;
-            if (orderType.equals(OrderType.BID)) getBestPriceStmt = getBestBidStmt;
-            else getBestPriceStmt = getBestAskStmt;
+            if (orderType.equals(OrderType.BID)) getBestPriceStmt = con.prepareStatement(bestBidStmt);
+            else getBestPriceStmt = con.prepareStatement(bestAskStmt);
 
             getBestPriceStmt.setLong(1, itemId);
             ResultSet bestPriceResults = getBestPriceStmt.executeQuery();
             if (bestPriceResults.next()) {
                 transactionSummary.setNewBestPrice(bestPriceResults.getFloat(1));
             }
+            bestPriceResults.close();
+            getBestPriceStmt.close();
+
+            con.close();
+            System.out.println(transactionSummary);
+            return transactionSummary;
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return transactionSummary;
+        return null;
     }
 
     public void collectOrder(Long orderId, int quantity) {
         try {
+            Connection con = DB.getConnection();
+            PreparedStatement collectOrderStmt = con.prepareStatement(
+                "UPDATE Orders " +
+                "SET quantity_uncollected = quantity_uncollected - ? " +
+                "WHERE id=?"
+            );
             collectOrderStmt.setInt(1, quantity);
             collectOrderStmt.setLong(2, orderId);
             collectOrderStmt.executeUpdate();
-            DB.commit();
+            collectOrderStmt.close();
+            con.commit();
+            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
