@@ -31,20 +31,20 @@ public class OrderRepository {
     public OrderRepository() {
         emptyOrderQtyStmt = (
             "UPDATE Orders " +
-            "SET quantity_filled = quantity, quantity_uncollected = quantity_uncollected + (quantity - quantity_filled) " +
+            "SET quantity_uncollected = quantity_uncollected + (quantity - quantity_filled), quantity_filled = quantity " +
             "WHERE id IN (?)"
         );
 
         bestBidStmt = (
             "SELECT MAX(price) " +
             "FROM Orders " +
-            "WHERE item_id=? AND type='BID'"
+            "WHERE item_id=? AND type='BID' AND quantity_filled < quantity"
         );
 
         bestAskStmt = (
             "SELECT MIN(price) " +
             "FROM Orders " +
-            "WHERE item_id=? AND type='ASK'"
+            "WHERE item_id=? AND type='ASK' AND quantity_filled < quantity"
         );
 
     }
