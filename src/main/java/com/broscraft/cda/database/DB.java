@@ -2,8 +2,10 @@ package com.broscraft.cda.database;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -23,6 +25,17 @@ public class DB {
         try {
             Class.forName(JDBC_DRIVER);
         } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Connection conn;
+        try {
+            conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/?user=root&password=");
+            Statement s = conn.createStatement();
+            s.executeUpdate("CREATE DATABASE IF NOT EXISTS MinecraftCDA");
+            s.close();
+            conn.close();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
