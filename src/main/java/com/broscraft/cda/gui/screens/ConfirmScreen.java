@@ -28,7 +28,10 @@ public class ConfirmScreen {
             event.setCancelled(true);
         });
         
-        setIcons(onConfirm, onCancel);
+        setIcons(e -> {
+            gui.setCloseGuiAction(ec -> {});
+            onConfirm.execute(e);
+        }, onCancel);
     }
 
     private void setIcons(GuiAction<InventoryClickEvent> onConfirm, GuiAction<InventoryClickEvent> onCancel) {
