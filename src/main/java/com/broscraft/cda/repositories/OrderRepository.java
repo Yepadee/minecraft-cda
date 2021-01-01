@@ -12,6 +12,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.broscraft.cda.database.DB;
+import com.broscraft.cda.database.mappers.AffectedOrderMapper;
+import com.broscraft.cda.database.mappers.GroupedAskMapper;
+import com.broscraft.cda.database.mappers.GroupedBidMapper;
+import com.broscraft.cda.database.mappers.PlayerOrderMapper;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
 import com.broscraft.cda.dtos.orders.OrderType;
@@ -50,8 +54,7 @@ public class OrderRepository {
 
     public GroupedOrdersDTO getItemOrders(Long itemId) {
         List<GroupedBidDTO> groupedBids = new ArrayList<>();
-        List<GroupedAskDTO> groupedAsks = new ArrayList<>();
-
+        List<GroupedAskDTO> groupedAsks = new ArrayList<>(); 
         try {
             Connection con = DB.getConnection();
             PreparedStatement getItemBidsStmt = con.prepareStatement(
@@ -72,26 +75,19 @@ public class OrderRepository {
             );
 
             getItemBidsStmt.setLong(1, itemId);
+            getItemAsksStmt.setLong(1, itemId);
+
             ResultSet bidResults = getItemBidsStmt.executeQuery();
-            while (bidResults.next()) {
-                BigDecimal price = EcoUtils.parseMoney(bidResults.getInt(1));
-                int quantity = bidResults.getInt(2);
-                GroupedBidDTO groupedBid = new GroupedBidDTO();
-                groupedBid.price(price).quantity(quantity);
-                groupedBids.add(groupedBid);   
-            }
+            ResultSet askResults = getItemAsksStmt.executeQuery();
+
+            GroupedBidMapper groupedBidMapper = new GroupedBidMapper();
+            groupedBids = groupedBidMapper.getResults(bidResults);
             bidResults.close();
 
-            getItemAsksStmt.setLong(1, itemId);
-            ResultSet askResults = getItemAsksStmt.executeQuery();
-            while (askResults.next()) {
-                BigDecimal price = EcoUtils.parseMoney(askResults.getInt(1));
-                int quantity = askResults.getInt(2);
-                GroupedAskDTO groupedAsk = new GroupedAskDTO();
-                groupedAsk.price(price).quantity(quantity);
-                groupedAsks.add(groupedAsk);   
-            }
+            GroupedAskMapper groupedAskMapper = new GroupedAskMapper();
+            groupedAsks = groupedAskMapper.getResults(askResults);
             askResults.close();
+
             getItemBidsStmt.close();
             getItemAsksStmt.close();
             con.close();
@@ -114,22 +110,16 @@ public class OrderRepository {
             );
 
             getPlayerOrdersStmt.setString(1, playerUUID.toString());
-            ResultSet results = getPlayerOrdersStmt.executeQuery();
-        
-            while (results.next()) {
-                OrderDTO orderDTO = new OrderDTO();
-                orderDTO.id(results.getLong(1))
-                .type(OrderType.valueOf(results.getString(2)))
-                .playerUUID(playerUUID)
-                .item(new ItemDTO().id(results.getLong(3)))
-                .price(EcoUtils.parseMoney(results.getInt(4)))
-                .quantity(results.getInt(5))
-                .quantityFilled(results.getInt(6))
-                .toCollect(results.getInt(7))
-                .quantityUnfilled(results.getInt(8));
+            ResultSet playerOrdersResults = getPlayerOrdersStmt.executeQuery();
+            
+            PlayerOrderMapper playerOrderMapper = new PlayerOrderMapper();
+            while (playerOrdersResults.next()) {
+                OrderDTO orderDTO = playerOrderMapper.getRow(playerOrdersResults)
+                .playerUUID(playerUUID);
+
                 playerOrders.add(orderDTO);
             }
-            results.close();
+            playerOrdersResults.close();
             con.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -220,16 +210,10 @@ public class OrderRepository {
             int totalFilled = 0;
 
             ResultSet orderResults = getOrdersToFillStmt.executeQuery();
+            AffectedOrderMapper orderMapper = new AffectedOrderMapper();
             while (orderResults.next() && totalAvailable < quantity) {
-                OrderDTO affectedOrder = new OrderDTO();
+                OrderDTO affectedOrder = orderMapper.getRow(orderResults);
                 affectedOrder.setType(orderType);
-                affectedOrder.setId(orderResults.getLong(1));
-                affectedOrder.setPlayerUUID(UUID.fromString(orderResults.getString(2)));
-                affectedOrder.setPrice(EcoUtils.parseMoney(orderResults.getInt(3)));
-                affectedOrder.setQuantity(orderResults.getInt(4));
-                affectedOrder.setQuantityFilled(orderResults.getInt(5));
-                affectedOrder.setToCollect(orderResults.getInt(6));
-                affectedOrder.setQuantityUnfilled(orderResults.getInt(7));
                 affectedOrder.setItem(itemDTO);
                 
                 totalAvailable += affectedOrder.getQuantityUnfilled();
