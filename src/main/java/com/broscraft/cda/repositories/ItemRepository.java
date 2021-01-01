@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.broscraft.cda.database.DB;
 import com.broscraft.cda.database.mappers.EnchantmentMapper;
@@ -111,11 +112,13 @@ public class ItemRepository {
         try (Connection con = DB.getConnection()) {
             itemInserter.setConnection(con);
             itemDTO.accept(itemInserter);
+
+            Long itemId = Objects.requireNonNull(itemInserter.getCreatedKey());
+            itemDTO.setId(itemId);
             
             con.commit();
             con.close();
-            Long itemId = itemInserter.getCreatedKey();
-            itemDTO.setId(itemId);
+
             return itemId;
         } catch (SQLException e) {
             e.printStackTrace();

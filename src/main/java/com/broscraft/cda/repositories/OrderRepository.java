@@ -124,7 +124,8 @@ public class OrderRepository {
             PreparedStatement getPlayerOrdersStmt = con.prepareStatement(
                 "SELECT id, type, item_id, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
                 "FROM Orders " +
-                "WHERE player_uuid=?"
+                "WHERE player_uuid=? " +
+                "ORDER BY quantity_uncollected DESC, (quantity_filled = quantity) ASC, created_at DESC"
             );
 
             getPlayerOrdersStmt.setString(1, playerUUID.toString());

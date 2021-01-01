@@ -61,7 +61,10 @@ public class PlayerOrdersScreen extends ScrollableScreen implements OrderUpdateO
             collectTxt = ChatColor.GRAY + "Collect Money: " + toCollectColor + EcoUtils.formatPriceCurrency(EcoUtils.multiply(orderDTO.getPrice(), orderDTO.getToCollect()));
         }
 
-        if (orderDTO.getQuantityFilled().equals(orderDTO.getQuantity())) color = ChatColor.RED;
+        if (orderDTO.getQuantityFilled().equals(orderDTO.getQuantity())) {
+            if (orderDTO.getToCollect() == 0) collectTxt = "   " + ChatColor.RED + ChatColor.BOLD.toString() + "COMPLETED";
+            color = ChatColor.RED;
+        } 
 
         quantityTxt += color.toString() +
             orderDTO.getQuantityFilled() + "/" +
