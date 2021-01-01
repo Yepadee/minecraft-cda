@@ -292,7 +292,8 @@ public class OrderRepository {
             getBestPriceStmt.setLong(1, itemId);
             ResultSet bestPriceResults = getBestPriceStmt.executeQuery();
             if (bestPriceResults.next()) {
-                transactionSummary.setNewBestPrice(EcoUtils.parseMoney(bestPriceResults.getInt(1)));
+                int nextBestPrice = bestPriceResults.getInt(1);
+                if (nextBestPrice > 0) transactionSummary.setNewBestPrice(EcoUtils.parseMoney(nextBestPrice));
             }
             bestPriceResults.close();
             getBestPriceStmt.close();

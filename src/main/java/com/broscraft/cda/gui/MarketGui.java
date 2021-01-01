@@ -99,8 +99,6 @@ public class MarketGui {
             });
             searchResultsScreen.open(player);
         });
-
-        
     }
 
     public void openNewAskScreen(ItemDTO itemDTO, HumanEntity player) {
@@ -109,14 +107,7 @@ public class MarketGui {
         newOrderDTO.setPlayerUUID(player.getUniqueId());
         newOrderDTO.setItem(itemDTO);
 
-        String placeholder = "_";
-        ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
-        if (itemOverviewDto != null) {
-            BigDecimal bestAsk = itemOverviewDto.getBestAsk();
-            if (bestAsk != null) {
-                placeholder = bestAsk + "_";
-            }
-        }
+        String placeholder = getPricePlaceholder(itemDTO, OrderType.ASK);
 
         new NewOrderPriceInputScreen(
             placeholder,
@@ -149,14 +140,7 @@ public class MarketGui {
         newOrderDTO.setPlayerUUID(player.getUniqueId());
         newOrderDTO.setItem(itemDTO);
 
-        String placeholder = "_";
-        ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
-        if (itemOverviewDto != null) {
-            BigDecimal bestBid = itemOverviewDto.getBestBid();
-            if (bestBid != null) {
-                placeholder = bestBid + "_";
-            }
-        }
+        String placeholder = getPricePlaceholder(itemDTO, OrderType.BID);
 
         new NewOrderPriceInputScreen(
             placeholder,
@@ -208,6 +192,26 @@ public class MarketGui {
         return iconsManager.hasIcon(itemDTO);
     }
 
+
+    private String getPricePlaceholder(ItemDTO itemDTO, OrderType orderType) {
+        String placeholder = "_";
+        ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
+        System.out.println(itemOverviewDto);
+        if (itemOverviewDto != null) {
+            BigDecimal bestPrice;
+            if (orderType.equals(OrderType.BID)) {
+                bestPrice = itemOverviewDto.getBestBid();
+            } else {
+                bestPrice = itemOverviewDto.getBestAsk();
+            }
+
+            if (bestPrice != null) {
+                placeholder = bestPrice + "_";
+            }
+
+        }
+        return placeholder;
+    }
 
     private void openNewAskItemInputScreen(ItemDTO itemDTO, NewOrderDTO newOrderDto, HumanEntity player) {
         ItemOverviewDTO itemOverview = itemService.getItemOverview(itemDTO);
