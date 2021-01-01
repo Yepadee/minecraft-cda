@@ -1,5 +1,6 @@
 package com.broscraft.cda.repositories;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,11 +20,9 @@ import com.broscraft.cda.dtos.orders.grouped.GroupedBidDTO;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrdersDTO;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.dtos.transaction.TransactionSummaryDTO;
+import com.broscraft.cda.utils.EcoUtils;
 
 public class OrderRepository {
-
-    private static float EPSILON = 0.001f;
-
     private String emptyOrderQtyStmt;
     private String bestBidStmt;
     private String bestAskStmt;
@@ -55,7 +54,6 @@ public class OrderRepository {
 
         try {
             Connection con = DB.getConnection();
-            System.out.println("GOT CONNECTION");
             PreparedStatement getItemBidsStmt = con.prepareStatement(
                 "SELECT price, SUM(quantity - quantity_filled) total_quantity " +
                 "FROM Orders " + 
@@ -76,7 +74,7 @@ public class OrderRepository {
             getItemBidsStmt.setLong(1, itemId);
             ResultSet bidResults = getItemBidsStmt.executeQuery();
             while (bidResults.next()) {
-                float price = bidResults.getFloat(1);
+                BigDecimal price = EcoUtils.parseMoney(bidResults.getInt(1));
                 int quantity = bidResults.getInt(2);
                 GroupedBidDTO groupedBid = new GroupedBidDTO();
                 groupedBid.price(price).quantity(quantity);
@@ -87,7 +85,7 @@ public class OrderRepository {
             getItemAsksStmt.setLong(1, itemId);
             ResultSet askResults = getItemAsksStmt.executeQuery();
             while (askResults.next()) {
-                float price = askResults.getFloat(1);
+                BigDecimal price = EcoUtils.parseMoney(askResults.getInt(1));
                 int quantity = askResults.getInt(2);
                 GroupedAskDTO groupedAsk = new GroupedAskDTO();
                 groupedAsk.price(price).quantity(quantity);
@@ -124,7 +122,7 @@ public class OrderRepository {
                 .type(OrderType.valueOf(results.getString(2)))
                 .playerUUID(playerUUID)
                 .item(new ItemDTO().id(results.getLong(3)))
-                .price(results.getFloat(4))
+                .price(EcoUtils.parseMoney(results.getInt(4)))
                 .quantity(results.getInt(5))
                 .quantityFilled(results.getInt(6))
                 .toCollect(results.getInt(7))
@@ -150,7 +148,7 @@ public class OrderRepository {
             createOrderStmt.setString(1, newOrderDTO.getType().toString());
             createOrderStmt.setString(2, newOrderDTO.getPlayerUUID().toString());
             createOrderStmt.setLong(3, newOrderDTO.getItem().getId());
-            createOrderStmt.setFloat(4, newOrderDTO.getPrice());
+            createOrderStmt.setInt(4, EcoUtils.getValue(newOrderDTO.getPrice()));
             createOrderStmt.setInt(5, newOrderDTO.getQuantity());
             createOrderStmt.executeUpdate();
             createOrderStmt.close();
@@ -161,8 +159,8 @@ public class OrderRepository {
         }
     }
 
-    public Float delete(OrderDTO orderDTO) {
-        Float nextBestPrice = null;
+    public BigDecimal delete(OrderDTO orderDTO) {
+        BigDecimal nextBestPrice = null;
         try {
             Connection con = DB.getConnection();
             PreparedStatement deleteOrderStmt = con.prepareStatement(
@@ -183,8 +181,8 @@ public class OrderRepository {
             stmt.setLong(1, orderDTO.getItem().getId());
             ResultSet results = stmt.executeQuery();
             if (results.next()) {
-                nextBestPrice = results.getFloat(1);
-                nextBestPrice = nextBestPrice == 0 ? null : nextBestPrice;
+                int nextBestPriceInt = results.getInt(1);
+                if (nextBestPriceInt > 0) nextBestPrice = EcoUtils.parseMoney(nextBestPriceInt);
             }
             results.close();
             stmt.close();
@@ -195,27 +193,24 @@ public class OrderRepository {
         return nextBestPrice;
     }
     
-    public TransactionSummaryDTO fillOrder(OrderType orderType, ItemDTO itemDTO, float price, int quantity) {
+    public TransactionSummaryDTO fillOrder(OrderType orderType, ItemDTO itemDTO, BigDecimal price, int quantity) {
         TransactionSummaryDTO transactionSummary = new TransactionSummaryDTO();
         List<OrderDTO> affectedOrders = new ArrayList<>();
- 
-        float minPrice = price - EPSILON;
-        float maxPrice = price + EPSILON;
+        int priceValue = EcoUtils.getValue(price);
         try {
             Connection con = DB.getConnection();
             PreparedStatement getOrdersToFillStmt = con.prepareStatement(
                 "SELECT id, player_uuid, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
                 "FROM Orders " +
                 "WHERE type=? AND item_id=? " + 
-                "AND ? <= price AND price <= ? " +
+                "AND price=? " +
                 "ORDER BY created_at ASC"
             );
     
             Long itemId = Objects.requireNonNull(itemDTO.getId());
             getOrdersToFillStmt.setString(1, orderType.toString());
             getOrdersToFillStmt.setLong(2, itemId);
-            getOrdersToFillStmt.setFloat(3, minPrice);
-            getOrdersToFillStmt.setFloat(4, maxPrice);
+            getOrdersToFillStmt.setInt(3, priceValue);
             
 
             int totalAvailable = 0;
@@ -230,7 +225,7 @@ public class OrderRepository {
                 affectedOrder.setType(orderType);
                 affectedOrder.setId(orderResults.getLong(1));
                 affectedOrder.setPlayerUUID(UUID.fromString(orderResults.getString(2)));
-                affectedOrder.setPrice(orderResults.getFloat(3));
+                affectedOrder.setPrice(EcoUtils.parseMoney(orderResults.getInt(3)));
                 affectedOrder.setQuantity(orderResults.getInt(4));
                 affectedOrder.setQuantityFilled(orderResults.getInt(5));
                 affectedOrder.setToCollect(orderResults.getInt(6));
@@ -297,13 +292,12 @@ public class OrderRepository {
             getBestPriceStmt.setLong(1, itemId);
             ResultSet bestPriceResults = getBestPriceStmt.executeQuery();
             if (bestPriceResults.next()) {
-                transactionSummary.setNewBestPrice(bestPriceResults.getFloat(1));
+                transactionSummary.setNewBestPrice(EcoUtils.parseMoney(bestPriceResults.getInt(1)));
             }
             bestPriceResults.close();
             getBestPriceStmt.close();
 
             con.close();
-            System.out.println(transactionSummary);
             return transactionSummary;
         } catch (SQLException e) {
             e.printStackTrace();

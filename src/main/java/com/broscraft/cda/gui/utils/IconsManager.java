@@ -1,5 +1,6 @@
 package com.broscraft.cda.gui.utils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -124,8 +125,8 @@ public class IconsManager implements OverviewUpdateObserver {
 
     private List<String> getLore(ItemOverviewDTO itemOverview) {
         String notAvailable = ChatColor.RED.toString() + ChatColor.BOLD + "N/A";
-        Float bestBid = itemOverview.getBestBid();
-        Float bestAsk = itemOverview.getBestAsk();
+        BigDecimal bestBid = itemOverview.getBestBid();
+        BigDecimal bestAsk = itemOverview.getBestAsk();
         int supply = itemOverview.getSupply();
         int demand = itemOverview.getDemand();
         List<String> lore = Arrays.asList(

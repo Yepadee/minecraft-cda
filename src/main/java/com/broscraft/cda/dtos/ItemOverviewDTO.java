@@ -1,13 +1,14 @@
 package com.broscraft.cda.dtos;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.broscraft.cda.dtos.items.ItemDTO;
 
 public class ItemOverviewDTO {
     private ItemDTO item;
-    private Float bestBid;
-    private Float bestAsk;
+    private BigDecimal bestBid;
+    private BigDecimal bestAsk;
     private int demand;
     private int supply;
 
@@ -15,7 +16,7 @@ public class ItemOverviewDTO {
     public ItemOverviewDTO() {
     }
 
-    public ItemOverviewDTO(ItemDTO item, Float bestBid, Float bestAsk, int demand, int supply) {
+    public ItemOverviewDTO(ItemDTO item, BigDecimal bestBid, BigDecimal bestAsk, int demand, int supply) {
         this.item = item;
         this.bestBid = bestBid;
         this.bestAsk = bestAsk;
@@ -31,19 +32,19 @@ public class ItemOverviewDTO {
         this.item = item;
     }
 
-    public Float getBestBid() {
+    public BigDecimal getBestBid() {
         return this.bestBid;
     }
 
-    public void setBestBid(Float bestBid) {
+    public void setBestBid(BigDecimal bestBid) {
         this.bestBid = bestBid;
     }
 
-    public Float getBestAsk() {
+    public BigDecimal getBestAsk() {
         return this.bestAsk;
     }
 
-    public void setBestAsk(Float bestAsk) {
+    public void setBestAsk(BigDecimal bestAsk) {
         this.bestAsk = bestAsk;
     }
 
@@ -68,12 +69,12 @@ public class ItemOverviewDTO {
         return this;
     }
 
-    public ItemOverviewDTO bestBid(Float bestBid) {
+    public ItemOverviewDTO bestBid(BigDecimal bestBid) {
         this.bestBid = bestBid;
         return this;
     }
 
-    public ItemOverviewDTO bestAsk(Float bestAsk) {
+    public ItemOverviewDTO bestAsk(BigDecimal bestAsk) {
         this.bestAsk = bestAsk;
         return this;
     }

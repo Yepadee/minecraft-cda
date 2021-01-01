@@ -1,25 +1,28 @@
 package com.broscraft.cda.dtos.orders.grouped;
 
 
+import java.math.BigDecimal;
+import java.util.Objects;
+
 import com.broscraft.cda.dtos.orders.grouped.visitors.GroupedOrderVisitor;
 
 public abstract class GroupedOrderDTO {
-    private Float price;
+    private BigDecimal price;
     private Integer quantity;
 
     public GroupedOrderDTO() {
     }
 
-    public GroupedOrderDTO(Float price, Integer quantity) {
+    public GroupedOrderDTO(BigDecimal price, Integer quantity) {
         this.price = price;
         this.quantity = quantity;
     }
 
-    public Float getPrice() {
+    public BigDecimal getPrice() {
         return this.price;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -31,7 +34,7 @@ public abstract class GroupedOrderDTO {
         this.quantity = quantity;
     }
 
-    public GroupedOrderDTO price(Float price) {
+    public GroupedOrderDTO price(BigDecimal price) {
         this.price = price;
         return this;
     }
@@ -39,6 +42,22 @@ public abstract class GroupedOrderDTO {
     public GroupedOrderDTO quantity(Integer quantity) {
         this.quantity = quantity;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof GroupedOrderDTO)) {
+            return false;
+        }
+        GroupedOrderDTO groupedOrderDTO = (GroupedOrderDTO) o;
+        return Objects.equals(price, groupedOrderDTO.price) && Objects.equals(quantity, groupedOrderDTO.quantity);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(price, quantity);
     }
 
     @Override

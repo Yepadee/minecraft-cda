@@ -1,5 +1,7 @@
 package com.broscraft.cda.gui;
 
+import java.math.BigDecimal;
+
 import com.broscraft.cda.dtos.ItemOverviewDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
@@ -33,7 +35,7 @@ import me.mattstudios.mfgui.gui.components.GuiAction;
 import net.md_5.bungee.api.ChatColor;
 
 public class MarketGui {
-    private static float MAX_PRICE = 1000000;
+    private static BigDecimal MAX_PRICE = BigDecimal.valueOf(1000000);
     private static int MAX_ITEM_STACKS = 8;
     private IconsManager iconsManager;
     private OrderService orderService;
@@ -110,7 +112,7 @@ public class MarketGui {
         String placeholder = "_";
         ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
         if (itemOverviewDto != null) {
-            Float bestAsk = itemOverviewDto.getBestAsk();
+            BigDecimal bestAsk = itemOverviewDto.getBestAsk();
             if (bestAsk != null) {
                 placeholder = bestAsk + "_";
             }
@@ -120,22 +122,12 @@ public class MarketGui {
             placeholder,
             (p, priceTxt) -> {
                 try {
-                    float price = Float.parseFloat(priceTxt);
-                    if (price > MAX_PRICE) {
+                    BigDecimal price = EcoUtils.parseMoney(priceTxt);
+                    if (EcoUtils.greaterThan(price, MAX_PRICE)) {
                         player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
                         openNewAskScreen(itemDTO, player);
                         return;
-                    } 
-
-                    // if (itemOverviewDto != null) {
-                    //     if (itemOverviewDto.getBestBid() != null) {
-                    //         if (price <= itemOverviewDto.getBestBid()) {
-                    //             player.sendMessage(ChatColor.RED + "Ask price must be higher than best bid!");
-                    //             openNewAskScreen(itemDTO, player);
-                    //             return;
-                    //         }
-                    //     }
-                    // }
+                    }
 
                     newOrderDTO.setPrice(price);
                     openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
@@ -160,7 +152,7 @@ public class MarketGui {
         String placeholder = "_";
         ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
         if (itemOverviewDto != null) {
-            Float bestBid = itemOverviewDto.getBestBid();
+            BigDecimal bestBid = itemOverviewDto.getBestBid();
             if (bestBid != null) {
                 placeholder = bestBid + "_";
             }
@@ -170,22 +162,12 @@ public class MarketGui {
             placeholder,
             (p, priceTxt) -> {
                 try {
-                    float price = Float.parseFloat(priceTxt);
-                    if (price > MAX_PRICE) {
+                    BigDecimal price = EcoUtils.parseMoney(priceTxt);
+                    if (EcoUtils.greaterThan(price, MAX_PRICE)) {
                         player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
                         openNewBidScreen(itemDTO, player);
                         return;
                     }
-
-                    // if (itemOverviewDto != null) {
-                    //     if (itemOverviewDto.getBestAsk() != null) {
-                    //         if (price >= itemOverviewDto.getBestAsk()) {
-                    //             player.sendMessage(ChatColor.RED + "Bid price must be lower than best ask!");
-                    //             openNewBidScreen(itemDTO, player);
-                    //             return;
-                    //         }
-                    //     }
-                    // }
 
                     newOrderDTO.setPrice(price);
                     openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
@@ -278,7 +260,7 @@ public class MarketGui {
                 try {
                     int quantity = Integer.parseInt(quantityTxt);
                     newOrderDto.setQuantity(quantity);
-                    float totalPrice = newOrderDto.getPrice() * quantity;
+                    BigDecimal totalPrice = EcoUtils.multiply(newOrderDto.getPrice(), quantity);
                     if (EcoUtils.hasMoney(player, totalPrice)) {
                         new ConfirmScreen(
                             "Bid " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
@@ -394,14 +376,14 @@ public class MarketGui {
                         );
                         openAskLiftQuantityInputScreen(groupedOrderDTO, itemDTO, player);
                     } else {
-                        float price = groupedOrderDTO.getPrice();
-                        float totalPrice = price * quantityToBuy;
+                        BigDecimal price = groupedOrderDTO.getPrice();
+                        BigDecimal totalPrice = EcoUtils.multiply(price, quantityToBuy);
                         if (EcoUtils.hasMoney(player, totalPrice)) {
                             new ConfirmScreen(
                                 "Buy " + quantityToBuy + " for " + EcoUtils.formatPriceCurrency(totalPrice) + "?",
                                 confirm -> {
                                     orderService.fillOrder(OrderType.ASK, itemDTO, quantityToBuy, price, quantityBought -> {
-                                        float amountToCharge = price * quantityBought;
+                                        BigDecimal amountToCharge = EcoUtils.multiply(price, quantityBought);
                                         String boughtPriceStr = EcoUtils.formatPriceCurrency(amountToCharge);
                                         player.sendMessage(
                                             ChatColor.AQUA + "Bought " +
@@ -454,13 +436,13 @@ public class MarketGui {
                     return;
                 }
                 int quantityToSell = insertedItems.getAmount();
-                float price = groupedOrderDTO.getPrice();
-                String totalPriceStr = EcoUtils.formatPriceCurrency(price * quantityToSell);
+                BigDecimal price = groupedOrderDTO.getPrice();
+                String totalPriceStr = EcoUtils.formatPriceCurrency(EcoUtils.multiply(price, quantityToSell));
                 new ConfirmScreen(
                     "Sell " + insertedItems.getAmount() + " for " + totalPriceStr + "?",
                     confirm -> {
                         orderService.fillOrder(OrderType.BID, itemDTO, quantityToSell, price, quantitySold -> {
-                            float amountToPay = price * quantitySold;
+                            BigDecimal amountToPay = EcoUtils.multiply(price, quantitySold);
                             String soldPriceStr = EcoUtils.formatPriceCurrency(amountToPay);
                             player.sendMessage(
                                 ChatColor.GOLD + "Sold " +

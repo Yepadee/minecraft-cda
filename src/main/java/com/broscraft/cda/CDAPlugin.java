@@ -134,7 +134,7 @@ public class CDAPlugin extends JavaPlugin {
                     " type CHAR(3) NOT NULL, " + 
                     " player_uuid CHAR(36) NOT NULL, " + 
                     " item_id INTEGER NOT NULL, " + 
-                    " price DECIMAL(8,2) NOT NULL, " + 
+                    " price INTEGER NOT NULL, " + 
                     " quantity INTEGER NOT NULL, " +
                     " quantity_filled INTEGER DEFAULT 0, " +
                     " quantity_uncollected INTEGER DEFAULT 0, " +

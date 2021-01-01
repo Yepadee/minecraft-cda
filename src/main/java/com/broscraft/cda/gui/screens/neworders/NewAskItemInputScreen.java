@@ -1,5 +1,7 @@
 package com.broscraft.cda.gui.screens.neworders;
 
+import java.math.BigDecimal;
+
 import com.broscraft.cda.dtos.ItemOverviewDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.gui.screens.ItemInputScreen;
@@ -14,7 +16,7 @@ public class NewAskItemInputScreen extends ItemInputScreen {
     public NewAskItemInputScreen(
         ItemDTO acceptedItem,
         ItemOverviewDTO itemOverviewDTO,
-        float selectedPrice
+        BigDecimal selectedPrice
     ) {
         super(
             6,

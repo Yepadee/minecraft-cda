@@ -15,6 +15,7 @@ import com.broscraft.cda.dtos.items.EnchantmentDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.items.PotionDTO;
 import com.broscraft.cda.dtos.items.visitors.ItemInserterDB;
+import com.broscraft.cda.utils.EcoUtils;
 
 import org.bukkit.Material;
 import org.bukkit.potion.PotionType;
@@ -67,9 +68,9 @@ public class ItemRepository {
 
 			while (itemResults.next()) {
                 int demand = itemResults.getInt(1);
-                Float bestBid = itemResults.getFloat(2);
+                int bestBid = itemResults.getInt(2);
                 int supply = itemResults.getInt(3);
-                Float bestAsk = itemResults.getFloat(4);
+                int bestAsk = itemResults.getInt(4);
 
                 long itemId = itemResults.getLong(5);
                 Material material = Material.valueOf(itemResults.getString(6));
@@ -92,9 +93,9 @@ public class ItemRepository {
 
                 ItemOverviewDTO itemOverviewDTO = new ItemOverviewDTO()
                 .demand(demand)
-                .bestBid(bestBid == 0 ? null : bestBid)
+                .bestBid(bestBid == 0 ? null : EcoUtils.parseMoney(bestBid))
                 .supply(supply)
-                .bestAsk(bestAsk == 0 ? null : bestAsk)
+                .bestAsk(bestAsk == 0 ? null : EcoUtils.parseMoney(bestAsk))
                 .item(itemDTO);
 
                 itemOverviews.put(itemId, itemOverviewDTO);

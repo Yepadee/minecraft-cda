@@ -1,5 +1,6 @@
 package com.broscraft.cda.services;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +102,7 @@ public class OrderService {
     public void cancelOrder(HumanEntity player, OrderDTO orderDTO, Runnable onComplete) {
         CDAPlugin.newSharedChain(getOrderOperationThreadName(orderDTO.getItem())).asyncFirst(() -> {
             orderRepository.collectOrder(orderDTO.getId(), orderDTO.getToCollect());
-            Float nextBestPrice = orderRepository.delete(orderDTO);
+            BigDecimal nextBestPrice = orderRepository.delete(orderDTO);
             notifyRemoveOrderObserver(
                 orderDTO,
                 nextBestPrice
@@ -115,7 +116,7 @@ public class OrderService {
             if (quantityUnfilled > 0) {
                 switch (orderType) {
                     case BID:
-                        float totalPrice = orderDTO.getPrice() * quantityUnfilled;
+                        BigDecimal totalPrice = EcoUtils.multiply(orderDTO.getPrice(), quantityUnfilled);
                         EcoUtils.pay(player, totalPrice);
                         player.sendMessage(
                             ChatColor.RED + "refunded " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(totalPrice) + ChatColor.RED + " from cancelled " +
@@ -189,7 +190,7 @@ public class OrderService {
                 return availableToCollect;
             }).abortIfNull(BukkitTaskChainFactory.MESSAGE, (Player) player, "Sorry, something failed!")
             .asyncLast(numCollected -> {
-                float moneyCollected = orderDTO.getPrice() * numCollected;
+                BigDecimal moneyCollected = EcoUtils.multiply(orderDTO.getPrice(), numCollected);
                 EcoUtils.pay(player, moneyCollected);
                 
                 player.sendMessage(ChatColor.AQUA + "Collected " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(moneyCollected) + ChatColor.GRAY + "!");
@@ -203,7 +204,7 @@ public class OrderService {
         chain.execute();
     }
 
-    public void fillOrder(OrderType orderType, ItemDTO itemDTO, int quantity, float price, Consumer<Integer> onComplete) {
+    public void fillOrder(OrderType orderType, ItemDTO itemDTO, int quantity, BigDecimal price, Consumer<Integer> onComplete) {
         CDAPlugin.newSharedChain(getOrderOperationThreadName(itemDTO))
         .asyncFirst(() -> {
             TransactionSummaryDTO transactionSummary = orderRepository.fillOrder(
@@ -243,7 +244,6 @@ public class OrderService {
 
     private void notifyOrderUpdateObserver(UUID playerUUID, OrderDTO orderDTO) {
         OrderUpdateObserver o = orderUpdateObservers.get(playerUUID);
-        System.out.println(playerUUID + " " + o + ": " + orderUpdateObservers.size());
         if (o != null) {
             o.onOrderUpdate(orderDTO);
         }
@@ -261,7 +261,7 @@ public class OrderService {
         orderObserver.onNewOrder(newOrderDTO);
     }
 
-    private void notifyRemoveOrderObserver(OrderDTO orderDTO, Float nextBestPrice) {
+    private void notifyRemoveOrderObserver(OrderDTO orderDTO, BigDecimal nextBestPrice) {
         orderObserver.onRemoveOrder(orderDTO, nextBestPrice);
     }
 

@@ -1,5 +1,6 @@
 package com.broscraft.cda.services;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.broscraft.cda.dtos.ItemOverviewDTO;
@@ -9,6 +10,7 @@ import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.dtos.transaction.TransactionSummaryDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
+import com.broscraft.cda.utils.EcoUtils;
 
 public class ItemOverviewService implements OrderObserver {
     private ItemService itemService;
@@ -29,21 +31,21 @@ public class ItemOverviewService implements OrderObserver {
 
         switch (newOrderDTO.getType()) {
             case ASK:
-                Float bestAsk = itemOverview.getBestAsk();
+                BigDecimal bestAsk = itemOverview.getBestAsk();
                 int supply = itemOverview.getSupply();
                 itemOverview.setSupply(supply + newOrderDTO.getQuantity());
                 if (bestAsk == null)
                     itemOverview.setBestAsk(newOrderDTO.getPrice());
-                else if (newOrderDTO.getPrice() < bestAsk)
+                else if (EcoUtils.lessThan(newOrderDTO.getPrice(), bestAsk))
                     itemOverview.setBestAsk(newOrderDTO.getPrice());
                 break;
             case BID:
-                Float bestBid = itemOverview.getBestBid();
+                BigDecimal bestBid = itemOverview.getBestBid();
                 int demand = itemOverview.getDemand();
                 itemOverview.setDemand(demand + newOrderDTO.getQuantity());
                 if (bestBid == null)
                     itemOverview.setBestBid(newOrderDTO.getPrice());
-                else if (newOrderDTO.getPrice() > bestBid)
+                else if (EcoUtils.greaterThan(newOrderDTO.getPrice(), bestBid))
                     itemOverview.setBestBid(newOrderDTO.getPrice());
                 break;
         }
@@ -52,7 +54,7 @@ public class ItemOverviewService implements OrderObserver {
     }
 
     @Override
-    public void onRemoveOrder(OrderDTO orderDTO, Float nextBestPrice) {
+    public void onRemoveOrder(OrderDTO orderDTO, BigDecimal nextBestPrice) {
 
         Long itemId = Objects.requireNonNull(itemService.getItemId(orderDTO.getItem()));
         ItemOverviewDTO itemOverview = Objects.requireNonNull(itemService.getItemOverview(itemId));
@@ -78,7 +80,7 @@ public class ItemOverviewService implements OrderObserver {
         Long itemId = transactionSummaryDTO.getItemId();
         ItemOverviewDTO itemOverview = Objects.requireNonNull(itemService.getItemOverview(itemId));
         int numFilled = transactionSummaryDTO.getNumFilled();
-        Float nextBestPrice = transactionSummaryDTO.getNewBestPrice();
+        BigDecimal nextBestPrice = transactionSummaryDTO.getNewBestPrice();
         switch (transactionSummaryDTO.getOrderType()) {
             case ASK:
                 int supply = itemOverview.getSupply();

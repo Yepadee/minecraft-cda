@@ -1,16 +1,17 @@
 package com.broscraft.cda.dtos.transaction;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 public class NewTransactionDTO {
     private Long itemId;
-    private Float price;
+    private BigDecimal price;
     private Integer quantity;
 
     public NewTransactionDTO() {
     }
 
-    public NewTransactionDTO(Long itemId, Float price, Integer quantity) {
+    public NewTransactionDTO(Long itemId, BigDecimal price, Integer quantity) {
         this.itemId = itemId;
         this.price = price;
         this.quantity = quantity;
@@ -24,11 +25,11 @@ public class NewTransactionDTO {
         this.itemId = itemId;
     }
 
-    public Float getPrice() {
+    public BigDecimal getPrice() {
         return this.price;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -45,7 +46,7 @@ public class NewTransactionDTO {
         return this;
     }
 
-    public NewTransactionDTO price(Float price) {
+    public NewTransactionDTO price(BigDecimal price) {
         this.price = price;
         return this;
     }

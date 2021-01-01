@@ -1,5 +1,6 @@
 package com.broscraft.cda.dtos.transaction;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -12,12 +13,12 @@ public class TransactionSummaryDTO {
     Long itemId;
     OrderType orderType;
     Integer numFilled;
-    Float newBestPrice;
+    BigDecimal newBestPrice;
 
     public TransactionSummaryDTO() {
     }
 
-    public TransactionSummaryDTO(List<OrderDTO> affectedOrders, Long itemId, OrderType orderType, Integer numFilled, Float newBestPrice) {
+    public TransactionSummaryDTO(List<OrderDTO> affectedOrders, Long itemId, OrderType orderType, Integer numFilled, BigDecimal newBestPrice) {
         this.affectedOrders = affectedOrders;
         this.itemId = itemId;
         this.orderType = orderType;
@@ -57,11 +58,11 @@ public class TransactionSummaryDTO {
         this.numFilled = numFilled;
     }
 
-    public Float getNewBestPrice() {
+    public BigDecimal getNewBestPrice() {
         return this.newBestPrice;
     }
 
-    public void setNewBestPrice(Float newBestPrice) {
+    public void setNewBestPrice(BigDecimal newBestPrice) {
         this.newBestPrice = newBestPrice;
     }
 
@@ -85,7 +86,7 @@ public class TransactionSummaryDTO {
         return this;
     }
 
-    public TransactionSummaryDTO newBestPrice(Float newBestPrice) {
+    public TransactionSummaryDTO newBestPrice(BigDecimal newBestPrice) {
         this.newBestPrice = newBestPrice;
         return this;
     }

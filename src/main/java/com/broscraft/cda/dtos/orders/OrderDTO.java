@@ -1,5 +1,6 @@
 package com.broscraft.cda.dtos.orders;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ public class OrderDTO {
     private UUID playerUUID;
     private ItemDTO item;
     private OrderType type;
-    private Float price;
+    private BigDecimal price;
     private Integer quantity;
     private Integer quantityFilled;
     private Integer quantityUnfilled;
@@ -20,7 +21,7 @@ public class OrderDTO {
     public OrderDTO() {
     }
 
-    public OrderDTO(Long id, UUID playerUUID, ItemDTO item, OrderType type, Float price, Integer quantity, Integer quantityFilled, Integer quantityUnfilled, Integer toCollect) {
+    public OrderDTO(Long id, UUID playerUUID, ItemDTO item, OrderType type, BigDecimal price, Integer quantity, Integer quantityFilled, Integer quantityUnfilled, Integer toCollect) {
         this.id = id;
         this.playerUUID = playerUUID;
         this.item = item;
@@ -64,11 +65,11 @@ public class OrderDTO {
         this.type = type;
     }
 
-    public Float getPrice() {
+    public BigDecimal getPrice() {
         return this.price;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -124,7 +125,7 @@ public class OrderDTO {
         return this;
     }
 
-    public OrderDTO price(Float price) {
+    public OrderDTO price(BigDecimal price) {
         this.price = price;
         return this;
     }
