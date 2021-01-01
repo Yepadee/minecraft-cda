@@ -16,7 +16,7 @@ public class AffectedOrderMapper extends RowMapper<OrderDTO> {
         affectedOrder.setPlayerUUID(UUID.fromString(rs.getString("player_uuid")));
         affectedOrder.setPrice(EcoUtils.parseMoney(rs.getInt("price")));
         affectedOrder.setQuantity(rs.getInt("quantity"));
-        affectedOrder.setQuantityFilled(rs.getInt("quanitity_filled"));
+        affectedOrder.setQuantityFilled(rs.getInt("quantity_filled"));
         affectedOrder.setToCollect(rs.getInt("quantity_uncollected"));
         affectedOrder.setQuantityUnfilled(rs.getInt("quantity_unfilled"));
         return affectedOrder;
