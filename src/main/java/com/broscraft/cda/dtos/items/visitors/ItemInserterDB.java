@@ -53,11 +53,12 @@ public class ItemInserterDB extends ItemVisitor {
     @Override
     public void visit(EnchantedItemDTO enchantedItemDto) {
         visit((ItemDTO) enchantedItemDto); // Create item then attatch enchantments
+
         try {
             enchantmentStmt = con.prepareStatement("INSERT INTO Enchantments (item_id, enchantment, level) " + "VALUES (?, ?, ?)");
             enchantedItemDto.getEnchantments().forEach(enchantmentDTO -> {
                 try {
-                    enchantmentStmt.setLong(1, enchantedItemDto.getId());
+                    enchantmentStmt.setLong(1, this.createdKey);
                     enchantmentStmt.setString(2, enchantmentDTO.getEnchantment());
                     enchantmentStmt.setInt(3, enchantmentDTO.getLevel());
                     enchantmentStmt.executeUpdate();

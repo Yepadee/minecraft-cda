@@ -121,7 +121,7 @@ public class MarketGui {
                     }
 
                     newOrderDTO.setPrice(price);
-                    openNewAskItemInputScreen(itemDTO, newOrderDTO, player);
+                    openNewAskItemInputScreen(newOrderDTO, player);
 
                 } catch (NumberFormatException ex) {
                     player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
@@ -196,7 +196,7 @@ public class MarketGui {
     private String getPricePlaceholder(ItemDTO itemDTO, OrderType orderType) {
         String placeholder = "_";
         ItemOverviewDTO itemOverviewDto = itemService.getItemOverview(itemDTO);
-        System.out.println(itemOverviewDto);
+
         if (itemOverviewDto != null) {
             BigDecimal bestPrice;
             if (orderType.equals(OrderType.BID)) {
@@ -213,7 +213,8 @@ public class MarketGui {
         return placeholder;
     }
 
-    private void openNewAskItemInputScreen(ItemDTO itemDTO, NewOrderDTO newOrderDto, HumanEntity player) {
+    private void openNewAskItemInputScreen(NewOrderDTO newOrderDto, HumanEntity player) {
+        ItemDTO itemDTO = newOrderDto.getItem();
         ItemOverviewDTO itemOverview = itemService.getItemOverview(itemDTO);
 
         NewAskItemInputScreen screen = new NewAskItemInputScreen(

@@ -8,17 +8,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import com.broscraft.cda.database.DB;
+import com.broscraft.cda.database.mappers.EnchantmentMapper;
+import com.broscraft.cda.database.mappers.ItemOverviewMapper;
 import com.broscraft.cda.dtos.ItemOverviewDTO;
 import com.broscraft.cda.dtos.items.EnchantedItemDTO;
 import com.broscraft.cda.dtos.items.EnchantmentDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
-import com.broscraft.cda.dtos.items.PotionDTO;
 import com.broscraft.cda.dtos.items.visitors.ItemInserterDB;
-import com.broscraft.cda.utils.EcoUtils;
-
-import org.bukkit.Material;
-import org.bukkit.potion.PotionType;
 
 public class ItemRepository {
     private ItemInserterDB itemInserter = new ItemInserterDB();
@@ -28,9 +26,9 @@ public class ItemRepository {
         try {
             Connection con = DB.getConnection();
             PreparedStatement getItemOverviewsStmt = con.prepareStatement(
-                "SELECT d.demand, bb.best_bid, " +
-                "s.supply, ab.best_ask, " +
-                "i.id item_id, i.material, i.potion_type, i.is_upgraded, i.is_extended " +
+                "SELECT d.demand demand, bb.best_bid best_bid, " +
+                "s.supply supply, ab.best_ask best_ask, " +
+                "i.id item_id, i.material material, i.potion_type potion_type, i.is_upgraded is_upgraded, i.is_extended is_extended " +
                 "FROM Items i " +
                 "LEFT JOIN (" +
                     "SELECT item_id, MAX(price) best_bid " +
@@ -63,60 +61,31 @@ public class ItemRepository {
                 "FROM Enchantments"  
             );
 
-            ResultSet itemResults = getItemOverviewsStmt.executeQuery();
+            ResultSet itemOverviewResults = getItemOverviewsStmt.executeQuery();
             ResultSet enchantResults = getItemEnchantsStmt.executeQuery();
 
-			while (itemResults.next()) {
-                int demand = itemResults.getInt(1);
-                int bestBid = itemResults.getInt(2);
-                int supply = itemResults.getInt(3);
-                int bestAsk = itemResults.getInt(4);
-
-                long itemId = itemResults.getLong(5);
-                Material material = Material.valueOf(itemResults.getString(6));
-                String potionType = itemResults.getString(7);
-                Boolean upgraded = itemResults.getBoolean(8);
-                Boolean extended = itemResults.getBoolean(9);
-                ItemDTO itemDTO;
-                if (potionType == null) {
-                    itemDTO = new ItemDTO();
-                } else {
-                    PotionDTO potionDTO = new PotionDTO();
-                    potionDTO.setType(PotionType.valueOf(potionType));
-                    potionDTO.upgraded(upgraded)
-                    .extended(extended);
-                    itemDTO = potionDTO;
-                }
-                 
-                itemDTO.id(itemId);
-                itemDTO.material(material);
-
-                ItemOverviewDTO itemOverviewDTO = new ItemOverviewDTO()
-                .demand(demand)
-                .bestBid(bestBid == 0 ? null : EcoUtils.parseMoney(bestBid))
-                .supply(supply)
-                .bestAsk(bestAsk == 0 ? null : EcoUtils.parseMoney(bestAsk))
-                .item(itemDTO);
-
+            ItemOverviewMapper itemOverviewMapper = new ItemOverviewMapper();
+            
+			while (itemOverviewResults.next()) {
+                ItemOverviewDTO itemOverviewDTO = itemOverviewMapper.getRow(itemOverviewResults);
+                Long itemId = itemOverviewDTO.getItem().getId();
                 itemOverviews.put(itemId, itemOverviewDTO);
 
             }
-            itemResults.close();
+            itemOverviewResults.close();
 
             Map<Long, List<EnchantmentDTO>> itemEnchantments = new HashMap<>();
+            EnchantmentMapper enchantmentMapper = new EnchantmentMapper();
             while (enchantResults.next()) {
-                Long itemId = enchantResults.getLong(1);
-                String enchantment = enchantResults.getString(2);
-                Integer level = enchantResults.getInt(3);
-                EnchantmentDTO enchantmentDTO = new EnchantmentDTO()
-                .enchantment(enchantment)
-                .level(level);
-
+                Long itemId = enchantResults.getLong("item_id");
+               
+                EnchantmentDTO enchantmentDTO = enchantmentMapper.getRow(enchantResults);
                 if (!itemEnchantments.containsKey(itemId))
                     itemEnchantments.put(itemId, new ArrayList<>());
 
                 itemEnchantments.get(itemId).add(enchantmentDTO);
             }
+
             itemEnchantments.entrySet().forEach(e -> {
                 Long itemId = e.getKey();
                 List<EnchantmentDTO> enchantments = e.getValue();
@@ -128,6 +97,7 @@ public class ItemRepository {
                 itemOverviews.get(itemId).setItem(enchantedItemDTO);
 
             });
+
             getItemOverviewsStmt.close();
             getItemEnchantsStmt.close();
             con.close();
@@ -143,6 +113,7 @@ public class ItemRepository {
             Connection con = DB.getConnection();
             itemInserter.setConnection(con);
             itemDTO.accept(itemInserter);
+            
             con.commit();
             con.close();
             Long itemId = itemInserter.getCreatedKey();
