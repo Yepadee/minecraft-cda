@@ -21,10 +21,8 @@ import com.broscraft.cda.dtos.items.visitors.ItemInserterDB;
 public class ItemRepository {
     private ItemInserterDB itemInserter = new ItemInserterDB();
 
-    public Map<Long, ItemOverviewDTO> getItemOverviews() {
-        Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
-        try {
-            Connection con = DB.getConnection();
+    public Map<Long, ItemOverviewDTO> getItemOverviews() {  
+        try (Connection con = DB.getConnection()) {
             PreparedStatement getItemOverviewsStmt = con.prepareStatement(
                 "SELECT d.demand demand, bb.best_bid best_bid, " +
                 "s.supply supply, ab.best_ask best_ask, " +
@@ -64,8 +62,8 @@ public class ItemRepository {
             ResultSet itemOverviewResults = getItemOverviewsStmt.executeQuery();
             ResultSet enchantResults = getItemEnchantsStmt.executeQuery();
 
+            Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
             ItemOverviewMapper itemOverviewMapper = new ItemOverviewMapper();
-            
 			while (itemOverviewResults.next()) {
                 ItemOverviewDTO itemOverviewDTO = itemOverviewMapper.getRow(itemOverviewResults);
                 Long itemId = itemOverviewDTO.getItem().getId();
@@ -100,17 +98,17 @@ public class ItemRepository {
 
             getItemOverviewsStmt.close();
             getItemEnchantsStmt.close();
-            con.close();
+
+            return itemOverviews;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
-        return itemOverviews;
+        return null;
     }
 
     public Long create(ItemDTO itemDTO) {
-        try {
-            Connection con = DB.getConnection();
+        try (Connection con = DB.getConnection()) {
             itemInserter.setConnection(con);
             itemDTO.accept(itemInserter);
             

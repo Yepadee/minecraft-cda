@@ -32,6 +32,9 @@ import co.aikar.taskchain.TaskChain;
 import net.md_5.bungee.api.ChatColor;
 
 public class OrderService {
+
+    public static int MAX_PLAYER_ORDERS = 7 * 4;
+
     private OrderRepository orderRepository;
 
     private OrderObserver orderObserver;
@@ -53,6 +56,15 @@ public class OrderService {
     }
 
     // Queries:
+    public void playerCanOrder(UUID playerUUID, Consumer<Boolean> onComplete) {
+        CDAPlugin.newChain().asyncFirst(() -> {
+            return orderRepository.getNumPlayerOrders(playerUUID) < MAX_PLAYER_ORDERS;
+        })
+        .abortIfNull() // TODO: handle error
+        .syncLast(canOrder -> onComplete.accept(canOrder))
+        .execute();
+    }
+
     public void getItemOrders(ItemDTO itemDTO, Consumer<GroupedOrdersDTO> onComplete) {
         Long itemId = Objects.requireNonNull(itemService.getItemId(itemDTO));
         CDAPlugin.newChain().asyncFirst(() -> {

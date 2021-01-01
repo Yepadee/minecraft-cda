@@ -3,6 +3,7 @@ package com.broscraft.cda.database;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -51,6 +52,63 @@ public class DB {
         ds.setMaximumPoolSize(1);
         ds.setIdleTimeout(5000);
         ds.setAutoCommit(false);
+
+        try (Connection con = DB.getConnection()) {
+            con.setAutoCommit(false);
+            PreparedStatement stmt;
+
+            if (!DB.tableExists(con, "Items")) {
+                stmt = con.prepareStatement(
+                    "CREATE TABLE Items " +
+                    "(id INTEGER PRIMARY KEY AUTO_INCREMENT, " +
+                    " material VARCHAR(64), " + 
+                    " potion_type VARCHAR(64), " + 
+                    " is_upgraded TINYINT, " + 
+                    " is_extended TINYINT" + 
+                    ")"
+                );
+                stmt.execute();
+                stmt.close();
+            }
+
+            if (!DB.tableExists(con, "Orders")) {
+                stmt = con.prepareStatement(
+                    "CREATE TABLE Orders " +
+                    "(id INTEGER PRIMARY KEY AUTO_INCREMENT, " +
+                    " type CHAR(3) NOT NULL, " + 
+                    " player_uuid CHAR(36) NOT NULL, " + 
+                    " item_id INTEGER NOT NULL, " + 
+                    " price INTEGER NOT NULL, " + 
+                    " quantity INTEGER NOT NULL, " +
+                    " quantity_filled INTEGER DEFAULT 0, " +
+                    " quantity_uncollected INTEGER DEFAULT 0, " +
+                    " created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, " +
+                    " FOREIGN KEY (item_id) REFERENCES Items(id) " +
+                    ")"
+                );
+                stmt.execute();
+                stmt.close();
+            }
+    
+            if (!DB.tableExists(con, "Enchantments")) {
+                stmt = con.prepareStatement(
+                    "CREATE TABLE Enchantments " +
+                    "(id INTEGER PRIMARY KEY AUTO_INCREMENT, " +
+                    " item_id INTEGER NOT NULL, " +
+                    " enchantment VARCHAR(64) NOT NULL, " + 
+                    " level TINYINT NOT NULL, " + 
+                    " FOREIGN KEY (item_id) REFERENCES Items(id) " +
+                    ")"
+                );
+                stmt.execute();
+                stmt.close();
+            }
+    
+            con.commit();
+            con.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Connection getConnection() throws SQLException {

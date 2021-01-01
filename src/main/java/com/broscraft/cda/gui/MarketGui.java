@@ -102,72 +102,83 @@ public class MarketGui {
     }
 
     public void openNewAskScreen(ItemDTO itemDTO, HumanEntity player) {
-        NewOrderDTO newOrderDTO = new NewOrderDTO();
-        newOrderDTO.setType(OrderType.ASK);
-        newOrderDTO.setPlayerUUID(player.getUniqueId());
-        newOrderDTO.setItem(itemDTO);
-
-        String placeholder = getPricePlaceholder(itemDTO, OrderType.ASK);
-
-        new NewOrderPriceInputScreen(
-            placeholder,
-            (p, priceTxt) -> {
-                try {
-                    BigDecimal price = EcoUtils.parseMoney(priceTxt);
-                    if (EcoUtils.greaterThan(price, MAX_PRICE)) {
-                        player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
-                        openNewAskScreen(itemDTO, player);
-                        return;
+        orderService.playerCanOrder(player.getUniqueId(), canOrder -> {
+            if (canOrder) {
+                NewOrderDTO newOrderDTO = new NewOrderDTO();
+                newOrderDTO.setType(OrderType.ASK);
+                newOrderDTO.setPlayerUUID(player.getUniqueId());
+                newOrderDTO.setItem(itemDTO);
+        
+                String placeholder = getPricePlaceholder(itemDTO, OrderType.ASK);
+        
+                new NewOrderPriceInputScreen(
+                    placeholder,
+                    (p, priceTxt) -> {
+                        try {
+                            BigDecimal price = EcoUtils.parseMoney(priceTxt);
+                            if (EcoUtils.greaterThan(price, MAX_PRICE)) {
+                                player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
+                                openNewAskScreen(itemDTO, player);
+                                return;
+                            }
+        
+                            newOrderDTO.setPrice(price);
+                            openNewAskItemInputScreen(newOrderDTO, player);
+        
+                        } catch (NumberFormatException ex) {
+                            player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
+                            openNewAskScreen(itemDTO, player);
+                        }
+                    },
+                    close -> {
+                        openItemOrdersScreenIfExists(itemDTO, player);
                     }
-
-                    newOrderDTO.setPrice(price);
-                    openNewAskItemInputScreen(newOrderDTO, player);
-
-                } catch (NumberFormatException ex) {
-                    player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
-                    openNewAskScreen(itemDTO, player);
-                }
-            },
-            close -> {
-                openItemOrdersScreenIfExists(itemDTO, player);
+                ).open(player);
+            } else {
+                player.sendMessage(ChatColor.RED + "Order limit exceeded (MAX: " + OrderService.MAX_PLAYER_ORDERS + ")");
             }
-        ).open(player);
+        });
+        
     }
 
     public void openNewBidScreen(ItemDTO itemDTO, HumanEntity player) {
-        NewOrderDTO newOrderDTO = new NewOrderDTO();
-        newOrderDTO.setType(OrderType.BID);
-        newOrderDTO.setPlayerUUID(player.getUniqueId());
-        newOrderDTO.setItem(itemDTO);
-
-        String placeholder = getPricePlaceholder(itemDTO, OrderType.BID);
-
-        new NewOrderPriceInputScreen(
-            placeholder,
-            (p, priceTxt) -> {
-                try {
-                    BigDecimal price = EcoUtils.parseMoney(priceTxt);
-                    if (EcoUtils.greaterThan(price, MAX_PRICE)) {
-                        player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
-                        openNewBidScreen(itemDTO, player);
-                        return;
+        orderService.playerCanOrder(player.getUniqueId(), canOrder -> {
+            if (canOrder) {
+                NewOrderDTO newOrderDTO = new NewOrderDTO();
+                newOrderDTO.setType(OrderType.BID);
+                newOrderDTO.setPlayerUUID(player.getUniqueId());
+                newOrderDTO.setItem(itemDTO);
+        
+                String placeholder = getPricePlaceholder(itemDTO, OrderType.BID);
+        
+                new NewOrderPriceInputScreen(
+                    placeholder,
+                    (p, priceTxt) -> {
+                        try {
+                            BigDecimal price = EcoUtils.parseMoney(priceTxt);
+                            if (EcoUtils.greaterThan(price, MAX_PRICE)) {
+                                player.sendMessage(ChatColor.RED + "Exeeded max price, please try again!");
+                                openNewBidScreen(itemDTO, player);
+                                return;
+                            }
+        
+                            newOrderDTO.setPrice(price);
+                            openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
+                            
+                        } catch (NumberFormatException ex) {
+                            player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
+                            openNewBidScreen(itemDTO, player);
+                        }
+                    },
+                    close -> {
+                        openItemOrdersScreenIfExists(itemDTO, player);
                     }
-
-                    newOrderDTO.setPrice(price);
-                    openNewBidQuantitiyInputScreen(itemDTO, newOrderDTO, player);
-                    
-                } catch (NumberFormatException ex) {
-                    player.sendMessage(ChatColor.RED + "Invalid price, please try again!");
-                    openNewBidScreen(itemDTO, player);
-                }
-            },
-            close -> {
-                openItemOrdersScreenIfExists(itemDTO, player);
+                ).open(player);
+            } else {
+                player.sendMessage(ChatColor.RED + "Order limit exceeded (MAX: " + OrderService.MAX_PLAYER_ORDERS + ")");
             }
-        ).open(player);
+        });
         
-        
-
     }
 
     public void openItemOrdersScreen(ItemDTO itemDTO, HumanEntity player) {

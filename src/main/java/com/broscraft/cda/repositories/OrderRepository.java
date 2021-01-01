@@ -55,8 +55,7 @@ public class OrderRepository {
     public GroupedOrdersDTO getItemOrders(Long itemId) {
         List<GroupedBidDTO> groupedBids = new ArrayList<>();
         List<GroupedAskDTO> groupedAsks = new ArrayList<>(); 
-        try {
-            Connection con = DB.getConnection();
+        try (Connection con = DB.getConnection()) {
             PreparedStatement getItemBidsStmt = con.prepareStatement(
                 "SELECT price, SUM(quantity - quantity_filled) total_quantity " +
                 "FROM Orders " + 
@@ -90,7 +89,6 @@ public class OrderRepository {
 
             getItemBidsStmt.close();
             getItemAsksStmt.close();
-            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -98,11 +96,31 @@ public class OrderRepository {
         return new GroupedOrdersDTO().groupedBids(groupedBids).groupedAsks(groupedAsks);
     }
 
+    public Integer getNumPlayerOrders(UUID playerUUID) {
+        Integer numPlayerOrders = null;
+        try (Connection con = DB.getConnection()) {
+            PreparedStatement getNumPlayerOrdersStmt = con.prepareStatement(
+                "SELECT COUNT(*) num_orders " +
+                "FROM Orders " +
+                "WHERE player_uuid=?"
+            );
+            getNumPlayerOrdersStmt.setString(1, playerUUID.toString());
+            ResultSet rs = getNumPlayerOrdersStmt.executeQuery();
+            if (rs.next()) {
+                numPlayerOrders = rs.getInt("num_orders");
+            }
+            rs.close();
+            getNumPlayerOrdersStmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return numPlayerOrders;
+    }
+
     public List<OrderDTO> getPlayerOrders(UUID playerUUID) {
         List<OrderDTO> playerOrders = new ArrayList<>();
         
-        try {
-            Connection con = DB.getConnection();
+        try (Connection con = DB.getConnection()) {
             PreparedStatement getPlayerOrdersStmt = con.prepareStatement(
                 "SELECT id, type, item_id, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
                 "FROM Orders " +
@@ -120,7 +138,6 @@ public class OrderRepository {
                 playerOrders.add(orderDTO);
             }
             playerOrdersResults.close();
-            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -129,8 +146,7 @@ public class OrderRepository {
     }
 
     public void createOrder(NewOrderDTO newOrderDTO) {
-        try {
-            Connection con =  DB.getConnection();
+        try (Connection con = DB.getConnection()) {
             PreparedStatement createOrderStmt = con.prepareStatement(
                 "INSERT INTO Orders (type, player_uuid, item_id, price, quantity) " +
                 "VALUES (?, ?, ?, ?, ?)"
@@ -143,7 +159,6 @@ public class OrderRepository {
             createOrderStmt.executeUpdate();
             createOrderStmt.close();
             con.commit();
-            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -151,8 +166,7 @@ public class OrderRepository {
 
     public BigDecimal delete(OrderDTO orderDTO) {
         BigDecimal nextBestPrice = null;
-        try {
-            Connection con = DB.getConnection();
+        try (Connection con = DB.getConnection()) {
             PreparedStatement deleteOrderStmt = con.prepareStatement(
                 "DELETE FROM Orders WHERE id=?"
             );
@@ -176,7 +190,6 @@ public class OrderRepository {
             }
             results.close();
             stmt.close();
-            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -187,8 +200,7 @@ public class OrderRepository {
         TransactionSummaryDTO transactionSummary = new TransactionSummaryDTO();
         List<OrderDTO> affectedOrders = new ArrayList<>();
         int priceValue = EcoUtils.getValue(price);
-        try {
-            Connection con = DB.getConnection();
+        try (Connection con = DB.getConnection()) {
             PreparedStatement getOrdersToFillStmt = con.prepareStatement(
                 "SELECT id, player_uuid, price, quantity, quantity_filled, quantity_uncollected, quantity - quantity_filled quantity_unfilled " +
                 "FROM Orders " +
@@ -282,7 +294,6 @@ public class OrderRepository {
             bestPriceResults.close();
             getBestPriceStmt.close();
 
-            con.close();
             return transactionSummary;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -292,8 +303,7 @@ public class OrderRepository {
     }
 
     public void collectOrder(Long orderId, int quantity) {
-        try {
-            Connection con = DB.getConnection();
+        try (Connection con = DB.getConnection()) {
             PreparedStatement collectOrderStmt = con.prepareStatement(
                 "UPDATE Orders " +
                 "SET quantity_uncollected = quantity_uncollected - ? " +
@@ -304,7 +314,6 @@ public class OrderRepository {
             collectOrderStmt.executeUpdate();
             collectOrderStmt.close();
             con.commit();
-            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
