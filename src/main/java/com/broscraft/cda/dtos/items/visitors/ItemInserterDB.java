@@ -77,7 +77,7 @@ public class ItemInserterDB extends ItemVisitor {
         try {
             potionStmt = con.prepareStatement(
                 "INSERT INTO Items (material, potion_type, is_upgraded, is_extended) " +
-                "VALUES (?, ?, ?, ?)"
+                "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS
             );
             potionStmt.setString(1, potionDto.getMaterial().toString());
             potionStmt.setString(2, potionDto.getType().toString());
