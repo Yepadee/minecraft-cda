@@ -1,7 +1,7 @@
 package com.broscraft.cda.gui.screens.overview;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -18,7 +18,7 @@ import me.mattstudios.mfgui.gui.guis.GuiItem;
 
 public abstract class MarketOverviewScreen extends ScrollableScreen implements IconUpdateObserver {
     int numItems = 0;
-    Map<ItemDTO, GuiItem> guiItems = new HashMap<>();
+    Map<ItemDTO, GuiItem> guiItems = new LinkedHashMap<>();
 
     public MarketOverviewScreen(
         String name,

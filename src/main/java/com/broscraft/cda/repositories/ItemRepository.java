@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,7 +53,8 @@ public class ItemRepository {
                     "FROM Orders " +
                     "WHERE type='ASK' " +
                     "GROUP BY item_id " +
-                ") s ON i.id = s.item_id "
+                ") s ON i.id = s.item_id " + 
+                "ORDER BY i.material ASC"
             );
     
             PreparedStatement getItemEnchantsStmt = con.prepareStatement(
@@ -63,7 +65,7 @@ public class ItemRepository {
             ResultSet itemOverviewResults = getItemOverviewsStmt.executeQuery();
             ResultSet enchantResults = getItemEnchantsStmt.executeQuery();
 
-            Map<Long, ItemOverviewDTO> itemOverviews = new HashMap<>();
+            Map<Long, ItemOverviewDTO> itemOverviews = new LinkedHashMap<>();
             ItemOverviewMapper itemOverviewMapper = new ItemOverviewMapper();
 			while (itemOverviewResults.next()) {
                 ItemOverviewDTO itemOverviewDTO = itemOverviewMapper.getRow(itemOverviewResults);

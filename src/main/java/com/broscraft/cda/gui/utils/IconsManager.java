@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -25,7 +26,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import net.md_5.bungee.api.ChatColor;
 
 public class IconsManager implements OverviewUpdateObserver {
-    private Map<ItemDTO, ItemStack> overviewIcons = new HashMap<>();
+    private Map<ItemDTO, ItemStack> overviewIcons = new LinkedHashMap<>();
     private Map<ItemDTO, ItemStack> icons = new HashMap<>();
     private Map<ItemDTO, String> iconSearchNames = new HashMap<>();
 

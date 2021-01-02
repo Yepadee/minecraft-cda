@@ -136,7 +136,7 @@ public class MarketGui {
                     }
                 ).open(player);
             } else {
-                player.sendMessage(ChatColor.RED + "Order limit exceeded (MAX: " + OrderService.MAX_PLAYER_ORDERS + "). " + ChatColor.BOLD + "Please cancel some of your orders!");
+                player.sendMessage(ChatColor.RED + "Order limit exceeded (MAX: " + OrderService.MAX_PLAYER_ORDERS + "). " + ChatColor.BOLD + "Please delete some of your orders!");
             }
         });
         
@@ -176,7 +176,7 @@ public class MarketGui {
                     }
                 ).open(player);
             } else {
-                player.sendMessage(ChatColor.RED + "Order limit exceeded (MAX: " + OrderService.MAX_PLAYER_ORDERS + "). " + ChatColor.BOLD + "Please cancel some of your orders!");
+                player.sendMessage(ChatColor.RED + "Order limit exceeded (MAX: " + OrderService.MAX_PLAYER_ORDERS + "). " + ChatColor.BOLD + "Please delete some of your orders!");
             }
         });
         
@@ -335,7 +335,7 @@ public class MarketGui {
 
     private void confirmCancelOrder(OrderDTO orderDTO, HumanEntity player) {
         new ConfirmScreen(
-            "Cancel Order?",
+            "Delete Order?",
             confirm -> {
                 PlayerOrdersScreen playerOrdersScreen = new PlayerOrdersScreen(
                    back -> openAllItemsScreen(player)
