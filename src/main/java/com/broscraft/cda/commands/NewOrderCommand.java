@@ -59,7 +59,6 @@ public class NewOrderCommand implements CommandExecutor {
 
 
             } catch (Exception e) {
-                e.printStackTrace();
                 sender.sendMessage(ChatColor.RED.toString() + "Invalid order-type specified");
                 return false;
             }

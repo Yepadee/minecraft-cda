@@ -36,6 +36,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class MarketGui {
     private static BigDecimal MAX_PRICE = BigDecimal.valueOf(1000000);
+    private static int MAX_BID_QUANTITY = 1024;
     private static int MAX_ITEM_STACKS = 8;
     private IconsManager iconsManager;
     private OrderService orderService;
@@ -135,7 +136,7 @@ public class MarketGui {
                     }
                 ).open(player);
             } else {
-                player.sendMessage(ChatColor.RED + "Order limit exceeded (MAX: " + OrderService.MAX_PLAYER_ORDERS + ")");
+                player.sendMessage(ChatColor.RED + "Order limit exceeded (MAX: " + OrderService.MAX_PLAYER_ORDERS + "). " + ChatColor.BOLD + "Please cancel some of your orders!");
             }
         });
         
@@ -175,7 +176,7 @@ public class MarketGui {
                     }
                 ).open(player);
             } else {
-                player.sendMessage(ChatColor.RED + "Order limit exceeded (MAX: " + OrderService.MAX_PLAYER_ORDERS + ")");
+                player.sendMessage(ChatColor.RED + "Order limit exceeded (MAX: " + OrderService.MAX_PLAYER_ORDERS + "). " + ChatColor.BOLD + "Please cancel some of your orders!");
             }
         });
         
@@ -275,35 +276,42 @@ public class MarketGui {
             (p, quantityTxt) -> {
                 try {
                     int quantity = Integer.parseInt(quantityTxt);
-                    newOrderDto.setQuantity(quantity);
-                    BigDecimal totalPrice = EcoUtils.multiply(newOrderDto.getPrice(), quantity);
-                    if (EcoUtils.hasMoney(player, totalPrice)) {
-                        new ConfirmScreen(
-                            "Bid " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
-                            " for " + newOrderDto.getQuantity() +
-                            "?",
-                            confirm -> {
-                                orderService.submitOrder(newOrderDto, () -> {
-                                    //screen.close(player);
-                                    player.sendMessage(
-                                        ChatColor.GRAY.toString() + "Created " + ChatColor.GOLD +
-                                        "Bid" + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
-                                        ChatColor.GOLD + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
-                                        ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice())
-                                    );
-                                    EcoUtils.charge(player, totalPrice);
-                                    openItemOrdersScreen(itemDTO, player);
-                                });
-                            },
-                            cancel -> openItemOrdersScreenIfExists(itemDTO, player)
-                        ).open(player);
+                    if (quantity <= MAX_BID_QUANTITY) {
+                        newOrderDto.setQuantity(quantity);
+                        BigDecimal totalPrice = EcoUtils.multiply(newOrderDto.getPrice(), quantity);
+                        if (EcoUtils.hasMoney(player, totalPrice)) {
+                            new ConfirmScreen(
+                                "Bid " + EcoUtils.formatPriceCurrency(newOrderDto.getPrice()) +
+                                " for " + newOrderDto.getQuantity() +
+                                "?",
+                                confirm -> {
+                                    orderService.submitOrder(newOrderDto, () -> {
+                                        player.sendMessage(
+                                            ChatColor.GRAY.toString() + "Created " + ChatColor.GOLD +
+                                            "Bid" + ChatColor.RESET.toString() + ChatColor.GRAY.toString() + " for " +
+                                            ChatColor.GOLD + newOrderDto.getQuantity() + ChatColor.WHITE + " '" + ItemUtils.getItemName(newOrderDto.getItem()) + "'" +
+                                            ChatColor.GRAY + " at " + ChatColor.GREEN + EcoUtils.formatPriceCurrency(newOrderDto.getPrice())
+                                        );
+                                        EcoUtils.charge(player, totalPrice);
+                                        openItemOrdersScreen(itemDTO, player);
+                                    });
+                                },
+                                cancel -> openItemOrdersScreenIfExists(itemDTO, player)
+                            ).open(player);
+                        } else {
+                            player.sendMessage(
+                                ChatColor.RED + "You do not have enough money! (Total cost " +
+                                EcoUtils.formatPriceCurrency(totalPrice) + ")"
+                            );
+                            openNewBidQuantitiyInputScreen(itemDTO, newOrderDto, player);
+                        }   
                     } else {
                         player.sendMessage(
-                            ChatColor.RED + "You do not have enough money! (Total cost " +
-                            EcoUtils.formatPriceCurrency(totalPrice) + ")"
+                            ChatColor.RED + "Max bid quantity exceeded (MAX: " + MAX_BID_QUANTITY + ")"
                         );
                         openNewBidQuantitiyInputScreen(itemDTO, newOrderDto, player);
                     }
+
                     
                 } catch (NumberFormatException e) {
                     player.sendMessage(
