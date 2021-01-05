@@ -17,6 +17,7 @@ import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.ItemUtils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import co.aikar.taskchain.BukkitTaskChainFactory;
@@ -28,6 +29,8 @@ import co.aikar.taskchain.TaskChainFactory;
  *
  */
 public class CDAPlugin extends JavaPlugin {
+    private FileConfiguration config = getConfig();
+
     private OpenMenuCommand openMenuCommand;
     private SearchMarketCommand searchMarketCommand;
     private NewOrderCommand newOrderCommand;
@@ -61,7 +64,8 @@ public class CDAPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        setUpTables();
+        setUpConfig();
+        setUpDB();
 
         instance = this;
 
@@ -83,14 +87,16 @@ public class CDAPlugin extends JavaPlugin {
         searchMarketCommand = new SearchMarketCommand(marketGui);
         newOrderCommand = new NewOrderCommand(marketGui);
         myOrdersCommand = new MyOrdersCommand(marketGui);
-        // TODO: stop negative input
+
+        setupCommands();
+
         getLogger().info("Enabled CDA!");
-        this.setupCommands();
     }
 
     @Override
     public void onDisable() {
         DB.close();
+        getLogger().info("Disabled CDA!");
     }
 
     private void setupCommands() {
@@ -100,9 +106,25 @@ public class CDAPlugin extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("myorders")).setExecutor(myOrdersCommand);
     }
 
-    private void setUpTables() {
-        this.getDataFolder().mkdir();
-        DB.init(this.getDataFolder());
-       
+    private void setUpDB() {
+        DB.init(config);
+    }
+
+    private void setUpConfig() {
+        config.addDefault("db.driverclassname", "org.mariadb.jdbc.Driver");
+        config.addDefault("db.dialect", "jdbc:mariadb");
+        config.addDefault("db.host", "localhost");
+        config.addDefault("db.port", 3306);
+        config.addDefault("db.database", "MinecraftCDA");
+        config.addDefault("db.user", "root");
+        config.addDefault("db.password", null);
+
+        config.addDefault("db.pool.maxlifetime", 60000);
+        config.addDefault("db.pool.minpoolsize", 0);
+        config.addDefault("db.pool.maxpoolsize", 1);
+        config.addDefault("db.pool.idletimeout", 5000);
+
+        config.options().copyDefaults(true);
+        saveConfig();
     }
 }

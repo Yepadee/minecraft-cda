@@ -11,35 +11,28 @@ import java.sql.Statement;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import org.bukkit.configuration.file.FileConfiguration;
+
 public class DB {
-    // private static String DB_NAME = "MinecraftCDA";
-    // private static String DIALECT = "jdbc:mariadb:";
-    static final String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-    private static String USER = "root";
-    private static String PASS = "";
-    private static String URL = "jdbc:mariadb://localhost:3306/MinecraftCDA?user=root&password=";
     private static HikariConfig config = new HikariConfig();
     private static HikariDataSource ds;
 
-    public static void init(File dbFolder) {
-        //String url = DIALECT + dbFolder.getAbsolutePath() + File.separator + DB_NAME;
-        try {
-            Class.forName(JDBC_DRIVER);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+    public static void init(FileConfiguration pluginConfig) {
+        String JDBC_DRIVER = pluginConfig.getString("db.driverclassname");
+        String DIALECT = pluginConfig.getString("db.dialect");
+        String USER = pluginConfig.getString("db.user");
+        String PASS = pluginConfig.getString("db.password");
+        String HOST = pluginConfig.getString("db.host");
+        String PORT = pluginConfig.getString("db.port");
+        String DATABASE = pluginConfig.getString("db.database");
+        String URL = DIALECT + "://" + HOST + ":" + PORT + "/" + DATABASE;
 
-        Connection conn;
-        try {
-            conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/?user=root&password=");
-            Statement s = conn.createStatement();
-            s.executeUpdate("CREATE DATABASE IF NOT EXISTS MinecraftCDA");
-            s.close();
-            conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        int maxLifeTime = pluginConfig.getInt("db.pool.maxlifetime");
+        int minPoolSize = pluginConfig.getInt("db.pool.minpoolsize");
+        int maxPoolSize = pluginConfig.getInt("db.pool.maxpoolsize");
+        int idleTimeout = pluginConfig.getInt("db.pool.idletimeout");
+    
+        config.setDriverClassName(JDBC_DRIVER);
         config.setJdbcUrl(URL);
         config.setUsername(USER);
         config.setPassword(PASS);
@@ -47,15 +40,19 @@ public class DB {
         config.addDataSourceProperty("prepStmtCacheSize" , "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit" , "2048");
         ds = new HikariDataSource(config);
-        ds.setMaxLifetime(60000);
-        ds.setMinimumIdle(0);
-        ds.setMaximumPoolSize(1);
-        ds.setIdleTimeout(5000);
+        ds.setMaxLifetime(maxLifeTime);
+        ds.setMinimumIdle(minPoolSize);
+        ds.setMaximumPoolSize(maxPoolSize);
+        ds.setIdleTimeout(idleTimeout);
         ds.setAutoCommit(false);
 
         try (Connection con = DB.getConnection()) {
             con.setAutoCommit(false);
             PreparedStatement stmt;
+
+            Statement s = con.createStatement();
+            s.executeUpdate("CREATE DATABASE IF NOT EXISTS  " + DATABASE);
+            s.close();
 
             if (!DB.tableExists(con, "Items")) {
                 stmt = con.prepareStatement(
