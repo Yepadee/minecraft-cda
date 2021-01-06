@@ -10,6 +10,7 @@ import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.grouped.GroupedOrderDTO;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.gui.screens.ConfirmScreen;
+import com.broscraft.cda.gui.screens.OrderByScreen;
 import com.broscraft.cda.gui.screens.fillOrders.AskLiftQuantityInputScreen;
 import com.broscraft.cda.gui.screens.fillOrders.BidHitItemInputScreen;
 import com.broscraft.cda.gui.screens.item.ItemOrdersScreen;
@@ -62,11 +63,9 @@ public class MarketGui {
         openAllItemsScreen(player, iconsManager.getAllOverviewIcons());
     }
 
-    public void openAllItemsScreen(HumanEntity player, Map<ItemDTO, ItemStack> icons) {
-        AllItemsScreen allItemsScreen = new AllItemsScreen(
-            icons,
-            search -> openSearchInputScreen(search.getWhoClicked()),
-            myOrders -> openMyOrdersScreen(myOrders.getWhoClicked()),
+    public void openOrderByScreen(HumanEntity player) {
+        new OrderByScreen(
+            back -> openAllItemsScreen(player),
             orderByBid -> {
                 FetchOrder fetchOrder;
                 if (orderByBid.isLeftClick()) fetchOrder = FetchOrder.DESC;
@@ -98,7 +97,17 @@ public class MarketGui {
                 itemOverviewService.getByQuantity(OrderType.ASK, fetchOrder, orderedItems -> {
                     openAllItemsScreen(player, iconsManager.getOverviewIconsByOrder(orderedItems));
                 });
-            },
+            }
+        )
+        .open(player);
+    }
+
+    public void openAllItemsScreen(HumanEntity player, Map<ItemDTO, ItemStack> icons) {
+        AllItemsScreen allItemsScreen = new AllItemsScreen(
+            icons,
+            search -> openSearchInputScreen(search.getWhoClicked()),
+            myOrders -> openMyOrdersScreen(myOrders.getWhoClicked()),
+            orderBy -> openOrderByScreen(player),
             itemDTO -> e -> openItemOrdersScreen(itemDTO, player)
         );
 

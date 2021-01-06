@@ -41,25 +41,27 @@ public class Styles {
     public static GuiItem NO_ITEM_ORDER_BTN = ItemBuilder.from(Material.BARRIER).setName(ChatColor.RED + "N/A").asGuiItem();
     public static GuiItem END_OF_ORDERS = ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).setName(ChatColor.BLACK + "_").asGuiItem();
 
-    public static ItemStack ORDER_BY_BID_ICON = ItemBuilder.from(BID_MATERIAL).setName(ChatColor.GOLD + "Order by Bid Price").setLore(
+    public static ItemStack ORDER_BY_BID_ICON = ItemBuilder.from(BID_MATERIAL).setName(ChatColor.GOLD + "Bid Price").setLore(
         ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                                    ",
         ChatColor.DARK_GREEN + "Left click: Highest to Lowest",
         ChatColor.DARK_RED + "Right click: Lowest to Highest"
     ).build();
-    public static ItemStack ORDER_BY_ASK_ICON = ItemBuilder.from(ASK_MATERIAL).setName(ChatColor.AQUA + "Order by Ask Price").setLore(
+    public static ItemStack ORDER_BY_ASK_ICON = ItemBuilder.from(ASK_MATERIAL).setName(ChatColor.AQUA + "Ask Price").setLore(
         ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                                    ",
         ChatColor.DARK_GREEN + "Left click: Highest to Lowest",
         ChatColor.DARK_RED + "Right click: Lowest to Highest"
     ).build();
 
-    public static ItemStack ORDER_BY_DEMAND = ItemBuilder.from(Material.ENDER_CHEST).setName(ChatColor.GOLD + "Order by Demand").setLore(
+    public static ItemStack ORDER_BY_DEMAND = ItemBuilder.from(Material.ENDER_CHEST).setName(ChatColor.GOLD + "Demand").setLore(
         ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                                    ",
         ChatColor.DARK_GREEN + "Left click: Highest to Lowest",
         ChatColor.DARK_RED + "Right click: Lowest to Highest"
     ).build();
-    public static ItemStack ORDER_BY_SUPPLY = ItemBuilder.from(Material.CHEST).setName(ChatColor.AQUA + "Order by Supply").setLore(
+    public static ItemStack ORDER_BY_SUPPLY = ItemBuilder.from(Material.CHEST).setName(ChatColor.AQUA + "Supply").setLore(
         ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                                    ",
         ChatColor.DARK_GREEN + "Left click: Highest to Lowest",
         ChatColor.DARK_RED + "Right click: Lowest to Highest"
     ).build();
+
+    public static ItemStack ORDER_BY_ICON = ItemBuilder.from(Material.MAGENTA_GLAZED_TERRACOTTA).setName(ChatColor.LIGHT_PURPLE + "Order by").build();
 }
