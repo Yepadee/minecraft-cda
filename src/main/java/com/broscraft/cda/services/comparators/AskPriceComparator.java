@@ -9,6 +9,7 @@ public class AskPriceComparator implements Comparator<ItemOverviewDTO> {
 
     @Override
     public int compare(ItemOverviewDTO a, ItemOverviewDTO b) {
+        if (a.getItem().equals(b.getItem())) return 0;
         BigDecimal ask1 = a.getBestAsk();
         BigDecimal ask2 = b.getBestAsk();
 

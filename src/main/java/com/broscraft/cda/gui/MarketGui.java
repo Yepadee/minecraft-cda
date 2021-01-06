@@ -83,6 +83,22 @@ public class MarketGui {
                     openAllItemsScreen(player, iconsManager.getOverviewIconsByOrder(orderedItems));
                 });
             },
+            orderByDemand -> {
+                FetchOrder fetchOrder;
+                if (orderByDemand.isLeftClick()) fetchOrder = FetchOrder.DESC;
+                else fetchOrder = FetchOrder.ASC;
+                itemOverviewService.getByQuantity(OrderType.BID, fetchOrder, orderedItems -> {
+                    openAllItemsScreen(player, iconsManager.getOverviewIconsByOrder(orderedItems));
+                });
+            },
+            orderBySupply -> {
+                FetchOrder fetchOrder;
+                if (orderBySupply.isLeftClick()) fetchOrder = FetchOrder.DESC;
+                else fetchOrder = FetchOrder.ASC;
+                itemOverviewService.getByQuantity(OrderType.ASK, fetchOrder, orderedItems -> {
+                    openAllItemsScreen(player, iconsManager.getOverviewIconsByOrder(orderedItems));
+                });
+            },
             itemDTO -> e -> openItemOrdersScreen(itemDTO, player)
         );
 

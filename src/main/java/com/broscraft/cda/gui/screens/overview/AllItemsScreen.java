@@ -22,10 +22,12 @@ public class AllItemsScreen extends MarketOverviewScreen implements NewIconObser
         GuiAction<InventoryClickEvent> onMyOrdersBtnClick,
         GuiAction<InventoryClickEvent> onOrderByBidPriceBtnClick,
         GuiAction<InventoryClickEvent> onOrderByAskPriceBtnClick,
+        GuiAction<InventoryClickEvent> onOrderByDemandBtnClick,
+        GuiAction<InventoryClickEvent> onOrderBySupplyBtnClick,
         Function<ItemDTO, GuiAction<InventoryClickEvent>> onItemClick
     ) {
         super("Market Overview", icons, onItemClick);
-        this.createNavbar(onSearchBtnClick, onMyOrdersBtnClick, onOrderByBidPriceBtnClick, onOrderByAskPriceBtnClick);
+        this.createNavbar(onSearchBtnClick, onMyOrdersBtnClick, onOrderByBidPriceBtnClick, onOrderByAskPriceBtnClick, onOrderByDemandBtnClick, onOrderBySupplyBtnClick);
         this.onItemClick = onItemClick;
     }
 
@@ -33,14 +35,18 @@ public class AllItemsScreen extends MarketOverviewScreen implements NewIconObser
         GuiAction<InventoryClickEvent> onSearchBtnClick,
         GuiAction<InventoryClickEvent> onMyOrdersBtnClick,
         GuiAction<InventoryClickEvent> onOrderByBidPriceBtnClick,
-        GuiAction<InventoryClickEvent> onOrderByAskPriceBtnClick
+        GuiAction<InventoryClickEvent> onOrderByAskPriceBtnClick,
+        GuiAction<InventoryClickEvent> onOrderByDemandBtnClick,
+        GuiAction<InventoryClickEvent> onOrderBySupplyBtnClick
     ) {
         this.gui.setItem(1, 1, ItemBuilder.from(Styles.CLOSE_ICON).asGuiItem(e -> this.gui.close(e.getWhoClicked())));
-        this.gui.setItem(1, 3, ItemBuilder.from(Styles.MY_ORDERS_ICON).asGuiItem(onMyOrdersBtnClick));
-        this.gui.setItem(1, 4, ItemBuilder.from(Styles.SEARCH_ICON).asGuiItem(onSearchBtnClick));
+        this.gui.setItem(1, 2, ItemBuilder.from(Styles.MY_ORDERS_ICON).asGuiItem(onMyOrdersBtnClick));
+        this.gui.setItem(1, 3, ItemBuilder.from(Styles.SEARCH_ICON).asGuiItem(onSearchBtnClick));
 
-        this.gui.setItem(1, 6, ItemBuilder.from(Styles.ORDER_BY_BID_ICON).asGuiItem(onOrderByBidPriceBtnClick));
-        this.gui.setItem(1, 7, ItemBuilder.from(Styles.ORDER_BY_ASK_ICON).asGuiItem(onOrderByAskPriceBtnClick));
+        this.gui.setItem(1, 5, ItemBuilder.from(Styles.ORDER_BY_BID_ICON).asGuiItem(onOrderByBidPriceBtnClick));
+        this.gui.setItem(1, 6, ItemBuilder.from(Styles.ORDER_BY_ASK_ICON).asGuiItem(onOrderByAskPriceBtnClick));
+        this.gui.setItem(1, 7, ItemBuilder.from(Styles.ORDER_BY_DEMAND).asGuiItem(onOrderByDemandBtnClick));
+        this.gui.setItem(1, 8, ItemBuilder.from(Styles.ORDER_BY_SUPPLY).asGuiItem(onOrderBySupplyBtnClick));
     }
 
     @Override

@@ -20,6 +20,8 @@ import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
 import com.broscraft.cda.services.comparators.AskPriceComparator;
 import com.broscraft.cda.services.comparators.BidPriceComparator;
+import com.broscraft.cda.services.comparators.DemandComparator;
+import com.broscraft.cda.services.comparators.SupplyComparator;
 import com.broscraft.cda.services.utils.FetchOrder;
 import com.broscraft.cda.utils.EcoUtils;
 
@@ -29,6 +31,9 @@ public class ItemOverviewService implements OrderObserver {
     private TreeSet<ItemOverviewDTO> orderByBid = new TreeSet<>(new BidPriceComparator());
     private TreeSet<ItemOverviewDTO> orderByAsk = new TreeSet<>(new AskPriceComparator());
 
+    private TreeSet<ItemOverviewDTO> orderByDemand = new TreeSet<>(new DemandComparator());
+    private TreeSet<ItemOverviewDTO> orderBySupply = new TreeSet<>(new SupplyComparator());
+
 
     public ItemOverviewService(ItemService itemService, OverviewUpdateObserver overviewUpdateObserver) {
         this.itemService = itemService;
@@ -37,6 +42,8 @@ public class ItemOverviewService implements OrderObserver {
         itemOverviews.forEach(o -> {
             orderByBid.add(o);
             orderByAsk.add(o);
+            orderByDemand.add(o);
+            orderBySupply.add(o);
         });
         overviewUpdateObserver.onOverviewLoad(itemOverviews);
     }
@@ -73,6 +80,22 @@ public class ItemOverviewService implements OrderObserver {
         .execute();
     }
 
+    public void getByQuantity(OrderType orderType, FetchOrder fetchOrder, Consumer<List<ItemDTO>> onComplete) {
+        CDAPlugin.newChain().asyncFirst(() -> {
+            TreeSet<ItemOverviewDTO> orderedSet;
+            if (orderType.equals(OrderType.BID)) orderedSet = this.orderByDemand;
+            else orderedSet = this.orderBySupply;
+
+            if (fetchOrder.equals(FetchOrder.ASC)) {
+                return orderedSet.stream().map(o -> o.getItem()).collect(Collectors.toList());
+            } else {
+                return orderedSet.descendingSet().stream().map(o -> o.getItem()).collect(Collectors.toList());
+            }
+        })
+        .syncLast(orderedItems -> onComplete.accept(orderedItems))
+        .execute();
+    }
+
     @Override
     public void onNewOrder(NewOrderDTO newOrderDTO) {
         ItemDTO itemDTO = newOrderDTO.getItem();
@@ -80,86 +103,74 @@ public class ItemOverviewService implements OrderObserver {
         Long itemId = itemService.getItemId(itemDTO);
         ItemOverviewDTO itemOverview = itemService.getItemOverview(itemId);
 
-        boolean bestBidUpdated = false;
-        boolean bestAskUpdated = false;
-
         switch (newOrderDTO.getType()) {
             case ASK:
+                this.orderBySupply.remove(itemOverview);
                 BigDecimal bestAsk = itemOverview.getBestAsk();
                 int supply = itemOverview.getSupply();
                 itemOverview.setSupply(supply + newOrderDTO.getQuantity());
+                this.orderBySupply.add(itemOverview);
+
+                this.orderByAsk.remove(itemOverview);
                 if (bestAsk == null) {
                     itemOverview.setBestAsk(newOrderDTO.getPrice());
-                    bestAskUpdated = true;
                 } else if (EcoUtils.lessThan(newOrderDTO.getPrice(), bestAsk)) {
                     itemOverview.setBestAsk(newOrderDTO.getPrice());
-                    bestAskUpdated = true;
                 }
+                this.orderByAsk.add(itemOverview);
+                
                 break;
             case BID:
+                this.orderByDemand.remove(itemOverview);
                 BigDecimal bestBid = itemOverview.getBestBid();
                 int demand = itemOverview.getDemand();
                 itemOverview.setDemand(demand + newOrderDTO.getQuantity());
+                this.orderByDemand.add(itemOverview);
+
+                this.orderByBid.remove(itemOverview);
                 if (bestBid == null) {
                     itemOverview.setBestBid(newOrderDTO.getPrice());
-                    bestBidUpdated = true;
                 } else if (EcoUtils.greaterThan(newOrderDTO.getPrice(), bestBid)) {
                     itemOverview.setBestBid(newOrderDTO.getPrice());
-                    bestBidUpdated = true;
                 }
+                this.orderByBid.add(itemOverview);
+ 
                 break;
         }
 
-        if (bestBidUpdated) {
-            this.orderByBid.remove(itemOverview);
-            this.orderByBid.add(itemOverview);
-        }
-
-        if (bestAskUpdated) {
-            this.orderByAsk.remove(itemOverview);
-            this.orderByAsk.add(itemOverview);
-        }
 
         overviewUpdateObserver.onOverviewUpdate(itemOverview);
     }
 
     @Override
     public void onRemoveOrder(OrderDTO orderDTO, BigDecimal nextBestPrice) {
-
         Long itemId = Objects.requireNonNull(itemService.getItemId(orderDTO.getItem()));
         ItemOverviewDTO itemOverview = Objects.requireNonNull(itemService.getItemOverview(itemId));
         int orderQuantityRemaining = orderDTO.getQuantityUnfilled();
 
-        boolean bestBidUpdated = false;
-        boolean bestAskUpdated = false;
-
         switch (orderDTO.getType()) {
             case ASK:
+                this.orderBySupply.remove(itemOverview);
                 int supply = itemOverview.getSupply();
                 itemOverview.setSupply(supply - orderQuantityRemaining);
-                itemOverview.setBestAsk(nextBestPrice);
+                this.orderBySupply.add(itemOverview);
 
-                bestAskUpdated = !itemOverview.getBestAsk().equals(nextBestPrice);
+                this.orderByAsk.remove(itemOverview);
+                itemOverview.setBestAsk(nextBestPrice);
+                this.orderByAsk.add(itemOverview);
 
                 break;
             case BID:
+                this.orderByDemand.remove(itemOverview);
                 int demand = itemOverview.getDemand();
                 itemOverview.setDemand(demand - orderQuantityRemaining);
-                itemOverview.setBestBid(nextBestPrice);
+                this.orderByDemand.add(itemOverview);
 
-                bestBidUpdated = !itemOverview.getBestBid().equals(nextBestPrice);
+                this.orderByBid.remove(itemOverview);
+                itemOverview.setBestBid(nextBestPrice);
+                this.orderByBid.add(itemOverview);
                 
                 break;
-        }
-
-        if (bestBidUpdated) {
-            this.orderByBid.remove(itemOverview);
-            this.orderByBid.add(itemOverview);
-        }
-
-        if (bestAskUpdated) {
-            this.orderByAsk.remove(itemOverview);
-            this.orderByAsk.add(itemOverview);
         }
 
         this.overviewUpdateObserver.onOverviewUpdate(itemOverview);
@@ -172,36 +183,27 @@ public class ItemOverviewService implements OrderObserver {
         int numFilled = transactionSummaryDTO.getNumFilled();
         BigDecimal nextBestPrice = transactionSummaryDTO.getNewBestPrice();
 
-        boolean bestBidUpdated = false;
-        boolean bestAskUpdated = false;
-
         switch (transactionSummaryDTO.getOrderType()) {
             case ASK:
+                this.orderBySupply.remove(itemOverview);
                 int supply = itemOverview.getSupply();
                 itemOverview.setSupply(supply - numFilled);
+                this.orderBySupply.add(itemOverview);
+
+                this.orderByAsk.remove(itemOverview); 
                 itemOverview.setBestAsk(nextBestPrice);
-
-                bestAskUpdated = !itemOverview.getBestAsk().equals(nextBestPrice);
-
+                this.orderByAsk.add(itemOverview);
                 break;
             case BID:
+                this.orderByDemand.remove(itemOverview);
                 int demand = itemOverview.getDemand();
                 itemOverview.setDemand(demand - numFilled);
+                this.orderByDemand.add(itemOverview);
+                
+                this.orderByBid.remove(itemOverview);
                 itemOverview.setBestBid(nextBestPrice);
-
-                bestBidUpdated = !itemOverview.getBestBid().equals(nextBestPrice);
-
+                this.orderByBid.add(itemOverview);
                 break;
-        }
-
-        if (bestBidUpdated) {
-            this.orderByBid.remove(itemOverview);
-            this.orderByBid.add(itemOverview);
-        }
-
-        if (bestAskUpdated) {
-            this.orderByAsk.remove(itemOverview);
-            this.orderByAsk.add(itemOverview);
         }
 
         this.overviewUpdateObserver.onOverviewUpdate(itemOverview);

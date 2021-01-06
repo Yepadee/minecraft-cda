@@ -9,6 +9,7 @@ public class BidPriceComparator implements Comparator<ItemOverviewDTO> {
 
     @Override
     public int compare(ItemOverviewDTO a, ItemOverviewDTO b) {
+        if (a.getItem().equals(b.getItem())) return 0;
         BigDecimal bid1 = a.getBestBid();
         BigDecimal bid2 = b.getBestBid();
 
