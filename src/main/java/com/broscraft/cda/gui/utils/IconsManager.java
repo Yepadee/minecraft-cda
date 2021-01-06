@@ -33,7 +33,6 @@ public class IconsManager implements OverviewUpdateObserver {
     private List<IconUpdateObserver> iconUpdateObservers = new ArrayList<>();
     private List<NewIconObserver> newIconObservers = new ArrayList<>();
 
-
     public void addIconUpdateObserver(IconUpdateObserver o) {
         iconUpdateObservers.add(o);
     }
@@ -89,6 +88,15 @@ public class IconsManager implements OverviewUpdateObserver {
         .syncLast(result -> onComplete.accept(result))
         .execute();
 
+    }
+
+    public Map<ItemDTO, ItemStack> getOverviewIconsByOrder(List<ItemDTO> itemDTOs) {
+        Map<ItemDTO, ItemStack> bidIcons = new LinkedHashMap<>();
+        itemDTOs.forEach(itemDTO -> {
+            bidIcons.put(itemDTO, overviewIcons.get(itemDTO));
+        });
+
+        return bidIcons;
     }
 
     public void createIcons(List<ItemOverviewDTO> itemOverviews) {

@@ -81,7 +81,7 @@ public class CDAPlugin extends JavaPlugin {
         itemOverviewService = new ItemOverviewService(itemService, iconsManager);
         orderService = new OrderService(orderRepository, itemService, itemOverviewService);
 
-        marketGui = new MarketGui(iconsManager, orderService, itemService);
+        marketGui = new MarketGui(iconsManager, orderService, itemService, itemOverviewService);
 
         openMenuCommand = new OpenMenuCommand(marketGui);
         searchMarketCommand = new SearchMarketCommand(marketGui);

@@ -97,7 +97,7 @@ public class ItemOverviewDTO {
             return false;
         }
         ItemOverviewDTO itemOverviewDTO = (ItemOverviewDTO) o;
-        return Objects.equals(item, itemOverviewDTO.item) && Objects.equals(bestBid, itemOverviewDTO.bestBid) && Objects.equals(bestAsk, itemOverviewDTO.bestAsk) && demand == itemOverviewDTO.demand && supply == itemOverviewDTO.supply;
+        return Objects.equals(item, itemOverviewDTO.item);
     }
 
     @Override

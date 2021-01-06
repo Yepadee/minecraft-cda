@@ -33,7 +33,7 @@ public class ItemRepository {
                 "LEFT JOIN (" +
                     "SELECT item_id, MAX(price) best_bid " +
                     "FROM Orders " +
-                    "WHERE type='BID' " +
+                    "WHERE type='BID' AND quantity_filled < quantity " +
                     "GROUP BY item_id " +
                 ") bb ON i.id = bb.item_id " +
                 "LEFT JOIN (" +
@@ -45,7 +45,7 @@ public class ItemRepository {
                 "LEFT JOIN (" +
                     "SELECT item_id, MIN(price) best_ask " +
                     "FROM Orders " +
-                    "WHERE type='ASK' " +
+                    "WHERE type='ASK' AND quantity_filled < quantity " +
                     "GROUP BY item_id " +
                 ") ab ON i.id = ab.item_id " +
                 "LEFT JOIN (" +

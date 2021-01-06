@@ -1,6 +1,7 @@
 package com.broscraft.cda.gui;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import com.broscraft.cda.dtos.ItemOverviewDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
@@ -20,6 +21,7 @@ import com.broscraft.cda.gui.screens.overview.AllItemsScreen;
 import com.broscraft.cda.gui.screens.overview.SearchResultsScreen;
 import com.broscraft.cda.gui.screens.search.SearchInputScreen;
 import com.broscraft.cda.gui.utils.IconsManager;
+import com.broscraft.cda.services.ItemOverviewService;
 import com.broscraft.cda.services.ItemService;
 import com.broscraft.cda.services.OrderService;
 import com.broscraft.cda.utils.EcoUtils;
@@ -41,22 +43,35 @@ public class MarketGui {
     private IconsManager iconsManager;
     private OrderService orderService;
     private ItemService itemService;
+    private ItemOverviewService itemOverviewService;
 
     public MarketGui(
         IconsManager iconsManager,
         OrderService orderService,
-        ItemService itemService
+        ItemService itemService,
+        ItemOverviewService itemOverviewService
     ) {
         this.iconsManager = iconsManager;
         this.orderService = orderService;
         this.itemService = itemService;
+        this.itemOverviewService = itemOverviewService;
     }
 
     public void openAllItemsScreen(HumanEntity player) {
+        openAllItemsScreen(player, iconsManager.getAllOverviewIcons());
+    }
+
+    public void openAllItemsScreen(HumanEntity player, Map<ItemDTO, ItemStack> icons) {
         AllItemsScreen allItemsScreen = new AllItemsScreen(
-            iconsManager.getAllOverviewIcons(),
+            icons,
             search -> openSearchInputScreen(search.getWhoClicked()),
             myOrders -> openMyOrdersScreen(myOrders.getWhoClicked()),
+            orderByBid -> openAllItemsScreen(player, iconsManager.getOverviewIconsByOrder(
+                itemOverviewService.getByBid()
+            )),
+            orderByAsk ->  openAllItemsScreen(player, iconsManager.getOverviewIconsByOrder(
+                itemOverviewService.getByAsk()
+            )),
             itemDTO -> e -> openItemOrdersScreen(itemDTO, player)
         );
 
@@ -67,6 +82,7 @@ public class MarketGui {
             iconsManager.removeIconUpdateObserver(allItemsScreen);
             iconsManager.removeNewIconObserver(allItemsScreen);
         });
+
         allItemsScreen.open(player);
     }
 
