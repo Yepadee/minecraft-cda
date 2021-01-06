@@ -38,6 +38,14 @@ public class Styles {
     public static GuiItem NO_ITEM_ORDER_BTN = ItemBuilder.from(Material.BARRIER).setName(ChatColor.RED + "N/A").asGuiItem();
     public static GuiItem END_OF_ORDERS = ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).setName(ChatColor.BLACK + "_").asGuiItem();
 
-    public static ItemStack ORDER_BY_BID_ICON = ItemBuilder.from(Material.GOLD_INGOT).setName(ChatColor.GOLD + "Order By Best Bid").build();
-    public static ItemStack ORDER_BY_ASK_ICON = ItemBuilder.from(Material.DIAMOND).setName(ChatColor.AQUA + "Order By Best Ask").build();
+    public static ItemStack ORDER_BY_BID_ICON = ItemBuilder.from(Material.GOLD_INGOT).setName(ChatColor.GOLD + "Order By Bid Price").setLore(
+        ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                                    ",
+        ChatColor.DARK_GREEN + "Left click: Highest to Lowest",
+        ChatColor.DARK_RED + "Right click: Lowest to Highest"
+    ).build();
+    public static ItemStack ORDER_BY_ASK_ICON = ItemBuilder.from(Material.DIAMOND).setName(ChatColor.AQUA + "Order By Ask Price").setLore(
+        ChatColor.GRAY + ChatColor.UNDERLINE.toString() + "                                    ",
+        ChatColor.DARK_GREEN + "Left click: Highest to Lowest",
+        ChatColor.DARK_RED + "Right click: Lowest to Highest"
+    ).build();
 }

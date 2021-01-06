@@ -119,7 +119,6 @@ public class ItemRepository {
             itemDTO.setId(itemId);
             
             con.commit();
-            con.close();
 
             return itemId;
         } catch (SQLException e) {

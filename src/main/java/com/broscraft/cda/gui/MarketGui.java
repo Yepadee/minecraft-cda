@@ -24,6 +24,7 @@ import com.broscraft.cda.gui.utils.IconsManager;
 import com.broscraft.cda.services.ItemOverviewService;
 import com.broscraft.cda.services.ItemService;
 import com.broscraft.cda.services.OrderService;
+import com.broscraft.cda.services.utils.FetchOrder;
 import com.broscraft.cda.utils.EcoUtils;
 import com.broscraft.cda.utils.InventoryUtils;
 import com.broscraft.cda.utils.ItemUtils;
@@ -66,12 +67,22 @@ public class MarketGui {
             icons,
             search -> openSearchInputScreen(search.getWhoClicked()),
             myOrders -> openMyOrdersScreen(myOrders.getWhoClicked()),
-            orderByBid -> openAllItemsScreen(player, iconsManager.getOverviewIconsByOrder(
-                itemOverviewService.getByBid()
-            )),
-            orderByAsk ->  openAllItemsScreen(player, iconsManager.getOverviewIconsByOrder(
-                itemOverviewService.getByAsk()
-            )),
+            orderByBid -> {
+                FetchOrder fetchOrder;
+                if (orderByBid.isLeftClick()) fetchOrder = FetchOrder.DESC;
+                else fetchOrder = FetchOrder.ASC;
+                itemOverviewService.getByPrice(OrderType.BID, fetchOrder, orderedItems -> {
+                    openAllItemsScreen(player, iconsManager.getOverviewIconsByOrder(orderedItems));
+                });
+            },
+            orderByAsk -> {
+                FetchOrder fetchOrder;
+                if (orderByAsk.isLeftClick()) fetchOrder = FetchOrder.DESC;
+                else fetchOrder = FetchOrder.ASC;
+                itemOverviewService.getByPrice(OrderType.ASK, fetchOrder, orderedItems -> {
+                    openAllItemsScreen(player, iconsManager.getOverviewIconsByOrder(orderedItems));
+                });
+            },
             itemDTO -> e -> openItemOrdersScreen(itemDTO, player)
         );
 

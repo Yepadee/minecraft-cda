@@ -16,7 +16,7 @@ public class AskPriceComparator implements Comparator<ItemOverviewDTO> {
         if (ask2 == null) ask2 = BigDecimal.valueOf(1000000000);
 
         int r = ask1.compareTo(ask2);
-        return r != 0 ? r : 1;
+        return r != 0 ? r : -1;
     }
     
 }

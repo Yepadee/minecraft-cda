@@ -100,7 +100,6 @@ public class DB {
             }
     
             con.commit();
-            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

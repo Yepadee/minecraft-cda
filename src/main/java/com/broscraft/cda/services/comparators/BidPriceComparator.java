@@ -12,9 +12,9 @@ public class BidPriceComparator implements Comparator<ItemOverviewDTO> {
         BigDecimal bid1 = a.getBestBid();
         BigDecimal bid2 = b.getBestBid();
 
-        if (bid1 == null) bid1 = BigDecimal.valueOf(0);
-        if (bid2 == null) bid2 = BigDecimal.valueOf(0);
-        int r = bid2.compareTo(bid1);
+        if (bid1 == null) bid1 = BigDecimal.valueOf(1000000000);
+        if (bid2 == null) bid2 = BigDecimal.valueOf(1000000000);
+        int r = bid1.compareTo(bid2);
         return r != 0 ? r : -1;
     }
     

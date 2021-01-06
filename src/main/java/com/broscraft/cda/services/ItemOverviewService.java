@@ -1,21 +1,26 @@
 package com.broscraft.cda.services;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.broscraft.cda.CDAPlugin;
 import com.broscraft.cda.dtos.ItemOverviewDTO;
 import com.broscraft.cda.dtos.items.ItemDTO;
 import com.broscraft.cda.dtos.orders.OrderDTO;
+import com.broscraft.cda.dtos.orders.OrderType;
 import com.broscraft.cda.dtos.orders.input.NewOrderDTO;
 import com.broscraft.cda.dtos.transaction.TransactionSummaryDTO;
 import com.broscraft.cda.observers.OrderObserver;
 import com.broscraft.cda.observers.OverviewUpdateObserver;
 import com.broscraft.cda.services.comparators.AskPriceComparator;
 import com.broscraft.cda.services.comparators.BidPriceComparator;
+import com.broscraft.cda.services.utils.FetchOrder;
 import com.broscraft.cda.utils.EcoUtils;
 
 public class ItemOverviewService implements OrderObserver {
@@ -36,12 +41,36 @@ public class ItemOverviewService implements OrderObserver {
         overviewUpdateObserver.onOverviewLoad(itemOverviews);
     }
 
-    public List<ItemDTO> getByBid() {
-        return this.orderByBid.stream().map(o -> o.getItem()).collect(Collectors.toList());
-    }
+    public void getByPrice(OrderType orderType, FetchOrder fetchOrder, Consumer<List<ItemDTO>> onComplete) {
+        CDAPlugin.newChain().asyncFirst(() -> {
+            TreeSet<ItemOverviewDTO> orderedSet;
+            if (orderType.equals(OrderType.BID)) orderedSet = this.orderByBid;
+            else orderedSet = this.orderByAsk;
 
-    public List<ItemDTO> getByAsk() {
-        return this.orderByAsk.stream().map(o -> o.getItem()).collect(Collectors.toList());
+            if (fetchOrder.equals(FetchOrder.ASC)) {
+                return orderedSet.stream().map(o -> o.getItem()).collect(Collectors.toList());
+            } else {
+                List<ItemDTO> nullPriceItems = new ArrayList<>();
+                List<ItemDTO> allItems = new ArrayList<>();
+
+                if (orderType.equals(OrderType.BID)) {
+                    orderedSet.descendingSet().forEach(o -> {
+                        if (o.getBestBid() == null) nullPriceItems.add(o.getItem());
+                        else allItems.add(o.getItem());
+                    });
+                } else {
+                    orderedSet.descendingSet().forEach(o -> {
+                        if (o.getBestAsk() == null) nullPriceItems.add(o.getItem());
+                        else allItems.add(o.getItem());
+                    });
+                }
+
+                allItems.addAll(nullPriceItems);
+                return allItems;
+            }
+        })
+        .syncLast(orderedItems -> onComplete.accept(orderedItems))
+        .execute();
     }
 
     @Override
