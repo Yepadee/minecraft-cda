@@ -1,4 +1,4 @@
-name: Continuous-Double-Auctions
+name: ContinuousDoubleAuctions
 main: com.broscraft.cda.CDAPlugin
 version: 0.0.1
 api-version: 1.16

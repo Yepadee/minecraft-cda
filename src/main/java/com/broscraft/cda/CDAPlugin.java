@@ -107,22 +107,21 @@ public class CDAPlugin extends JavaPlugin {
     }
 
     private void setUpDB() {
-        DB.init(config);
+        DB.init(config, this);
     }
 
     private void setUpConfig() {
-        config.addDefault("db.driverclassname", "org.mariadb.jdbc.Driver");
-        config.addDefault("db.dialect", "jdbc:mariadb");
-        config.addDefault("db.host", "localhost");
-        config.addDefault("db.port", 3306);
-        config.addDefault("db.database", "MinecraftCDA");
-        config.addDefault("db.user", "root");
-        config.addDefault("db.password", null);
+        config.addDefault("storage-method", "MariaDB");
+        config.addDefault("data.host", "localhost");
+        config.addDefault("data.port", 3306);
+        config.addDefault("data.database", "minecraft");
+        config.addDefault("data.user", "root");
+        config.addDefault("data.password", null);
 
-        config.addDefault("db.pool.maxlifetime", 60000);
-        config.addDefault("db.pool.minpoolsize", 0);
-        config.addDefault("db.pool.maxpoolsize", 1);
-        config.addDefault("db.pool.idletimeout", 5000);
+        config.addDefault("data.pool-settings.minimum-idle", 10);
+        config.addDefault("data.pool-settings.maximum-pool-size", 10);
+        config.addDefault("data.pool-settings.maximum-lifetime", 1800000);
+        config.addDefault("data.pool-settings.connection-timeout", 5000);
 
         config.options().copyDefaults(true);
         saveConfig();

@@ -4,31 +4,40 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.Plugin;
 
 public class DB {
     private static HikariConfig config = new HikariConfig();
     private static HikariDataSource ds;
 
-    public static void init(FileConfiguration pluginConfig) {
-        String JDBC_DRIVER = pluginConfig.getString("db.driverclassname");
-        String DIALECT = pluginConfig.getString("db.dialect");
-        String USER = pluginConfig.getString("db.user");
-        String PASS = pluginConfig.getString("db.password");
-        String HOST = pluginConfig.getString("db.host");
-        String PORT = pluginConfig.getString("db.port");
-        String DATABASE = pluginConfig.getString("db.database");
+    public static void init(FileConfiguration pluginConfig, Plugin plugin) {
+        String storageMethod = pluginConfig.getString("storage-method");
+        String JDBC_DRIVER;
+        String DIALECT;
+        if (storageMethod.equals("MariaDB")) {
+            JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+            DIALECT = "jdbc:mariadb";
+        } else {
+            plugin.getLogger().warning("ERROR! Invalid storage-method specified. Please check the storage method in the plugin config.");
+            return;
+        }
+
+        String USER = pluginConfig.getString("data.user");
+        String PASS = pluginConfig.getString("data.password");
+        String HOST = pluginConfig.getString("data.host");
+        String PORT = pluginConfig.getString("data.port");
+        String DATABASE = pluginConfig.getString("data.database");
         String URL = DIALECT + "://" + HOST + ":" + PORT + "/" + DATABASE;
 
-        int maxLifeTime = pluginConfig.getInt("db.pool.maxlifetime");
-        int minPoolSize = pluginConfig.getInt("db.pool.minpoolsize");
-        int maxPoolSize = pluginConfig.getInt("db.pool.maxpoolsize");
-        int idleTimeout = pluginConfig.getInt("db.pool.idletimeout");
+        int maxLifeTime = pluginConfig.getInt("data.pool-settings.maximum-lifetime");
+        int minPoolSize = pluginConfig.getInt("data.pool-settings.minimum-idle");
+        int maxPoolSize = pluginConfig.getInt("data.pool-settings.maximum-pool-size");
+        int idleTimeout = pluginConfig.getInt("data.pool-settings.connection-timeout");
     
         config.setDriverClassName(JDBC_DRIVER);
         config.setJdbcUrl(URL);
@@ -47,10 +56,6 @@ public class DB {
         try (Connection con = DB.getConnection()) {
             con.setAutoCommit(false);
             PreparedStatement stmt;
-
-            Statement s = con.createStatement();
-            s.executeUpdate("CREATE DATABASE IF NOT EXISTS  " + DATABASE);
-            s.close();
 
             if (!DB.tableExists(con, "Items")) {
                 stmt = con.prepareStatement(
